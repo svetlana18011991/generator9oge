@@ -26,8 +26,8 @@
             solution,
             imageHTML,
             printLayout: 'image-grid',
-            printGridHeight: isPriceTask ? 72 : 155,
-            printCompact: isPriceTask,
+            printGridHeight: isPriceTask ? 72 : (['1.2','2.1','2.2'].includes(id) ? 82 : 105),
+            printCompact: isPriceTask || ['1.2','2.1','2.2'].includes(id),
             printBreakBefore: id === '5.1'
         };
     };
