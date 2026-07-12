@@ -887,6 +887,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         let answeredMap = {};
         let slideStartTime = Date.now();
         let presentationStartTime = Date.now();
+        let presentationFinishedAt = null;
         let totalTimerSeconds = ${timerMinutes} > 0 ? ${timerMinutes} * 60 : 0;
         let timerInterval = null;
         let resultsRendered = false;
@@ -1041,6 +1042,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
                     clearInterval(timerInterval);
                     timerInterval = null;
                 }
+                if (presentationFinishedAt === null) presentationFinishedAt = Date.now();
                 renderResults(); 
             }
             if (window.MathJax && MathJax.typesetPromise) {
@@ -1134,8 +1136,14 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
                     </tr>\`;
                 });
 
+            const finishedAt = presentationFinishedAt === null ? Date.now() : presentationFinishedAt;
+            const totalElapsedSeconds = Math.max(0, Math.floor((finishedAt - presentationStartTime) / 1000));
+            const totalElapsedLabel = formatTime(totalElapsedSeconds);
+
             if (summary) {
-                summary.textContent = 'Верно: ' + correctCount + ' из ' + userResults.length;
+                summary.innerHTML =
+                    '<div>Верно: ' + correctCount + ' из ' + userResults.length + '</div>' +
+                    '<div style="margin-top:8px; color:#9a6500; font-size:0.92em;">⏱ Общее время выполнения: <b>' + totalElapsedLabel + '</b></div>';
             }
 
             tbody.innerHTML = html;
