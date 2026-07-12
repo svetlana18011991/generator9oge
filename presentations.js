@@ -26,6 +26,16 @@ function getShowCorrectOnErrorSetting() {
 
 
 
+function getPresentationTaskText(task) {
+    if (task && typeof task.presentationText !== 'undefined') return String(task.presentationText || '');
+    return String((task && task.text) || '');
+}
+
+function presentationTaskHasTable(task) {
+    if (task && task.presentationHasTable) return true;
+    return /<table\b/i.test(getPresentationTaskText(task));
+}
+
 // ==========================================
 // ЧЕРНОВИК В ПРЕЗЕНТАЦИЯХ: чертёж на белой подложке
 // ==========================================
@@ -77,11 +87,11 @@ function generatePresentation1() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 15px; box-shadow: 0 0 25px #ff8c00, inset 0 0 15px #ff8c00; border: 2px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'} ${presentationTaskHasTable(t) ? 'task-card-table' : ''}" style="position: absolute; right: 5%; top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 15px; box-shadow: 0 0 25px #ff8c00, inset 0 0 15px #ff8c00; border: 2px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div class="pres-task-layout" style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; min-height:0;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text">${t.text}</div>
+                        <div class="task-text">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -156,11 +166,11 @@ function generatePresentation2() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #ff4081, inset 0 0 15px #ff4081; border: 2px solid #ff4081; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'} ${presentationTaskHasTable(t) ? 'task-card-table' : ''}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #ff4081, inset 0 0 15px #ff4081; border: 2px solid #ff4081; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div class="pres-task-layout" style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; min-height:0;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text">${t.text}</div>
+                        <div class="task-text">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -235,11 +245,11 @@ function generatePresentation3() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: 38px; color: #fff; text-shadow: 0 0 10px #9c27b0, 0 0 20px #9c27b0; margin: 0;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #9c27b0, inset 0 0 15px #9c27b0; border: 2px solid #9c27b0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'} ${presentationTaskHasTable(t) ? 'task-card-table' : ''}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #9c27b0, inset 0 0 15px #9c27b0; border: 2px solid #9c27b0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div class="pres-task-layout" style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; min-height:0;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text">${t.text}</div>
+                        <div class="task-text">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -430,11 +440,11 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
     return `
         <div class="slide task-slide" style="background-image: url('${bg}')">
             ${plate}
-            <div class="task-right-side ${taskHasVisual ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; ${taskPos} top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: ${radius}px; box-shadow: 0 0 25px ${accent}, inset 0 0 15px ${accent}; border: 2px solid ${accent}; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${taskHasVisual ? 'task-card-visual' : 'task-card-text-only'} ${presentationTaskHasTable(t) ? 'task-card-table' : ''}" style="position: absolute; ${taskPos} top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: ${radius}px; box-shadow: 0 0 25px ${accent}, inset 0 0 15px ${accent}; border: 2px solid ${accent}; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div class="pres-task-layout" style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; min-height:0;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text">${t.text}</div>
+                        <div class="task-text">${getPresentationTaskText(t)}</div>
                     </div>
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 12px; border: 2px solid ${accent}; text-align: center; outline: none; color: ${accent};">
@@ -827,6 +837,24 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         @media (max-height: 760px), (max-width: 1200px) {
             .task-card-text-only { width: min(64vw, 760px) !important; min-height: 210px !important; max-height: 70vh !important; padding: 18px 24px !important; }
             .task-card-text-only .task-text { font-size: clamp(16px, 1.65vw, 24px) !important; max-height: 46vh !important; line-height: 1.22 !important; margin-bottom: 18px !important; }
+        }
+
+        /* ТАБЛИЧНЫЕ ЗАДАНИЯ: компактная таблица и обычный вопрос */
+        .task-card-table { width: min(64vw, 900px) !important; min-height: 360px !important; max-height: 76vh !important; top: 50% !important; bottom: auto !important; right: 5% !important; transform: translateY(-50%) !important; padding: 16px 20px !important; }
+        .task-card-table .pres-task-layout { height: 100% !important; min-height: 0 !important; overflow: hidden !important; }
+        .task-card-table .pres-task-scroll { flex: 1 1 auto !important; min-height: 0 !important; max-height: none !important; overflow-y: auto !important; padding: 0 8px 8px !important; }
+        .task-card-table .task-text { font-size: 14px !important; line-height: 1.2 !important; max-height: none !important; overflow: visible !important; margin: 0 !important; padding: 0 4px 4px !important; text-align: left !important; }
+        .task-card-table .task-text table { width: 100% !important; border-collapse: collapse !important; table-layout: auto !important; margin: 0 auto 10px !important; font-size: 12px !important; line-height: 1.12 !important; background: #fff !important; }
+        .task-card-table .task-text th, .task-card-table .task-text td { border: 1px solid #555 !important; padding: 4px 5px !important; text-align: center !important; vertical-align: middle !important; }
+        .task-card-table .task-text p { margin: 8px 0 2px !important; font-size: 15px !important; line-height: 1.25 !important; text-align: left !important; }
+        .task-card-table .pres-check-zone { margin-top: 4px !important; padding-top: 6px !important; }
+
+        @media (max-height: 760px), (max-width: 1200px) {
+            .task-card-table { width: min(68vw, 860px) !important; min-height: 320px !important; max-height: 78vh !important; padding: 12px 15px !important; }
+            .task-card-table .task-text { font-size: 12.5px !important; }
+            .task-card-table .task-text table { font-size: 10.5px !important; }
+            .task-card-table .task-text th, .task-card-table .task-text td { padding: 3px 4px !important; }
+            .task-card-table .task-text p { font-size: 13px !important; margin-top: 6px !important; }
         }
     </style>
 </head>
