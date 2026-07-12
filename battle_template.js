@@ -56,18 +56,18 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         #centerControls{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);z-index:8;display:flex;flex-direction:column;align-items:center;gap:14px}
         #startBattleBtn{border:none;border-radius:18px;background:linear-gradient(90deg,#ff8c00,#ff5470);color:#fff;padding:16px 28px;font-size:22px;font-weight:1000;cursor:pointer;box-shadow:0 18px 28px rgba(0,0,0,.28), 0 0 20px rgba(255,140,0,.38)}
         #startBattleBtn:hover{filter:brightness(1.06);transform:translateY(-1px)}
-        #questionPanel{display:none;position:absolute;left:45.7%;top:52%;transform:translate(-50%,-50%);width:min(630px,calc(100vw - 26px));max-height:82vh;background:var(--panel);color:#222;border-radius:24px;border:2px solid var(--accent);box-shadow:0 0 30px rgba(255,140,0,.25), var(--shadow);padding:16px 16px 14px;z-index:9;overflow:hidden}
-        #questionHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+        #questionPanel{display:none;position:absolute;left:45.7%;top:52%;transform:translate(-50%,-50%);width:min(630px,calc(100vw - 26px));height:min(82vh,780px);max-height:82vh;background:var(--panel);color:#222;border-radius:24px;border:2px solid var(--accent);box-shadow:0 0 30px rgba(255,140,0,.25), var(--shadow);padding:16px 16px 14px;z-index:9;overflow:hidden;flex-direction:column;min-height:0}
+        #questionHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex:0 0 auto}
         #questionHead .badge{background:#fff3e0;border:1px solid #ffcc80;color:#e65100;border-radius:999px;padding:8px 14px;font-weight:900}
         #questionHead .prog{font-weight:900;color:#666}
-        #q{font-size:clamp(14px,1.9vh,18px);line-height:1.26;max-height:none;overflow:visible;padding:6px 4px 6px;text-align:center;color:#222;text-wrap:pretty;}
+        #q{font-size:clamp(14px,1.9vh,18px);line-height:1.26;flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:6px 10px 8px 4px;text-align:center;color:#222;text-wrap:pretty;}
         #q img,#q svg{display:block;max-width:100% !important;width:auto !important;height:auto !important;max-height:min(30vh,300px) !important;object-fit:contain !important;margin:0 auto 10px auto !important}
-        #answerRow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:12px}
+        #answerRow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px;flex:0 0 auto}
         #ansInput{width:min(240px,100%);font-size:18px;padding:12px 16px;border-radius:14px;border:2px solid #ddd;outline:none;text-align:center}
         #attackBtn,#nextBtn{border:none;border-radius:14px;padding:12px 18px;font-size:17px;font-weight:1000;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.16)}
         #attackBtn{background:var(--accent);color:#fff}
         #nextBtn{display:none;background:#26334f;color:#fff}
-        #msg{margin-top:10px;min-height:24px;text-align:center;font-weight:900}
+        #msg{margin-top:8px;min-height:24px;text-align:center;font-weight:900;flex:0 0 auto}
         #projectile{display:none;position:fixed;z-index:14;width:84px;height:84px;pointer-events:none;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 0 12px rgba(255,255,255,.45)) drop-shadow(0 0 22px rgba(255,140,0,.45))}
         #explosion{display:none;position:fixed;z-index:15;width:26px;height:26px;border-radius:999px;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(255,214,64,.95) 26%, rgba(255,140,0,.88) 46%, rgba(255,84,112,.34) 68%, rgba(255,84,112,0) 100%);box-shadow:0 0 20px rgba(255,255,255,.8),0 0 44px rgba(255,140,0,.7);animation:boom .45s ease-out forwards}
         @keyframes boom{0%{opacity:1;transform:translate(-50%,-50%) scale(.2)}55%{opacity:1;transform:translate(-50%,-50%) scale(3.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(5.4)}}
@@ -116,17 +116,19 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);
             border:2px solid #bbdefb;
             border-radius:10px;
-            overflow:hidden;
-            display: flex;
-            flex-direction: column;
+            overflow-y:auto;
+            overflow-x:hidden;
+            overscroll-behavior:contain;
+            scrollbar-gutter:stable;
+            display:block;
         }
 
         #draftTaskStatement{
             display:none;
             position:relative;
             flex:0 0 auto;
-            max-height:45vh;
-            overflow:hidden;
+            max-height:none;
+            overflow:visible;
             padding:10px 12px;
             color:#222;
             background:#fff;
@@ -171,14 +173,22 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             pointer-events:none;
         }
 
+        #draftGridSpace{
+            position:relative;
+            width:100%;
+            min-height:360px;
+            height:52vh;
+            pointer-events:none;
+        }
+
         #canvas-battle{
             position:absolute!important;
             left:0!important;
             top:0!important;
-            right:0!important;
-            bottom:0!important;
+            right:auto!important;
+            bottom:auto!important;
             width:100%!important;
-            height:100%!important;
+            height:auto;
             z-index:30!important;
             pointer-events:auto!important;
             touch-action:none!important;
@@ -293,6 +303,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             </div>
             <div id="drawCanvasWrap">
                 <div id="draftTaskStatement"></div>
+                <div id="draftGridSpace" aria-hidden="true"></div>
                 <canvas id="canvas-battle" title="Рисуйте прямо поверх условия и на клетчатом поле"></canvas>
             </div>
         </div>
@@ -418,10 +429,11 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         if(currentIndex >= questions.length || heroLives <= 0 || bossHits >= total){ finishBattle(); return; }
         locked = false;
         const q = questions[currentIndex] || {};
-        $('questionPanel').style.display = 'block';
+        $('questionPanel').style.display = 'flex';
         $('questionBadge').textContent = 'Задание ' + (currentIndex + 1);
         $('questionProgress').textContent = (currentIndex + 1) + ' / ' + questions.length;
         $('q').innerHTML = String(q.prompt || '').replace(/\s+([.,!?;:])/g, '$1');
+        $('q').scrollTop = 0;
         
         // Очищаем черновик для нового задания
         draftState.undo = [];
@@ -746,7 +758,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
 
     function returnAfterBattle(){
         hideBattleCaption();
-        $('questionPanel').style.display = 'block';
+        $('questionPanel').style.display = 'flex';
         fitQuestionPanel();
     }
 
@@ -757,18 +769,35 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         const canvas = $('canvas-battle');
         if(!canvas) return;
         const wrap = $('drawCanvasWrap');
-        const rect = wrap.getBoundingClientRect();
+        const statement = $('draftTaskStatement');
+        const gridSpace = $('draftGridSpace');
+        if(!wrap) return;
+
+        const cssWidth = Math.max(1, wrap.clientWidth);
+        const statementHeight = statement && statement.style.display !== 'none'
+            ? Math.max(statement.scrollHeight, statement.offsetHeight)
+            : 0;
+        const gridHeight = Math.max(360, Math.round(wrap.clientHeight * 0.68));
+        if(gridSpace) gridSpace.style.height = gridHeight + 'px';
+        const cssHeight = Math.max(wrap.clientHeight, statementHeight + gridHeight);
         const dpr = window.devicePixelRatio || 1;
-        if(rect.width <= 0 || rect.height <= 0) return;
+
         const old = document.createElement('canvas');
-        old.width = canvas.width; old.height = canvas.height;
+        old.width = canvas.width;
+        old.height = canvas.height;
         const oldCtx = old.getContext('2d');
         if(canvas.width && canvas.height) oldCtx.drawImage(canvas, 0, 0);
-        canvas.width = Math.max(1, Math.round(rect.width * dpr));
-        canvas.height = Math.max(1, Math.round(rect.height * dpr));
+
+        canvas.style.setProperty('width', cssWidth + 'px', 'important');
+        canvas.style.setProperty('height', cssHeight + 'px', 'important');
+        canvas.width = Math.max(1, Math.round(cssWidth * dpr));
+        canvas.height = Math.max(1, Math.round(cssHeight * dpr));
+
         const ctx = canvas.getContext('2d');
         ctx.setTransform(dpr,0,0,dpr,0,0);
-        if(old.width && old.height) ctx.drawImage(old,0,0,old.width/dpr,old.height/dpr);
+        if(old.width && old.height){
+            ctx.drawImage(old, 0, 0, old.width / dpr, old.height / dpr);
+        }
         draftState.canvas = canvas;
         draftState.ctx = ctx;
     }
@@ -933,6 +962,9 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
 
         box.appendChild(clone);
         box.style.display = 'block';
+        box.scrollTop = 0;
+        const draftWrap = $('drawCanvasWrap');
+        if(draftWrap) draftWrap.scrollTop = 0;
 
         const afterRender = ()=>{
             requestAnimationFrame(()=>{
