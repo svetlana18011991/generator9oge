@@ -541,6 +541,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         ctx.setTransform(dpr,0,0,dpr,0,0);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.miterLimit = 2;
         draft.canvas = canvas;
         draft.ctx = ctx;
         renderDraft();
@@ -591,9 +592,24 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
         if(obj.tool === 'pen' || obj.tool === 'eraser'){
-            ctx.beginPath();
-            (obj.points || []).forEach((pt,i)=>{ if(i===0) ctx.moveTo(pt.x,pt.y); else ctx.lineTo(pt.x,pt.y); });
-            ctx.stroke();
+            const pts = obj.points || [];
+            if(pts.length === 1){
+                ctx.beginPath();
+                ctx.arc(pts[0].x, pts[0].y, Math.max(1, ctx.lineWidth / 2), 0, Math.PI * 2);
+                ctx.fillStyle = ctx.strokeStyle;
+                ctx.fill();
+            } else if(pts.length > 1){
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for(let i = 1; i < pts.length - 1; i++){
+                    const midX = (pts[i].x + pts[i + 1].x) / 2;
+                    const midY = (pts[i].y + pts[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
+                }
+                const last = pts[pts.length - 1];
+                ctx.lineTo(last.x, last.y);
+                ctx.stroke();
+            }
         } else if(obj.tool === 'line' || obj.tool === 'vector'){
             ctx.beginPath(); ctx.moveTo(obj.sx,obj.sy); ctx.lineTo(obj.ex,obj.ey); ctx.stroke();
             if(obj.tool === 'vector'){
@@ -675,8 +691,23 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
             renderDraft(); return;
         }
         if(!draft.isDrawing || !draft.currentObj) return;
-        if(draft.currentObj.tool === 'pen' || draft.currentObj.tool === 'eraser') draft.currentObj.points.push(p);
-        else {draft.currentObj.ex = p.x; draft.currentObj.ey = p.y; const b=getBounds(draft.currentObj); draft.currentObj.cx=(b.minX+b.maxX)/2; draft.currentObj.cy=(b.minY+b.maxY)/2;}
+        if(draft.currentObj.tool === 'pen' || draft.currentObj.tool === 'eraser'){
+            const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
+            for(const evt of events){
+                const next = pointerPos(evt);
+                const pts = draft.currentObj.points;
+                const prev = pts[pts.length - 1];
+                if(!prev || Math.hypot(next.x - prev.x, next.y - prev.y) >= 0.7){
+                    pts.push(next);
+                }
+            }
+        }else{
+            draft.currentObj.ex = p.x;
+            draft.currentObj.ey = p.y;
+            const b=getBounds(draft.currentObj);
+            draft.currentObj.cx=(b.minX+b.maxX)/2;
+            draft.currentObj.cy=(b.minY+b.maxY)/2;
+        }
         renderDraft();
     }
     function endDraw(){
