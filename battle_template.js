@@ -56,18 +56,21 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         #centerControls{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);z-index:8;display:flex;flex-direction:column;align-items:center;gap:14px}
         #startBattleBtn{border:none;border-radius:18px;background:linear-gradient(90deg,#ff8c00,#ff5470);color:#fff;padding:16px 28px;font-size:22px;font-weight:1000;cursor:pointer;box-shadow:0 18px 28px rgba(0,0,0,.28), 0 0 20px rgba(255,140,0,.38)}
         #startBattleBtn:hover{filter:brightness(1.06);transform:translateY(-1px)}
-        #questionPanel{display:none;position:absolute;left:45.7%;top:52%;transform:translate(-50%,-50%);width:min(630px,calc(100vw - 26px));max-height:82vh;background:var(--panel);color:#222;border-radius:24px;border:2px solid var(--accent);box-shadow:0 0 30px rgba(255,140,0,.25), var(--shadow);padding:16px 16px 14px;z-index:9;overflow:hidden}
-        #questionHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+        #questionPanel{display:none;position:absolute;left:45.7%;top:52%;transform:translate(-50%,-50%);width:min(630px,calc(100vw - 26px));height:min(82vh,760px);max-height:82vh;background:var(--panel);color:#222;border-radius:24px;border:2px solid var(--accent);box-shadow:0 0 30px rgba(255,140,0,.25), var(--shadow);padding:16px 16px 14px;z-index:9;overflow:hidden;flex-direction:column}
+        #questionHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex:0 0 auto}
         #questionHead .badge{background:#fff3e0;border:1px solid #ffcc80;color:#e65100;border-radius:999px;padding:8px 14px;font-weight:900}
         #questionHead .prog{font-weight:900;color:#666}
-        #q{font-size:clamp(14px,1.9vh,18px);line-height:1.26;max-height:none;overflow:visible;padding:6px 4px 6px;text-align:center;color:#222;text-wrap:pretty;}
-        #q img,#q svg{display:block;max-width:100% !important;width:auto !important;height:auto !important;max-height:min(30vh,300px) !important;object-fit:contain !important;margin:0 auto 10px auto !important}
-        #answerRow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:12px}
+        #q{font-size:clamp(14px,1.9vh,18px);line-height:1.26;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:6px 8px 10px 4px;text-align:center;color:#222;text-wrap:pretty;scrollbar-width:thin;scrollbar-color:#ffb35c #eef3f8;overscroll-behavior:contain}
+        #q::-webkit-scrollbar{width:9px}
+        #q::-webkit-scrollbar-track{background:#eef3f8;border-radius:999px}
+        #q::-webkit-scrollbar-thumb{background:#ffb35c;border-radius:999px;border:2px solid #eef3f8}
+        #q img,#q svg{display:block;max-width:100% !important;width:auto !important;height:auto !important;max-height:min(34vh,320px) !important;object-fit:contain !important;margin:0 auto 10px auto !important}
+        #answerRow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px;flex:0 0 auto}
         #ansInput{width:min(240px,100%);font-size:18px;padding:12px 16px;border-radius:14px;border:2px solid #ddd;outline:none;text-align:center}
         #attackBtn,#nextBtn{border:none;border-radius:14px;padding:12px 18px;font-size:17px;font-weight:1000;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.16)}
         #attackBtn{background:var(--accent);color:#fff}
         #nextBtn{display:none;background:#26334f;color:#fff}
-        #msg{margin-top:10px;min-height:24px;text-align:center;font-weight:900}
+        #msg{margin-top:8px;min-height:24px;text-align:center;font-weight:900;flex:0 0 auto}
         #projectile{display:none;position:fixed;z-index:14;width:84px;height:84px;pointer-events:none;transform:translate(-50%,-50%);object-fit:contain;filter:drop-shadow(0 0 12px rgba(255,255,255,.45)) drop-shadow(0 0 22px rgba(255,140,0,.45))}
         #explosion{display:none;position:fixed;z-index:15;width:26px;height:26px;border-radius:999px;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(255,214,64,.95) 26%, rgba(255,140,0,.88) 46%, rgba(255,84,112,.34) 68%, rgba(255,84,112,0) 100%);box-shadow:0 0 20px rgba(255,255,255,.8),0 0 44px rgba(255,140,0,.7);animation:boom .45s ease-out forwards}
         @keyframes boom{0%{opacity:1;transform:translate(-50%,-50%) scale(.2)}55%{opacity:1;transform:translate(-50%,-50%) scale(3.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(5.4)}}
@@ -125,9 +128,9 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             display:none;
             position:relative;
             flex:0 0 auto;
-            max-height:45vh;
+            max-height:48%;
             overflow:hidden;
-            padding:10px 12px;
+            padding:9px 12px 11px;
             color:#222;
             background:#fff;
             border-bottom:2px solid #bbdefb;
@@ -141,6 +144,22 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             line-height:1.22;
             text-align:center;
             color:#222;
+            pointer-events:none;
+        }
+        #draftTaskStatement .draft-current-question{
+            position:relative;
+            z-index:1;
+            margin:7px auto 0;
+            padding:8px 10px;
+            max-width:100%;
+            border-left:4px solid var(--accent);
+            border-radius:0 8px 8px 0;
+            background:#fff8ed;
+            color:#222;
+            font-size:14px;
+            line-height:1.28;
+            text-align:left;
+            font-weight:600;
             pointer-events:none;
         }
         #draftTaskStatement .draft-figure-wrap{
@@ -231,8 +250,8 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             #hud{top:14px;left:12px;right:12px;gap:8px;flex-wrap:wrap}
             .pill{font-size:13px;padding:8px 10px}
             #timerPill{margin-left:0}
-            #questionPanel{top:58%;max-height:58vh;width:min(92vw,700px)}
-            #q{max-height:30vh}
+            #questionPanel{top:58%;height:58vh;max-height:58vh;width:min(92vw,700px)}
+            #q{min-height:0}
         }
     </style>
 </head>
@@ -410,20 +429,9 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         if(!panel || !qEl || panel.style.display === 'none') return;
         qEl.style.fontSize = '';
         qEl.style.lineHeight = '';
-        qEl.querySelectorAll('svg,img').forEach(el => {
-            el.style.maxHeight = '';
-        });
+        qEl.querySelectorAll('svg,img').forEach(el => { el.style.maxHeight = ''; });
         requestAnimationFrame(()=>{
-            let guard = 0;
-            while(panel.scrollHeight > panel.clientHeight && guard < 5){
-                const cur = parseFloat(getComputedStyle(qEl).fontSize) || 18;
-                qEl.style.fontSize = Math.max(13, cur - 1) + 'px';
-                qEl.style.lineHeight = '1.22';
-                qEl.querySelectorAll('svg,img').forEach(el => {
-                    el.style.maxHeight = '24vh';
-                });
-                guard++;
-            }
+            qEl.scrollTop = Math.max(0, Math.min(qEl.scrollTop, qEl.scrollHeight - qEl.clientHeight));
         });
     }
 
@@ -431,10 +439,11 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         if(currentIndex >= questions.length || heroLives <= 0 || bossHits >= total){ finishBattle(); return; }
         locked = false;
         const q = questions[currentIndex] || {};
-        $('questionPanel').style.display = 'block';
+        $('questionPanel').style.display = 'flex';
         $('questionBadge').textContent = 'Задание ' + (currentIndex + 1);
         $('questionProgress').textContent = (currentIndex + 1) + ' / ' + questions.length;
         $('q').innerHTML = String(q.prompt || '').replace(/\s+([.,!?;:])/g, '$1');
+        $('q').scrollTop = 0;
         
         // Очищаем черновик для нового задания
         draftState.undo = [];
@@ -759,7 +768,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
 
     function returnAfterBattle(){
         hideBattleCaption();
-        $('questionPanel').style.display = 'block';
+        $('questionPanel').style.display = 'flex';
         fitQuestionPanel();
     }
 
@@ -1009,39 +1018,42 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         if(!box || !qEl){ return; }
         box.innerHTML = '';
 
-        const clone = qEl.cloneNode(true);
-        clone.removeAttribute('id');
-        clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-        clone.classList.add('draft-condition-text');
-        clone.innerHTML = clone.innerHTML.replace(/\\s+([.,!?;:])/g, '$1');
+        const currentQuestion = questions[currentIndex] || {};
+        const visualHtml = String(currentQuestion.draftSvg || '').trim();
+        const questionHtml = String(currentQuestion.draftText || '').trim();
 
-        const fig = clone.querySelector('svg,img,picture,canvas');
-        if(fig){
-            const wrap = document.createElement('div');
-            const isTropinki = /(?:Тропинк|Tropinka|План сюжета[^<]{0,80}Тропинки)/i.test(clone.innerHTML);
-            wrap.className = 'draft-figure-wrap' + (isTropinki ? ' tropinki-draft-figure' : '');
-
-            fig.parentNode.insertBefore(wrap, fig);
-            wrap.appendChild(fig);
-
-            fig.style.maxWidth = '100%';
-            fig.style.maxHeight = '26vh';
-            fig.style.width = 'auto';
-            fig.style.height = 'auto';
-            fig.style.objectFit = 'contain';
-            fig.style.margin = '0 auto';
-            fig.style.pointerEvents = 'none';
+        if(visualHtml){
+            const visualHost = document.createElement('div');
+            visualHost.innerHTML = visualHtml;
+            const fig = visualHost.querySelector('svg,img,picture,canvas');
+            if(fig){
+                const wrap = document.createElement('div');
+                const isTropinki = /(?:Тропинк|Tropinka|План сюжета[^<]{0,80}Тропинки)/i.test(visualHtml + questionHtml);
+                wrap.className = 'draft-figure-wrap' + (isTropinki ? ' tropinki-draft-figure' : '');
+                wrap.appendChild(fig);
+                fig.style.maxWidth = '100%';
+                fig.style.maxHeight = isTropinki ? '220px' : '25vh';
+                fig.style.width = 'auto';
+                fig.style.height = 'auto';
+                fig.style.objectFit = 'contain';
+                fig.style.margin = '0 auto';
+                fig.style.pointerEvents = 'none';
+                box.appendChild(wrap);
+            }
         }
 
-        box.appendChild(clone);
+        const questionBlock = document.createElement('div');
+        questionBlock.className = 'draft-current-question';
+        const cleanQuestion = questionHtml || String(currentQuestion.prompt || '');
+        questionBlock.innerHTML = '<b>Задание ' + (currentIndex + 1) + '.</b> ' + cleanQuestion.replace(/\s+([.,!?;:])/g, '$1');
+        questionBlock.querySelectorAll('svg,img,picture,canvas').forEach(el => el.remove());
+        box.appendChild(questionBlock);
         box.style.display = 'block';
 
         const afterRender = ()=>{
             requestAnimationFrame(()=>{
                 resizeDraftCanvas();
-                if(draftState.undo.length === 0 && draftState.canvas){
-                    saveDraftState();
-                }
+                if(draftState.undo.length === 0 && draftState.canvas){ saveDraftState(); }
             });
         };
 

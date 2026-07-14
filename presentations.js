@@ -84,8 +84,10 @@ function generatePresentation1() {
             
             <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 15px; box-shadow: 0 0 25px #ff8c00, inset 0 0 15px #ff8c00; border: 2px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 1; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                    <div class="task-text" style="margin-bottom: 20px; text-align: center; color: #333; width: 100%; flex-shrink: 1; overflow-y: auto;">${t.text}</div>
+                    <div class="pres-task-scroll">
+                        ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                    </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 10px; border: 2px solid #ccc; text-align: center; outline: none;">
@@ -162,8 +164,10 @@ function generatePresentation2() {
             
             <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #ff4081, inset 0 0 15px #ff4081; border: 2px solid #ff4081; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 1; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                    <div class="task-text" style="margin-bottom: 20px; text-align: center; color: #333; width: 100%; flex-shrink: 1; overflow-y: auto;">${t.text}</div>
+                    <div class="pres-task-scroll">
+                        ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                    </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 12px; border: 2px solid #f8bbd0; text-align: center; outline: none; color: #e91e63;">
@@ -240,8 +244,10 @@ function generatePresentation3() {
             
             <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #9c27b0, inset 0 0 15px #9c27b0; border: 2px solid #9c27b0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 1; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                    <div class="task-text" style="margin-bottom: 20px; text-align: center; color: #333; width: 100%; flex-shrink: 1; overflow-y: auto;">${t.text}</div>
+                    <div class="pres-task-scroll">
+                        ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                    </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 12px; border: 2px solid #e1bee7; text-align: center; outline: none; color: #7b1fa2;">
@@ -434,8 +440,10 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
             ${plate}
             <div class="task-right-side ${taskHasVisual ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; ${taskPos} top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: ${radius}px; box-shadow: 0 0 25px ${accent}, inset 0 0 15px ${accent}; border: 2px solid ${accent}; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                    ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 1; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                    <div class="task-text" style="margin-bottom: 20px; text-align: center; color: #333; width: 100%; flex-shrink: 1; overflow-y: auto;">${t.text}</div>
+                    <div class="pres-task-scroll">
+                        ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                    </div>
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 12px; border: 2px solid ${accent}; text-align: center; outline: none; color: ${accent};">
                         <div id="pres-feedback-${i}" class="pres-feedback" style="width:100%; text-align:center; font-weight:bold; min-height:24px; display:none;"></div>
@@ -736,15 +744,29 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         .pres-status.ok { color: #2e7d32; }
         .pres-status.bad { color: #c62828; }
 
-        /* ФИКС СЛАЙДОВ С КАРТИНКАМИ */
+        /* СОДЕРЖИМОЕ ЗАДАНИЯ ПРОКРУЧИВАЕТСЯ, КНОПКИ ОСТАЮТСЯ ВНИЗУ */
         .task-right-side { overflow: hidden !important; }
         .task-right-side > div { min-height: 0 !important; height: 100% !important; justify-content: flex-start !important; overflow: hidden !important; }
-        .svg-wrapper { flex: 1 1 auto !important; min-height: 0 !important; max-height: 54% !important; width: 100% !important; overflow: hidden !important; margin-bottom: 10px !important; }
-        .svg-wrapper img, .svg-wrapper svg { max-width: 100% !important; max-height: 100% !important; width: auto !important; height: auto !important; object-fit: contain !important; display: block !important; margin: 0 auto !important; }
-        .task-text { font-size: clamp(16px, 1.5vw, 23px) !important; line-height: 1.22 !important; max-height: 28% !important; min-height: 0 !important; flex: 0 1 auto !important; overflow: hidden !important; padding: 0 8px !important; margin-bottom: 10px !important; box-sizing: border-box !important; text-align: center !important; }
-        .task-card-visual .task-text mjx-container { font-size: 108% !important; }
-        .pres-check-zone { flex: 0 0 auto !important; margin-top: auto !important; gap: 10px !important; }
-        .pres-input { max-width: 180px !important; box-sizing: border-box !important; }
+        .pres-task-scroll {
+            width:100% !important;
+            min-height:0 !important;
+            flex:1 1 auto !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+            padding:2px 8px 10px 2px !important;
+            box-sizing:border-box !important;
+            scrollbar-width:thin;
+            scrollbar-color:${accentColor} rgba(0,0,0,.08);
+        }
+        .pres-task-scroll::-webkit-scrollbar{width:9px}
+        .pres-task-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:99px}
+        .pres-task-scroll::-webkit-scrollbar-thumb{background:${accentColor};border-radius:99px}
+        .svg-wrapper { flex:0 0 auto !important; min-height:0 !important; max-height:none !important; width:100% !important; overflow:visible !important; margin-bottom:12px !important; }
+        .svg-wrapper img, .svg-wrapper svg { max-width:100% !important; max-height:min(42vh,390px) !important; width:auto !important; height:auto !important; object-fit:contain !important; display:block !important; margin:0 auto !important; }
+        .task-text { font-size:clamp(15px,1.35vw,21px) !important; line-height:1.24 !important; max-height:none !important; min-height:0 !important; height:auto !important; flex:0 0 auto !important; overflow:visible !important; padding:0 8px !important; margin-bottom:10px !important; box-sizing:border-box !important; text-align:center !important; }
+        .task-card-visual .task-text mjx-container { font-size:104% !important; }
+        .pres-check-zone { flex:0 0 auto !important; margin-top:10px !important; gap:10px !important; background:rgba(255,255,255,.96); position:relative; z-index:5; }
+        .pres-input { max-width:180px !important; box-sizing:border-box !important; }
 
         .pres-canvas-box { isolation: isolate; }
         .pres-draft-diagram { position: absolute; left: 12px; top: 12px; z-index: 1; display: inline-flex; align-items: flex-start; justify-content: flex-start; width: fit-content; max-width: calc(100% - 24px); max-height: 62%; padding: 10px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.10); box-sizing: border-box; overflow: visible; }
@@ -763,8 +785,8 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
 
         /* РЕЖИМ ДЛЯ ЗАДАНИЙ БЕЗ ЧЕРТЕЖА */
         .task-card-text-only { width: min(58vw, 780px) !important; min-height: 230px !important; height: auto !important; max-height: 68vh !important; top: 50% !important; bottom: auto !important; right: 7% !important; transform: translateY(-50%) !important; padding: 24px 34px !important; justify-content: center !important; }
-        .task-card-text-only > div { justify-content: center !important; min-height: 0 !important; height: auto !important; overflow: hidden !important; }
-        .task-card-text-only .task-text { font-size: clamp(19px, 1.72vw, 27px) !important; line-height: 1.28 !important; max-height: 44vh !important; overflow: hidden !important; text-align: center !important; margin: 0 0 22px 0 !important; padding: 0 6px !important; color: #222 !important; }
+        .task-card-text-only > div { justify-content:flex-start !important; min-height:0 !important; height:100% !important; overflow:hidden !important; }
+        .task-card-text-only .task-text { font-size:clamp(17px,1.55vw,24px) !important; line-height:1.26 !important; max-height:none !important; overflow:visible !important; text-align:center !important; margin:0 0 18px 0 !important; padding:0 6px !important; color:#222 !important; }
         .task-card-text-only .task-text mjx-container { font-size: 104% !important; }
         .task-card-text-only .pres-check-zone { margin-top: 0 !important; gap: 14px !important; }
         .task-card-text-only .pres-input { width: 190px !important; font-size: 1.15em !important; }
@@ -929,16 +951,13 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         }
 
         function fitCurrentSlideText() {
-            let slide = slides[currentSlide];
+            const slide = slides[currentSlide];
             if (!slide) return;
-            slide.querySelectorAll('.task-right-side').forEach(card => {
-                let textEl = card.querySelector('.task-text');
-                if (!textEl) return;
-                if (card.classList.contains('task-card-text-only')) {
-                    fitTextToBox(textEl, chooseTextOnlyMax(textEl), 13);
-                } else {
-                    fitTextToBox(textEl, 23, 14);
-                }
+            slide.querySelectorAll('.pres-task-scroll').forEach(box => { box.scrollTop = 0; });
+            slide.querySelectorAll('.task-text').forEach(textEl => {
+                textEl.style.overflow = 'visible';
+                textEl.style.maxHeight = 'none';
+                textEl.style.height = 'auto';
             });
         }
 

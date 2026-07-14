@@ -67,6 +67,13 @@ const TOWER_TEMPLATE = `<!DOCTYPE html>
     #canvas-tower{ position:absolute; inset:0; z-index:2; display:block; width:100%; height:100%; touch-action:none; cursor:crosshair; background:transparent; }
     #towerDraftDiagram{ position:absolute; left:10px; top:10px; z-index:1; pointer-events:none; max-width:42%; max-height:42%; background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:8px; padding:8px; box-shadow:0 4px 12px rgba(0,0,0,.10); box-sizing:border-box; display:none; }
     #towerDraftDiagram svg, #towerDraftDiagram img, #towerDraftDiagram picture, #towerDraftDiagram canvas{ display:block; max-width:100% !important; max-height:100% !important; width:auto !important; height:auto !important; object-fit:contain !important; }
+    #towerZoomModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(5,12,22,.82);backdrop-filter:blur(7px);align-items:center;justify-content:center;padding:22px;box-sizing:border-box;}
+    #towerZoomModal.open{display:flex;}
+    #towerZoomBox{position:relative;width:min(1120px,94vw);height:min(780px,88vh);background:#fff;border:3px solid #ff8c00;border-radius:20px;box-shadow:0 22px 70px rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;padding:58px 22px 22px;box-sizing:border-box;overflow:hidden;}
+    #towerZoomTitle{position:absolute;left:22px;top:15px;font-weight:900;color:#26334f;font-size:20px;}
+    #towerZoomClose{position:absolute;right:14px;top:10px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:10px;width:42px;height:42px;font-size:26px;font-weight:900;cursor:pointer;}
+    #towerZoomContent{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-out;}
+    #towerZoomContent img,#towerZoomContent svg,#towerZoomContent picture,#towerZoomContent canvas{display:block!important;max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important;margin:auto!important;}
     #overlay.draft-open #card{ margin-right:0; }
     #overlay.show.draft-open #card{ transform: translateX(-320px) translateY(0) scale(1); }
     @media (max-width: 1180px){ #overlay.show.draft-open #card{ transform: translateY(0) scale(1); } #overlay.draft-open #card{ margin-right:0; max-height:48vh; } #drawPanel{ left:12px; right:12px; top:auto; height:42vh; bottom:12px; width:auto; padding:14px; } #towerDraftDiagram{ max-width:36%; max-height:38%; } }
@@ -78,7 +85,7 @@ const TOWER_TEMPLATE = `<!DOCTYPE html>
             <canvas id="c"></canvas>
             <div id="hud"><div class="pill" id="leftPill">Башня: <b id="heightTxt">0</b><span style="opacity:.5">|</span>Осталось: <b id="remainNum">9</b></div><div id="progressWrap">Прогресс<div id="bar"><div></div></div><span id="pct">0%</span></div><div class="pill" id="scorePill">Счёт: <b id="scoreNum">0</b></div></div>
             <button id="nextBtn" disabled>Далее →</button>
-            <div id="overlay" role="dialog" aria-modal="true"><div id="card"><div id="cardHeader"><div><div id="title">Вопрос</div><div id="q">...</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div style="display:flex; align-items:center; gap:10px;"><button id="draftBtn" type="button" title="Открыть черновик">✏️</button><div id="badge">1 / 9</div></div></div></div><div id="answers"></div><div id="inputRow"><input id="ansInput" type="text" placeholder="Введите ответ..." autocomplete="off" /><button id="submit">ОК</button></div><div id="msg"></div><div id="hint">Верно → блок опускается и становится этажом (+100). Неверно → обугливание, взрыв и исчезает.</div></div><div id="drawPanel" onclick="event.stopPropagation();"><div id="drawTools"><button type="button" onclick="window.setTool('tower', 'pointer')" title="Указатель (Перетаскивание)">👆</button><button type="button" onclick="window.setTool('tower', 'pen')" title="Карандаш">🖊️</button><select id="tool-select-tower" onchange="window.setTool('tower', this.value)"><option value="" disabled selected hidden>🔺 Фигуры</option><option value="line">📏 Прямая</option><option value="vector">↗️ Вектор</option><option value="circle">⭕ Окружность</option><option value="triangle">🔺 Треугольник</option><option value="cylinder">🛢️ Цилиндр</option><option value="cone">🍦 Конус</option><option value="sphere">🔮 Сфера</option></select><input type="color" id="color-tower" value="#003399" title="Цвет"><input type="range" id="size-tower" min="1" max="15" value="3" title="Толщина линии"><button type="button" onclick="window.setTool('tower', 'eraser')" title="Ластик">🧽</button><div style="flex-grow:1;"></div><button type="button" onclick="window.clearCanvas('tower')" title="Очистить всё">🗑️</button><button id="drawClose" type="button" title="Закрыть">×</button><input type="hidden" id="tool-tower" value="pen"></div><div id="drawCanvasWrap"><div id="towerDraftDiagram"></div><canvas id="canvas-tower"></canvas></div></div></div>
+            <div id="overlay" role="dialog" aria-modal="true"><div id="card"><div id="cardHeader"><div><div id="title">Вопрос</div><div id="q">...</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><div style="display:flex; align-items:center; gap:10px;"><button id="draftBtn" type="button" title="Открыть черновик">✏️</button><div id="badge">1 / 9</div></div></div></div><div id="answers"></div><div id="inputRow"><input id="ansInput" type="text" placeholder="Введите ответ..." autocomplete="off" /><button id="submit">ОК</button></div><div id="msg"></div><div id="hint">Верно → блок опускается и становится этажом (+100). Неверно → обугливание, взрыв и исчезает.</div></div><div id="drawPanel" onclick="event.stopPropagation();"><div id="drawTools"><button type="button" onclick="window.setTool('tower', 'pointer')" title="Указатель (Перетаскивание)">👆</button><button type="button" onclick="window.setTool('tower', 'zoom')" title="Лупа: выберите и нажмите на чертёж">🔍</button><button type="button" onclick="window.setTool('tower', 'pen')" title="Карандаш">🖊️</button><select id="tool-select-tower" onchange="window.setTool('tower', this.value)"><option value="" disabled selected hidden>🔺 Фигуры</option><option value="line">📏 Прямая</option><option value="vector">↗️ Вектор</option><option value="circle">⭕ Окружность</option><option value="triangle">🔺 Треугольник</option><option value="cylinder">🛢️ Цилиндр</option><option value="cone">🍦 Конус</option><option value="sphere">🔮 Сфера</option></select><input type="color" id="color-tower" value="#003399" title="Цвет"><input type="range" id="size-tower" min="1" max="15" value="3" title="Толщина линии"><button type="button" onclick="window.setTool('tower', 'eraser')" title="Ластик">🧽</button><div style="flex-grow:1;"></div><button type="button" onclick="window.clearCanvas('tower')" title="Очистить всё">🗑️</button><button id="drawClose" type="button" title="Закрыть">×</button><input type="hidden" id="tool-tower" value="pen"></div><div id="drawCanvasWrap"><div id="towerDraftDiagram"></div><canvas id="canvas-tower"></canvas></div></div></div><div id="towerZoomModal" aria-hidden="true"><div id="towerZoomBox" onclick="event.stopPropagation()"><div id="towerZoomTitle">🔍 Увеличенный чертёж</div><button id="towerZoomClose" type="button" title="Закрыть">×</button><div id="towerZoomContent" title="Нажмите, чтобы закрыть"></div></div></div>
             <div id="start"><div id="startCard"><h1>Башня знаний</h1><p></p><button id="play">▶ Начать</button><div id="err" style="display:none;"></div></div></div>
             <div id="finish"><div id="finishCard"><div id="finishTitle">Отлично!</div><div id="finishText">Заработано <b id="finishScore">0</b> баллов из 900</div><div id="finishCustomText" style="color:var(--text); margin-bottom:14px; font-size:16px; line-height:1.4; display:none;"></div><div id="stats"><div class="stat"><b id="stCorrect">0</b><div>правильных ответов</div></div><div class="stat"><b id="stWrong">0</b><div>неправильных ответов</div></div><div class="stat"><b id="stHeight">0</b><div>блоков в башне</div></div></div><button id="restart">↻ Сыграть ещё раз</button></div></div>
         </div>
@@ -174,6 +181,26 @@ const TOWER_TEMPLATE = `<!DOCTYPE html>
                 towerDraftDiagram.style.display = "none";
             }
         }
+
+        const towerZoomModal = document.getElementById('towerZoomModal');
+        const towerZoomContent = document.getElementById('towerZoomContent');
+        const towerZoomClose = document.getElementById('towerZoomClose');
+        function openTowerZoom(){
+            if(!towerZoomModal || !towerZoomContent || !towerDraftDiagram || !towerDraftDiagram.innerHTML.trim()) return;
+            towerZoomContent.innerHTML = towerDraftDiagram.innerHTML;
+            towerZoomModal.classList.add('open');
+            towerZoomModal.setAttribute('aria-hidden','false');
+        }
+        function closeTowerZoom(){
+            if(!towerZoomModal) return;
+            towerZoomModal.classList.remove('open');
+            towerZoomModal.setAttribute('aria-hidden','true');
+        }
+        window.openTowerZoom = openTowerZoom;
+        if(towerZoomClose) towerZoomClose.addEventListener('click', closeTowerZoom);
+        if(towerZoomContent) towerZoomContent.addEventListener('click', closeTowerZoom);
+        if(towerZoomModal) towerZoomModal.addEventListener('click', e=>{ if(e.target===towerZoomModal) closeTowerZoom(); });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeTowerZoom(); });
 
         // Черновик: логика один-в-один как в презентациях, только панель открывается справа
         window.mainCanvases = window.mainCanvases || {};
@@ -336,6 +363,12 @@ const TOWER_TEMPLATE = `<!DOCTYPE html>
             function startDraw(e) {
                 isDrawing = true; let p = getPos(e);
                 let tool = document.getElementById('tool-' + id).value; let color = document.getElementById('color-' + id).value; let size = document.getElementById('size-' + id).value;
+                if (tool === 'zoom') {
+                    isDrawing = false;
+                    openTowerZoom();
+                    if (e.cancelable) e.preventDefault();
+                    return;
+                }
                 if (tool === 'pointer') {
                     let hitHandle = false;
                     if (draggingObj) {
@@ -401,6 +434,7 @@ const TOWER_TEMPLATE = `<!DOCTYPE html>
             if (canvas) {
                 if (tool === 'eraser') canvas.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>🧽</text></svg>') 0 20, auto";
                 else if (tool === 'pointer') canvas.style.cursor = 'move';
+                else if (tool === 'zoom') canvas.style.cursor = 'zoom-in';
                 else canvas.style.cursor = 'crosshair';
             }
         };
