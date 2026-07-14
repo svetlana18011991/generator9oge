@@ -57,6 +57,25 @@ function getPresentationDraftDiagramHtml(task, draftId) {
     return `<div${idAttr} class="${className}" aria-hidden="true"><div class="pres-draft-diagram-inner">${visualHtml}</div></div>`;
 }
 
+
+function getPresentationTaskText(task) {
+    const source = task && task.presentationText !== undefined
+        ? String(task.presentationText || '')
+        : String((task && task.text) || '');
+    try {
+        const box = document.createElement('div');
+        box.innerHTML = source;
+        box.querySelectorAll('svg, img, picture, canvas').forEach(el => el.remove());
+        // Удаляем пустые обёртки, оставшиеся после вынесения чертежа.
+        [...box.querySelectorAll('div, p')].reverse().forEach(el => {
+            if (!el.textContent.trim() && !el.querySelector('table, mjx-container')) el.remove();
+        });
+        return box.innerHTML;
+    } catch (e) {
+        return source;
+    }
+}
+
 // ==========================================
 // АВТОРСКИЙ СТИЛЬ 1 (Оранжевый неон)
 // ==========================================
@@ -86,7 +105,7 @@ function generatePresentation1() {
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -166,7 +185,7 @@ function generatePresentation2() {
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -246,7 +265,7 @@ function generatePresentation3() {
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${getPresentationTaskText(t)}</div>
                     </div>
                     
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
@@ -442,7 +461,7 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
-                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${t.text}</div>
+                        <div class="task-text" style="margin-bottom: 14px; text-align: center; color: #333; width: 100%;">${getPresentationTaskText(t)}</div>
                     </div>
                     <div class="pres-check-zone" style="display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; flex-shrink: 0;">
                         <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${i}" style="font-size: 1.1em; padding: 12px 20px; width: 180px; border-radius: 12px; border: 2px solid ${accent}; text-align: center; outline: none; color: ${accent};">
@@ -753,7 +772,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             flex:1 1 auto !important;
             overflow-y:auto !important;
             overflow-x:hidden !important;
-            padding:2px 8px 10px 2px !important;
+            padding:4px 10px 14px 4px !important;
             box-sizing:border-box !important;
             scrollbar-width:thin;
             scrollbar-color:${accentColor} rgba(0,0,0,.08);
@@ -761,9 +780,10 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         .pres-task-scroll::-webkit-scrollbar{width:9px}
         .pres-task-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:99px}
         .pres-task-scroll::-webkit-scrollbar-thumb{background:${accentColor};border-radius:99px}
-        .svg-wrapper { flex:0 0 auto !important; min-height:0 !important; max-height:none !important; width:100% !important; overflow:visible !important; margin-bottom:12px !important; }
-        .svg-wrapper img, .svg-wrapper svg { max-width:100% !important; max-height:min(42vh,390px) !important; width:auto !important; height:auto !important; object-fit:contain !important; display:block !important; margin:0 auto !important; }
-        .task-text { font-size:clamp(15px,1.35vw,21px) !important; line-height:1.24 !important; max-height:none !important; min-height:0 !important; height:auto !important; flex:0 0 auto !important; overflow:visible !important; padding:0 8px !important; margin-bottom:10px !important; box-sizing:border-box !important; text-align:center !important; }
+        .svg-wrapper { flex:0 0 auto !important; min-height:0 !important; max-height:none !important; width:100% !important; overflow:hidden !important; margin-bottom:18px !important; padding-bottom:2px !important; }
+        .svg-wrapper img, .svg-wrapper svg, .svg-wrapper picture, .svg-wrapper canvas { max-width:94% !important; max-height:min(29vh,270px) !important; width:auto !important; height:auto !important; object-fit:contain !important; display:block !important; margin:0 auto !important; }
+        .slide.pres-draft-open .svg-wrapper img, .slide.pres-draft-open .svg-wrapper svg, .slide.pres-draft-open .svg-wrapper picture, .slide.pres-draft-open .svg-wrapper canvas { max-height:min(24vh,220px) !important; max-width:90% !important; }
+        .task-text { font-size:clamp(14px,1.18vw,18px) !important; line-height:1.24 !important; max-height:none !important; min-height:0 !important; height:auto !important; flex:0 0 auto !important; overflow:visible !important; padding:0 8px !important; margin-bottom:10px !important; box-sizing:border-box !important; text-align:center !important; }
         .task-card-visual .task-text mjx-container { font-size:104% !important; }
         .pres-check-zone { flex:0 0 auto !important; margin-top:10px !important; gap:10px !important; background:rgba(255,255,255,.96); position:relative; z-index:5; }
         .pres-input { max-width:180px !important; box-sizing:border-box !important; }
@@ -777,8 +797,9 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
 
         @media (max-height: 760px), (max-width: 1200px) {
             .task-right-side { padding: 14px 18px !important; }
-            .svg-wrapper { max-height: 50% !important; }
-            .task-text { font-size: 15px !important; line-height: 1.16 !important; max-height: 30% !important; }
+            .svg-wrapper { max-height:none !important; }
+            .svg-wrapper img, .svg-wrapper svg, .svg-wrapper picture, .svg-wrapper canvas { max-height:min(25vh,210px) !important; }
+            .task-text { font-size:14px !important; line-height:1.18 !important; max-height:none !important; }
             .pres-input { padding: 9px 14px !important; width: 150px !important; }
             .pres-btn { padding: 9px 22px !important; }
         }

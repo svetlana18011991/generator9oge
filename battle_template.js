@@ -128,9 +128,10 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             display:none;
             position:relative;
             flex:0 0 auto;
-            max-height:48%;
+            min-height:280px;
+            max-height:62%;
             overflow:hidden;
-            padding:9px 12px 11px;
+            padding:8px 10px 10px;
             color:#222;
             background:#fff;
             border-bottom:2px solid #bbdefb;
@@ -156,8 +157,8 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             border-radius:0 8px 8px 0;
             background:#fff8ed;
             color:#222;
-            font-size:14px;
-            line-height:1.28;
+            font-size:13px;
+            line-height:1.22;
             text-align:left;
             font-weight:600;
             pointer-events:none;
@@ -185,7 +186,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         #draftTaskStatement .draft-figure-wrap.tropinki-draft-figure img,
         #draftTaskStatement .draft-figure-wrap.tropinki-draft-figure picture,
         #draftTaskStatement .draft-figure-wrap.tropinki-draft-figure canvas{
-            max-height:240px!important;
+            max-height:180px!important;
         }
 
         #draftTaskStatement .draft-figure-wrap svg,
@@ -194,7 +195,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         #draftTaskStatement .draft-figure-wrap canvas{
             display:block;
             max-width:100%;
-            max-height:26vh;
+            max-height:185px;
             width:auto!important;
             height:auto!important;
             object-fit:contain!important;
@@ -1032,7 +1033,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
                 wrap.className = 'draft-figure-wrap' + (isTropinki ? ' tropinki-draft-figure' : '');
                 wrap.appendChild(fig);
                 fig.style.maxWidth = '100%';
-                fig.style.maxHeight = isTropinki ? '220px' : '25vh';
+                fig.style.maxHeight = isTropinki ? '175px' : '185px';
                 fig.style.width = 'auto';
                 fig.style.height = 'auto';
                 fig.style.objectFit = 'contain';

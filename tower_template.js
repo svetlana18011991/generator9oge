@@ -1,4 +1,4 @@
-const TOWER_TEMPLATE = `<!DOCTYPE html>
+window.TOWER_TEMPLATE = `<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
