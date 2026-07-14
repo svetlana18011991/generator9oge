@@ -101,7 +101,7 @@ function generatePresentation1() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 15px; box-shadow: 0 0 25px #ff8c00, inset 0 0 15px #ff8c00; border: 2px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.presentationHasTable ? 'task-card-table' : (t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only')}" style="position: absolute; right: 5%; top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 15px; box-shadow: 0 0 25px #ff8c00, inset 0 0 15px #ff8c00; border: 2px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
@@ -181,7 +181,7 @@ function generatePresentation2() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #ff4081, inset 0 0 15px #ff4081; border: 2px solid #ff4081; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.presentationHasTable ? 'task-card-table' : (t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only')}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #ff4081, inset 0 0 15px #ff4081; border: 2px solid #ff4081; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
@@ -261,7 +261,7 @@ function generatePresentation3() {
                 <h3 style="font-family: 'Caveat', cursive; font-size: 38px; color: #fff; text-shadow: 0 0 10px #9c27b0, 0 0 20px #9c27b0; margin: 0;">Задание ${i+1}</h3>
             </div>
             
-            <div class="task-right-side ${t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #9c27b0, inset 0 0 15px #9c27b0; border: 2px solid #9c27b0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.presentationHasTable ? 'task-card-table' : (t.svg && String(t.svg).trim() !== "" ? 'task-card-visual' : 'task-card-text-only')}" style="position: absolute; right: 5%; top: 15%; bottom: 15%; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 20px; box-shadow: 0 0 25px #9c27b0, inset 0 0 15px #9c27b0; border: 2px solid #9c27b0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
@@ -457,7 +457,7 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
     return `
         <div class="slide task-slide" style="background-image: url('${bg}')">
             ${plate}
-            <div class="task-right-side ${taskHasVisual ? 'task-card-visual' : 'task-card-text-only'}" style="position: absolute; ${taskPos} top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: ${radius}px; box-shadow: 0 0 25px ${accent}, inset 0 0 15px ${accent}; border: 2px solid ${accent}; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
+            <div class="task-right-side ${t.presentationHasTable ? 'task-card-table' : (taskHasVisual ? 'task-card-visual' : 'task-card-text-only')}" style="position: absolute; ${taskPos} top: ${panelTop}; bottom: ${panelBottom}; width: 50%; background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: ${radius}px; box-shadow: 0 0 25px ${accent}, inset 0 0 15px ${accent}; border: 2px solid ${accent}; overflow: hidden; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" onclick="event.stopPropagation();">
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
                     <div class="pres-task-scroll">
                         ${t.svg ? `<div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; width: 100%; flex-shrink: 0; min-height: 0;" class="svg-wrapper">${t.svg}</div>` : ""}
@@ -802,6 +802,60 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             .task-text { font-size:14px !important; line-height:1.18 !important; max-height:none !important; }
             .pres-input { padding: 9px 14px !important; width: 150px !important; }
             .pres-btn { padding: 9px 22px !important; }
+        }
+
+        /* ТАБЛИЧНЫЕ ЗАДАНИЯ №5: только таблица и вопрос, компактный читаемый шрифт */
+        .task-card-table {
+            width:min(68vw,1040px) !important;
+            top:50% !important;
+            bottom:auto !important;
+            height:min(78vh,720px) !important;
+            max-height:78vh !important;
+            transform:translateY(-50%) !important;
+            padding:16px 20px !important;
+            justify-content:flex-start !important;
+        }
+        .task-card-table > div { min-height:0 !important; height:100% !important; overflow:hidden !important; justify-content:flex-start !important; }
+        .task-card-table .pres-task-scroll { padding:2px 8px 10px 2px !important; overflow-y:auto !important; overflow-x:hidden !important; }
+        .task-card-table .svg-wrapper { display:none !important; }
+        .task-card-table .task-text {
+            font-size:clamp(12px,.92vw,15px) !important;
+            line-height:1.18 !important;
+            text-align:left !important;
+            padding:0 4px !important;
+            margin:0 0 8px !important;
+            overflow:visible !important;
+        }
+        .task-card-table .task-text .common-table-wrap { width:100% !important; overflow-x:auto !important; margin:0 0 10px !important; }
+        .task-card-table .task-text table,
+        .task-card-table .task-text .common-table {
+            width:100% !important;
+            max-width:100% !important;
+            border-collapse:collapse !important;
+            table-layout:auto !important;
+            font-size:clamp(10px,.72vw,12.5px) !important;
+            line-height:1.12 !important;
+            background:#fff !important;
+        }
+        .task-card-table .task-text th,
+        .task-card-table .task-text td {
+            border:1px solid #8d99a6 !important;
+            padding:3px 4px !important;
+            vertical-align:middle !important;
+            text-align:center !important;
+            white-space:normal !important;
+            word-break:normal !important;
+        }
+        .task-card-table .task-text th { font-weight:700 !important; background:#f4f7f9 !important; }
+        .task-card-table .task-text p { font-size:clamp(13px,.95vw,16px) !important; line-height:1.22 !important; text-align:left !important; margin:8px 2px 2px !important; }
+        .task-card-table .pres-check-zone { margin-top:6px !important; }
+        @media (max-height:760px), (max-width:1200px) {
+            .task-card-table { width:min(72vw,980px) !important; height:80vh !important; max-height:80vh !important; padding:12px 14px !important; }
+            .task-card-table .task-text table,
+            .task-card-table .task-text .common-table { font-size:10px !important; }
+            .task-card-table .task-text th,
+            .task-card-table .task-text td { padding:2px 3px !important; }
+            .task-card-table .task-text p { font-size:13px !important; }
         }
 
         /* РЕЖИМ ДЛЯ ЗАДАНИЙ БЕЗ ЧЕРТЕЖА */
