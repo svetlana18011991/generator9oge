@@ -238,6 +238,8 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
             box-shadow:0 2px 8px rgba(0,0,0,.08);padding:10px;max-width:42%;max-height:72%;overflow:hidden;pointer-events:none;
         }
         .draftDiagram svg,.draftDiagram img{display:block;max-width:100%!important;max-height:220px!important;width:auto!important;height:auto!important}
+        .draftDiagram.tropinki-draft{width:min(42%,350px);max-width:350px;max-height:72%;}
+        .draftDiagram.tropinki-draft svg,.draftDiagram.tropinki-draft img{max-height:220px!important;}
         #draftCanvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;touch-action:none;cursor:crosshair;background:transparent}
         @media(max-width:850px){.main{grid-template-columns:1fr}.side{order:-1}.top{flex-direction:column;align-items:flex-start}.canvasWrap{height:280px}}
     </style>
@@ -285,6 +287,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         <div class="draftPanel" id="draftPanel">
             <div class="draftTools" id="draftTools">
                 <button type="button" data-tool="pointer" onclick="setTool('pointer')" title="Указатель">👆</button>
+                <button type="button" data-tool="zoom" onclick="setTool('zoom')" title="Лупа: нажмите на чертёж, чтобы открыть его крупно">🔍</button>
                 <button type="button" data-tool="pen" onclick="setTool('pen')" title="Карандаш">🖊️</button>
                 <button type="button" onclick="undoDraft()" title="Отменить">↶</button>
                 <button type="button" onclick="redoDraft()" title="Повторить">↷</button>
@@ -554,8 +557,78 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         const sel = document.getElementById('toolSelect');
         if(sel && ['line','vector','circle','triangle','cylinder','cone','sphere'].includes(window.currentDraftTool)) sel.value = window.currentDraftTool;
         const c = document.getElementById('draftCanvas');
-        if(c) c.style.cursor = window.currentDraftTool === 'pointer' ? 'move' : 'crosshair';
+        if(c) c.style.cursor = window.currentDraftTool === 'pointer' ? 'move' : (window.currentDraftTool === 'zoom' ? 'zoom-in' : 'crosshair');
     };
+
+
+    function openMotivationDraftZoomModal(sourceEl){
+        if(!sourceEl || !sourceEl.innerHTML.trim()) return;
+        const old = document.getElementById('motivation-draft-zoom-modal');
+        if(old){ old.remove(); return; }
+
+        const previousOverflow = document.body.style.overflow || '';
+        const overlay = document.createElement('div');
+        overlay.id = 'motivation-draft-zoom-modal';
+        overlay.dataset.previousOverflow = previousOverflow;
+        overlay.setAttribute('role','dialog');
+        overlay.setAttribute('aria-modal','true');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(7,18,31,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;';
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:relative;width:min(96vw,1700px);height:94vh;background:#fff;border:3px solid #19b8b0;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;';
+
+        const head = document.createElement('div');
+        head.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e9fbf9;border-bottom:1px solid #9adfd9;color:#073b4c;font:700 17px Arial,sans-serif;';
+        head.innerHTML = '<span style="font-size:23px;">🔍</span><span>Увеличенный чертёж</span><span style="margin-left:auto;font-size:13px;font-weight:500;color:#526273;">Нажмите на чертёж ещё раз, чтобы закрыть</span>';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.innerHTML = '&times;';
+        close.title = 'Закрыть';
+        close.style.cssText = 'margin-left:6px;width:38px;height:38px;border:1px solid #ef7f1a;border-radius:10px;background:#fff;color:#d95f02;font:700 28px/30px Arial;cursor:pointer;';
+        head.appendChild(close);
+
+        const viewport = document.createElement('div');
+        viewport.style.cssText = 'flex:1 1 auto;min-height:0;overflow:hidden;background:#f4f8fb;padding:18px;box-sizing:border-box;cursor:zoom-out;';
+        const diagram = document.createElement('div');
+        diagram.innerHTML = sourceEl.innerHTML;
+        diagram.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;';
+        diagram.querySelectorAll('img,svg,picture,canvas').forEach(function(media){
+            media.style.setProperty('display','block','important');
+            media.style.setProperty('width','auto','important');
+            media.style.setProperty('height','auto','important');
+            media.style.setProperty('min-width','0','important');
+            media.style.setProperty('min-height','0','important');
+            media.style.setProperty('max-width','100%','important');
+            media.style.setProperty('max-height','100%','important');
+            media.style.setProperty('margin','auto','important');
+            media.style.setProperty('object-fit','contain','important');
+            media.style.setProperty('cursor','zoom-out','important');
+            media.style.setProperty('box-sizing','border-box','important');
+            media.style.setProperty('pointer-events','auto','important');
+        });
+
+        viewport.appendChild(diagram);
+        modal.appendChild(head);
+        modal.appendChild(viewport);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        function closeZoom(){
+            const current = document.getElementById('motivation-draft-zoom-modal');
+            if(current){
+                document.body.style.overflow = current.dataset.previousOverflow || '';
+                current.remove();
+            }
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e){ if(e.key === 'Escape') closeZoom(); }
+        close.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); closeZoom(); });
+        overlay.addEventListener('click', function(e){ if(e.target === overlay) closeZoom(); });
+        diagram.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); closeZoom(); });
+        document.addEventListener('keydown', onKey);
+    }
 
     function pointerPos(e){
         const r = draft.canvas.getBoundingClientRect();
@@ -659,6 +732,16 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         const p = pointerPos(e);
         const tool = getTool();
         e.preventDefault();
+        if(tool === 'zoom'){
+            const figure = document.getElementById('draftDiagram');
+            if(figure && figure.style.display !== 'none' && figure.innerHTML.trim()){
+                const r = figure.getBoundingClientRect();
+                if(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom){
+                    openMotivationDraftZoomModal(figure);
+                }
+            }
+            return;
+        }
         if(tool === 'pointer'){
             const hit = topObjectAt(p);
             if(hit){
@@ -767,6 +850,8 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         const q = questions[currentIndex] || {};
         const visual = q.svg || firstVisualFromHtml(q.prompt || q.text || '');
         d.innerHTML = visual || '';
+        const isTropinki = /(?:Тропинк|Tropinka|План сюжета[^<]{0,80}Тропинки)/i.test(String(visual || '') + ' ' + String(q.prompt || q.text || ''));
+        d.classList.toggle('tropinki-draft', !!isTropinki);
         d.style.display = visual ? 'block' : 'none';
     }
 
