@@ -783,6 +783,38 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         .svg-wrapper { flex:0 0 auto !important; min-height:0 !important; max-height:none !important; width:100% !important; overflow:hidden !important; margin-bottom:18px !important; padding-bottom:2px !important; }
         .svg-wrapper img, .svg-wrapper svg, .svg-wrapper picture, .svg-wrapper canvas { max-width:94% !important; max-height:min(29vh,270px) !important; width:auto !important; height:auto !important; object-fit:contain !important; display:block !important; margin:0 auto !important; }
         .slide.pres-draft-open .svg-wrapper img, .slide.pres-draft-open .svg-wrapper svg, .slide.pres-draft-open .svg-wrapper picture, .slide.pres-draft-open .svg-wrapper canvas { max-height:min(24vh,220px) !important; max-width:90% !important; }
+
+        /* При открытом черновике табличное задание остаётся целиком справа и не перекрывается панелью */
+        .slide.pres-draft-open .task-card-table {
+            width:49% !important;
+            right:3% !important;
+            left:auto !important;
+            top:50% !important;
+            bottom:auto !important;
+            max-height:72vh !important;
+            transform:translateY(-50%) !important;
+            padding:18px 20px 16px !important;
+        }
+        .slide.pres-draft-open .task-card-table .pres-task-scroll {
+            max-height:calc(72vh - 104px) !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+        }
+        .slide.pres-draft-open .task-card-table .task-text table,
+        .slide.pres-draft-open .task-card-table .task-text .common-table {
+            width:100% !important;
+            min-width:100% !important;
+            font-size:clamp(11px,.74vw,13px) !important;
+        }
+        .slide.pres-draft-open .task-card-table .task-text th,
+        .slide.pres-draft-open .task-card-table .task-text td {
+            padding:5px 6px !important;
+        }
+        .slide.pres-draft-open .task-card-table .task-text p {
+            font-size:clamp(13px,.88vw,15px) !important;
+            line-height:1.25 !important;
+            margin-top:10px !important;
+        }
         .task-text { font-size:clamp(14px,1.18vw,18px) !important; line-height:1.24 !important; max-height:none !important; min-height:0 !important; height:auto !important; flex:0 0 auto !important; overflow:visible !important; padding:0 8px !important; margin-bottom:10px !important; box-sizing:border-box !important; text-align:center !important; }
         .task-card-visual .task-text mjx-container { font-size:104% !important; }
         .pres-check-zone { flex:0 0 auto !important; margin-top:10px !important; gap:10px !important; background:rgba(255,255,255,.96); position:relative; z-index:5; }
