@@ -804,58 +804,139 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             .pres-btn { padding: 9px 22px !important; }
         }
 
-        /* ТАБЛИЧНЫЕ ЗАДАНИЯ №5: только таблица и вопрос, компактный читаемый шрифт */
+        /* ТАБЛИЧНЫЕ ЗАДАНИЯ №5: аккуратная карточка без пустого «поля» */
         .task-card-table {
-            width:min(68vw,1040px) !important;
+            width:min(64vw,1020px) !important;
             top:50% !important;
             bottom:auto !important;
-            height:min(78vh,720px) !important;
-            max-height:78vh !important;
+            height:auto !important;
+            min-height:0 !important;
+            max-height:76vh !important;
             transform:translateY(-50%) !important;
-            padding:16px 20px !important;
+            padding:22px 26px 20px !important;
             justify-content:flex-start !important;
         }
-        .task-card-table > div { min-height:0 !important; height:100% !important; overflow:hidden !important; justify-content:flex-start !important; }
-        .task-card-table .pres-task-scroll { padding:2px 8px 10px 2px !important; overflow-y:auto !important; overflow-x:hidden !important; }
+        .task-card-table > div {
+            min-height:0 !important;
+            height:auto !important;
+            max-height:100% !important;
+            overflow:hidden !important;
+            justify-content:flex-start !important;
+        }
+        .task-card-table .pres-task-scroll {
+            flex:0 1 auto !important;
+            width:100% !important;
+            max-height:calc(76vh - 112px) !important;
+            padding:2px 4px 4px !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+        }
         .task-card-table .svg-wrapper { display:none !important; }
         .task-card-table .task-text {
-            font-size:clamp(12px,.92vw,15px) !important;
-            line-height:1.18 !important;
-            text-align:left !important;
-            padding:0 4px !important;
-            margin:0 0 8px !important;
+            width:100% !important;
+            font-size:15px !important;
+            line-height:1.25 !important;
+            text-align:center !important;
+            padding:0 !important;
+            margin:0 !important;
             overflow:visible !important;
         }
-        .task-card-table .task-text .common-table-wrap { width:100% !important; overflow-x:auto !important; margin:0 0 10px !important; }
+        .task-card-table .task-text .common-table-wrap {
+            width:100% !important;
+            margin:0 auto 14px !important;
+            overflow:visible !important;
+            display:flex !important;
+            justify-content:center !important;
+            align-items:flex-start !important;
+        }
         .task-card-table .task-text table,
         .task-card-table .task-text .common-table {
-            width:100% !important;
+            width:auto !important;
+            min-width:min(100%,720px) !important;
             max-width:100% !important;
-            border-collapse:collapse !important;
+            margin:0 auto !important;
+            border-collapse:separate !important;
+            border-spacing:0 !important;
             table-layout:auto !important;
-            font-size:clamp(10px,.72vw,12.5px) !important;
-            line-height:1.12 !important;
+            font-size:clamp(13px,.92vw,15px) !important;
+            line-height:1.22 !important;
             background:#fff !important;
+            border:1px solid #7f8c99 !important;
+            border-radius:8px !important;
+            box-shadow:0 4px 12px rgba(0,0,0,.08) !important;
+            overflow:hidden !important;
         }
         .task-card-table .task-text th,
         .task-card-table .task-text td {
-            border:1px solid #8d99a6 !important;
-            padding:3px 4px !important;
+            border:0 !important;
+            border-right:1px solid #aab4bd !important;
+            border-bottom:1px solid #aab4bd !important;
+            padding:7px 10px !important;
             vertical-align:middle !important;
             text-align:center !important;
             white-space:normal !important;
             word-break:normal !important;
         }
-        .task-card-table .task-text th { font-weight:700 !important; background:#f4f7f9 !important; }
-        .task-card-table .task-text p { font-size:clamp(13px,.95vw,16px) !important; line-height:1.22 !important; text-align:left !important; margin:8px 2px 2px !important; }
-        .task-card-table .pres-check-zone { margin-top:6px !important; }
+        .task-card-table .task-text tr:last-child > * { border-bottom:0 !important; }
+        .task-card-table .task-text tr > *:last-child { border-right:0 !important; }
+        .task-card-table .task-text th {
+            font-weight:700 !important;
+            background:linear-gradient(180deg,#f7fbfc,#eaf3f5) !important;
+            color:#1f3540 !important;
+        }
+        .task-card-table .task-text tbody tr:nth-child(even) td { background:#fafcfd !important; }
+
+        /* Средние таблицы на 4–5 столбцов */
+        .task-card-table .task-text table:has(tr:first-child > :nth-child(4)),
+        .task-card-table .task-text .common-table:has(tr:first-child > :nth-child(4)) {
+            width:100% !important;
+            min-width:100% !important;
+            font-size:clamp(12px,.82vw,14px) !important;
+        }
+
+        /* Широкие таблицы с большим количеством столбцов */
+        .task-card-table .task-text table:has(tr:first-child > :nth-child(6)),
+        .task-card-table .task-text .common-table:has(tr:first-child > :nth-child(6)) {
+            width:100% !important;
+            min-width:100% !important;
+            font-size:clamp(10px,.68vw,12px) !important;
+            line-height:1.12 !important;
+        }
+        .task-card-table .task-text table:has(tr:first-child > :nth-child(6)) th,
+        .task-card-table .task-text table:has(tr:first-child > :nth-child(6)) td,
+        .task-card-table .task-text .common-table:has(tr:first-child > :nth-child(6)) th,
+        .task-card-table .task-text .common-table:has(tr:first-child > :nth-child(6)) td {
+            padding:4px 5px !important;
+        }
+
+        .task-card-table .task-text p {
+            max-width:920px !important;
+            margin:14px auto 2px !important;
+            padding:0 6px !important;
+            font-size:clamp(15px,1.05vw,18px) !important;
+            line-height:1.3 !important;
+            text-align:left !important;
+            color:#263238 !important;
+        }
+        .task-card-table .pres-check-zone {
+            margin-top:14px !important;
+            padding-top:2px !important;
+        }
+
         @media (max-height:760px), (max-width:1200px) {
-            .task-card-table { width:min(72vw,980px) !important; height:80vh !important; max-height:80vh !important; padding:12px 14px !important; }
+            .task-card-table {
+                width:min(70vw,980px) !important;
+                max-height:80vh !important;
+                padding:16px 18px !important;
+            }
+            .task-card-table .pres-task-scroll { max-height:calc(80vh - 100px) !important; }
             .task-card-table .task-text table,
-            .task-card-table .task-text .common-table { font-size:10px !important; }
+            .task-card-table .task-text .common-table { font-size:12px !important; }
             .task-card-table .task-text th,
-            .task-card-table .task-text td { padding:2px 3px !important; }
-            .task-card-table .task-text p { font-size:13px !important; }
+            .task-card-table .task-text td { padding:5px 7px !important; }
+            .task-card-table .task-text table:has(tr:first-child > :nth-child(6)),
+            .task-card-table .task-text .common-table:has(tr:first-child > :nth-child(6)) { font-size:9.5px !important; }
+            .task-card-table .task-text p { font-size:14px !important; margin-top:10px !important; }
         }
 
         /* РЕЖИМ ДЛЯ ЗАДАНИЙ БЕЗ ЧЕРТЕЖА */
