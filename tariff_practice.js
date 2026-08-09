@@ -3,6 +3,7 @@
 
     // Тема «Тарифы»: каталог прототипов для тренажёра заданий ОГЭ 1–5.
     // Сюжетные генераторы, уже находящиеся в oge_practice.js, не изменяются.
+    // График берётся из вшитого base64-изображения, как в прежней логике.
 
     const minutes = [175, 275, 150, 350, 300, 325, 375, 325, 200, 200, 325, 350];
     const gigabytes = [2.5, 3.5, 2, 4, 2.75, 3, 1, 1.5, 2.75, 3.25, 3.75, 2.25];
@@ -62,7 +63,10 @@
         </svg>`;
     }
 
-    const imageHTML = buildGraphSvg();
+    const tariffPlotSrc = window.TARIFF_PLOT_BASE64 || '';
+    const imageHTML = tariffPlotSrc
+        ? `<img src="${tariffPlotSrc}" alt="График минут исходящих вызовов и мобильного интернет-трафика по месяцам 2019 года" class="practice-tariff-plot" loading="eager">`
+        : buildGraphSvg();
     const theoryImageHTML = imageHTML;
 
     const overageTable = `<div class="common-table-wrap"><table class="common-table"><tbody>

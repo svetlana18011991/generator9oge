@@ -12,7 +12,8 @@
     <script src="motivation_template.js?v=motivation-v43"></script>
     <!-- Связанные практические комплекты ОГЭ 1–5 -->
     <script src="oge_practice.js?v=37"></script>
-    <script src="tariff_practice.js?v=20260809-1"></script>
+    <script src="tariff_plot_base64.js?v=20260809-2"></script>
+    <script src="tariff_practice.js?v=20260809-2"></script>
     <script src="apartment_practice.js?v=38"></script>
     <script src="tires_practice.js?v=53"></script>
     <script src="task6.js"></script>
@@ -2383,6 +2384,8 @@ body.auth-locked > :not(#passwordGate){
             .oge-practice-sticky::-webkit-scrollbar-track { background:transparent; }
             .oge-practice-common p { line-height:1.45; }
             .oge-practice-common svg, .oge-practice-common img { display:block; max-width:100%; height:auto; margin:12px auto; }
+            .practice-zoomable-diagram { cursor:zoom-in; }
+            .practice-zoomable-diagram img, img.practice-zoomable-diagram, .practice-zoomable-diagram svg, svg.practice-zoomable-diagram { cursor:zoom-in; }
             .oge-practice-common table, table.common-table { width:100%; border-collapse:collapse !important; border-spacing:0 !important; border:2px solid #111 !important; margin:10px 0; font-size:0.94em; background:#fff; color:#111; }
             .oge-practice-common th, .oge-practice-common td, table.common-table th, table.common-table td { border:1.5px solid #111 !important; padding:6px 7px; text-align:center; vertical-align:middle; }
             .oge-practice-common th, table.common-table th { background:#f0f0f0; font-weight:700; }
@@ -2394,8 +2397,9 @@ body.auth-locked > :not(#passwordGate){
     function makeOgePracticeIntro(themeTitle, scenario, setNumber) {
         const stickyText = stripDiagramsFromHTML(scenario.common || '');
         const introDiagram = scenario.imageHTML || extractFirstDiagramHTML(scenario.common || '');
-        const introDiagramHTML = introDiagram
-            ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${introDiagram}</div>`
+        const zoomableIntroDiagram = makePracticeZoomableDiagram(introDiagram);
+        const introDiagramHTML = zoomableIntroDiagram
+            ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${zoomableIntroDiagram}</div>`
             : '';
         return `${ogePracticeOutputStyles()}<div class="oge-practice-sticky-scope"><div class="oge-practice-common oge-practice-sticky" style="padding:13px 15px;">
             <h3 style="margin-bottom:8px;">Практический комплект ${setNumber}. ${themeTitle}</h3>
@@ -2428,6 +2432,20 @@ body.auth-locked > :not(#passwordGate){
         const holder = document.createElement('div');
         holder.innerHTML = html;
         holder.querySelectorAll('svg, img, picture, canvas').forEach(el => el.remove());
+        return holder.innerHTML;
+    }
+
+    function makePracticeZoomableDiagram(html) {
+        if (!html) return '';
+        const holder = document.createElement('div');
+        holder.innerHTML = html;
+        const visual = holder.querySelector('img, svg, picture, canvas');
+        if (!visual) return html;
+        const target = visual.closest('picture') || visual;
+        target.classList.add('practice-zoomable-diagram');
+        target.style.cursor = 'zoom-in';
+        target.setAttribute('title', 'Нажмите, чтобы увеличить изображение');
+        target.setAttribute('onclick', 'window.openDraftVisualZoom(this)');
         return holder.innerHTML;
     }
 
@@ -2485,7 +2503,8 @@ body.auth-locked > :not(#passwordGate){
             const commonText = theme.catalog && theme.catalog.common ? theme.catalog.common : '';
             const commonImageHTML = theme.catalog && theme.catalog.imageHTML ? theme.catalog.imageHTML : extractFirstDiagramHTML(commonText);
             const commonTextOnly = stripDiagramsFromHTML(commonText);
-            const commonIntroDiagram = commonImageHTML ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${commonImageHTML}</div>` : '';
+            const commonZoomableImageHTML = makePracticeZoomableDiagram(commonImageHTML);
+            const commonIntroDiagram = commonZoomableImageHTML ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${commonZoomableImageHTML}</div>` : '';
             const lastStickyProtoIndex = selectedPrototypes.reduce((lastIndex, proto, index) => Number(proto.examNumber) !== 5 ? index : lastIndex, -1);
             const commonIntro = commonText ? `<div class="oge-practice-sticky-scope">${ogePracticeOutputStyles()}<div class="oge-practice-common oge-practice-sticky" style="padding:13px 15px;"><h3 style="margin-bottom:8px;">${theme.title}. Общее условие</h3><div class="oge-practice-common-body" style="font-size:0.82em; line-height:1.28;">${commonIntroDiagram}${commonTextOnly}<div style="clear:both;"></div></div></div>` : '';
             const commonPrintIntro = commonText ? `${ogePracticeOutputStyles()}<div class="oge-practice-common"><h3>${theme.title}. Общее условие</h3><div>${commonTextOnly}</div></div>` : '';
@@ -3428,6 +3447,48 @@ body.auth-locked > :not(#passwordGate){
 
         if (hasContent) { document.getElementById('output-section').style.display = 'block'; document.getElementById('btn-group').style.display = 'flex'; renderPreview(); }
     }
+
+    window.openDraftVisualZoom = window.openDraftVisualZoom || function(sourceEl) {
+        if (!sourceEl) return;
+        const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
+        if (!visual) return;
+        let overlay = document.getElementById('draftVisualZoomOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'draftVisualZoomOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
+            overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
+            document.body.appendChild(overlay);
+            const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
+            overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
+            overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._scale = Math.min(4, (overlay._scale || 1) + .25); overlay._apply(); });
+            overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._scale = Math.max(.5, (overlay._scale || 1) - .25); overlay._apply(); });
+            overlay.querySelector('[data-z="reset"]').addEventListener('click', () => { overlay._scale = 1; overlay._apply(); });
+            overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); overlay._scale = Math.max(.5, Math.min(4, (overlay._scale || 1) + (e.deltaY < 0 ? .15 : -.15))); overlay._apply(); }, {passive:false});
+        }
+        const content = overlay.querySelector('[data-z="content"]');
+        content.innerHTML = '';
+        let clone;
+        if (visual.tagName && visual.tagName.toLowerCase() === 'canvas') {
+            clone = document.createElement('img');
+            try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
+        } else clone = visual.cloneNode(true);
+        clone.removeAttribute && clone.removeAttribute('id');
+        clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;min-width:min(760px,82vw);object-fit:contain;margin:auto;';
+        if (clone.tagName && clone.tagName.toLowerCase() === 'svg') {
+            const vb = clone.getAttribute('viewBox');
+            if (!clone.getAttribute('width')) clone.setAttribute('width', vb ? Math.max(760, Number(vb.split(/\s+/)[2]) * 2) : 900);
+            if (!clone.getAttribute('height') && vb) clone.setAttribute('height', Math.max(520, Number(vb.split(/\s+/)[3]) * 2));
+        }
+        content.appendChild(clone);
+        overlay._scale = 1;
+        overlay._apply = () => { content.style.transform = 'scale(' + overlay._scale + ')'; overlay.querySelector('[data-z="reset"]').textContent = Math.round(overlay._scale * 100) + '%'; };
+        overlay._apply();
+        overlay.dataset.oldOverflow = document.body.style.overflow || '';
+        document.body.style.overflow = 'hidden';
+        overlay.style.display = 'flex';
+    };
 
     window.CANVAS_LOGIC_SCRIPT = `
         window.mainCanvases = {};
