@@ -3457,7 +3457,7 @@ body.auth-locked > :not(#passwordGate){
             overlay = document.createElement('div');
             overlay.id = 'draftVisualZoomOverlay';
             overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-            overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
+            overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
             document.body.appendChild(overlay);
             const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
             overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
@@ -3475,7 +3475,7 @@ body.auth-locked > :not(#passwordGate){
             try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
         } else clone = visual.cloneNode(true);
         clone.removeAttribute && clone.removeAttribute('id');
-        clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;min-width:min(760px,82vw);object-fit:contain;margin:auto;';
+        clone.style.cssText = 'display:block;max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain;margin:auto;';
         if (clone.tagName && clone.tagName.toLowerCase() === 'svg') {
             const vb = clone.getAttribute('viewBox');
             if (!clone.getAttribute('width')) clone.setAttribute('width', vb ? Math.max(760, Number(vb.split(/\s+/)[2]) * 2) : 900);
@@ -3483,7 +3483,7 @@ body.auth-locked > :not(#passwordGate){
         }
         content.appendChild(clone);
         overlay._scale = 1;
-        overlay._apply = () => { content.style.transform = 'scale(' + overlay._scale + ')'; overlay.querySelector('[data-z="reset"]').textContent = Math.round(overlay._scale * 100) + '%'; };
+        overlay._apply = () => { const pct = Math.round(overlay._scale * 100); content.style.transform = 'none'; content.style.width = pct + '%'; content.style.height = pct + '%'; content.style.flex = '0 0 auto'; overlay.querySelector('[data-z="reset"]').textContent = pct + '%'; };
         overlay._apply();
         overlay.dataset.oldOverflow = document.body.style.overflow || '';
         document.body.style.overflow = 'hidden';
@@ -3502,7 +3502,7 @@ body.auth-locked > :not(#passwordGate){
                 overlay = document.createElement('div');
                 overlay.id = 'draftVisualZoomOverlay';
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-                overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
+                overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
                 document.body.appendChild(overlay);
                 const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
                 overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
@@ -3520,7 +3520,7 @@ body.auth-locked > :not(#passwordGate){
                 try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
             } else clone = visual.cloneNode(true);
             clone.removeAttribute && clone.removeAttribute('id');
-            clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;min-width:min(760px,82vw);object-fit:contain;margin:auto;';
+            clone.style.cssText = 'display:block;max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain;margin:auto;';
             if (clone.tagName && clone.tagName.toLowerCase() === 'svg') {
                 const vb = clone.getAttribute('viewBox');
                 if (!clone.getAttribute('width')) clone.setAttribute('width', vb ? Math.max(760, Number(vb.split(/\s+/)[2]) * 2) : 900);
@@ -3528,7 +3528,7 @@ body.auth-locked > :not(#passwordGate){
             }
             content.appendChild(clone);
             overlay._scale = 1;
-            overlay._apply = () => { content.style.transform = 'scale(' + overlay._scale + ')'; overlay.querySelector('[data-z="reset"]').textContent = Math.round(overlay._scale * 100) + '%'; };
+            overlay._apply = () => { const pct = Math.round(overlay._scale * 100); content.style.transform = 'none'; content.style.width = pct + '%'; content.style.height = pct + '%'; content.style.flex = '0 0 auto'; overlay.querySelector('[data-z="reset"]').textContent = pct + '%'; };
             overlay._apply();
             overlay.dataset.oldOverflow = document.body.style.overflow || '';
             document.body.style.overflow = 'hidden';
