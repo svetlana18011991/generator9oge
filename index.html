@@ -3469,112 +3469,119 @@ body.auth-locked > :not(#passwordGate){
         if (!sourceEl) return;
         const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
         if (!visual) return;
+    
         let overlay = document.getElementById('draftVisualZoomOverlay');
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'draftVisualZoomOverlay';
             overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-            overlay.innerHTML = '<div style="position:relative;width:min(1180px,96vw);height:min(860px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
+            overlay.innerHTML = '<div style="position:relative;width:min(1240px,96vw);height:min(900px,92vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
             document.body.appendChild(overlay);
-            const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
+            const close = () => {
+                overlay.style.display = 'none';
+                document.body.style.overflow = overlay.dataset.oldOverflow || '';
+            };
             overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
             document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
-            overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + .25); overlay._apply && overlay._apply(); });
-            overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(.25, (overlay._zoom || 1) - .25); overlay._apply && overlay._apply(); });
-            overlay.querySelector('[data-z="reset"]').addEventListener('click', () => { overlay._zoom = 1; overlay._apply && overlay._apply(); });
+            overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + 0.25); overlay._apply && overlay._apply(); });
+            overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(0.25, (overlay._zoom || 1) - 0.25); overlay._apply && overlay._apply(); });
+            overlay.querySelector('[data-z="reset"]').addEventListener('click', () => {
+                overlay._zoom = 1;
+                overlay._recalcFit && overlay._recalcFit();
+                overlay._apply && overlay._apply();
+                const vp = overlay.querySelector('[data-z="viewport"]');
+                vp.scrollLeft = 0; vp.scrollTop = 0;
+            });
             overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => {
                 if (!e.ctrlKey) return;
                 e.preventDefault();
-                overlay._zoom = Math.max(.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? .15 : -.15)));
+                overlay._zoom = Math.max(0.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? 0.15 : -0.15)));
                 overlay._apply && overlay._apply();
-            }, {passive:false});
+            }, { passive:false });
             window.addEventListener('resize', () => {
-                if (overlay.style.display === 'none' || !overlay._baseWidth || !overlay._baseHeight) return;
-                const viewport = overlay.querySelector('[data-z="viewport"]');
-                const availW = Math.max(160, viewport.clientWidth - 8);
-                const availH = Math.max(120, viewport.clientHeight - 8);
-                overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
-                if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
+                if (overlay.style.display === 'none') return;
+                overlay._recalcFit && overlay._recalcFit();
                 overlay._apply && overlay._apply();
             });
         }
+    
         const viewport = overlay.querySelector('[data-z="viewport"]');
         const content = overlay.querySelector('[data-z="content"]');
         content.innerHTML = '';
     
-        const originalTag = visual.tagName ? visual.tagName.toLowerCase() : '';
-        let baseWidth = 0, baseHeight = 0, clone;
-    
-        if (originalTag === 'img') {
-            baseWidth = visual.naturalWidth || visual.width || visual.clientWidth || 800;
-            baseHeight = visual.naturalHeight || visual.height || visual.clientHeight || 600;
-            clone = document.createElement('img');
-            clone.src = visual.currentSrc || visual.src;
-            clone.alt = visual.alt || '';
-            clone.decoding = 'sync';
-            clone.loading = 'eager';
-        } else if (originalTag === 'canvas') {
-            baseWidth = visual.width || visual.clientWidth || 800;
-            baseHeight = visual.height || visual.clientHeight || 600;
-            clone = document.createElement('img');
-            try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
-            clone.decoding = 'sync';
-            clone.loading = 'eager';
-        } else {
-            clone = visual.cloneNode(true);
-            if (originalTag === 'svg') {
-                const vb = visual.getAttribute('viewBox');
-                if (vb) {
-                    const parts = vb.trim().split(/\s+/).map(Number);
-                    if (parts.length === 4) {
-                        baseWidth = parts[2] || 800;
-                        baseHeight = parts[3] || 600;
-                    }
-                }
-                if (!baseWidth || !baseHeight) {
-                    baseWidth = parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800;
-                    baseHeight = parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600;
-                }
-                clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            }
-        }
-        if (!baseWidth || !baseHeight) {
-            const rect = visual.getBoundingClientRect();
-            baseWidth = rect.width || 800;
-            baseHeight = rect.height || 600;
-        }
-    
-        clone.removeAttribute && clone.removeAttribute('id');
-        clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;';
-        content.appendChild(clone);
-    
-        overlay._baseWidth = baseWidth;
-        overlay._baseHeight = baseHeight;
-        const availW = Math.max(160, viewport.clientWidth - 8);
-        const availH = Math.max(120, viewport.clientHeight - 8);
-        overlay._fitScale = Math.min(availW / baseWidth, availH / baseHeight);
-        if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
-        overlay._zoom = 1;
-    
-        overlay._apply = () => {
-            const zoom = overlay._zoom || 1;
-            const scale = overlay._fitScale * zoom;
-            const w = Math.max(40, Math.round(overlay._baseWidth * scale));
-            const h = Math.max(40, Math.round(overlay._baseHeight * scale));
-            content.style.width = w + 'px';
-            content.style.height = h + 'px';
-            clone.style.width = w + 'px';
-            clone.style.height = h + 'px';
-            overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
-        };
-    
-        const finalize = () => { overlay._apply(); };
-        if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = finalize;
-        else setTimeout(finalize, 0);
-    
         overlay.dataset.oldOverflow = document.body.style.overflow || '';
         document.body.style.overflow = 'hidden';
         overlay.style.display = 'flex';
+    
+        const tag = visual.tagName ? visual.tagName.toLowerCase() : '';
+        let clone;
+        if (tag === 'canvas') {
+            clone = document.createElement('img');
+            try { clone.src = visual.toDataURL('image/png'); } catch (e) { return; }
+        } else if (tag === 'img') {
+            clone = document.createElement('img');
+            clone.src = visual.currentSrc || visual.src;
+            clone.alt = visual.alt || '';
+        } else {
+            clone = visual.cloneNode(true);
+        }
+        clone.removeAttribute && clone.removeAttribute('id');
+        clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:auto;';
+        if (tag === 'svg') clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        content.appendChild(clone);
+    
+        const getBaseSize = () => {
+            if (tag === 'img' || tag === 'canvas') {
+                const w = visual.naturalWidth || visual.width || visual.clientWidth || clone.naturalWidth || clone.width || clone.clientWidth || 800;
+                const h = visual.naturalHeight || visual.height || visual.clientHeight || clone.naturalHeight || clone.height || clone.clientHeight || 600;
+                return { width: w, height: h };
+            }
+            if (tag === 'svg') {
+                const vb = visual.getAttribute('viewBox');
+                if (vb) {
+                    const parts = vb.trim().split(/\s+/).map(Number);
+                    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) return { width: parts[2], height: parts[3] };
+                }
+                return {
+                    width: parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800,
+                    height: parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600
+                };
+            }
+            const rect = visual.getBoundingClientRect();
+            return { width: rect.width || 800, height: rect.height || 600 };
+        };
+    
+        const init = () => {
+            const dims = getBaseSize();
+            overlay._baseWidth = Math.max(1, dims.width);
+            overlay._baseHeight = Math.max(1, dims.height);
+            overlay._zoom = 1;
+            overlay._recalcFit = () => {
+                const availW = Math.max(200, viewport.clientWidth - 16);
+                const availH = Math.max(160, viewport.clientHeight - 16);
+                overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
+                if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
+            };
+            overlay._apply = () => {
+                const zoom = overlay._zoom || 1;
+                const scale = (overlay._fitScale || 1) * zoom;
+                const w = Math.max(40, Math.round(overlay._baseWidth * scale));
+                const h = Math.max(40, Math.round(overlay._baseHeight * scale));
+                content.style.width = w + 'px';
+                content.style.height = h + 'px';
+                clone.style.width = w + 'px';
+                clone.style.height = h + 'px';
+                overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
+            };
+            overlay._recalcFit();
+            overlay._apply();
+            viewport.scrollLeft = 0;
+            viewport.scrollTop = 0;
+        };
+    
+        const runInit = () => requestAnimationFrame(() => requestAnimationFrame(init));
+        if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = runInit;
+        else runInit();
     };
 
     window.CANVAS_LOGIC_SCRIPT = `
@@ -3584,112 +3591,119 @@ body.auth-locked > :not(#passwordGate){
             if (!sourceEl) return;
             const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
             if (!visual) return;
+        
             let overlay = document.getElementById('draftVisualZoomOverlay');
             if (!overlay) {
                 overlay = document.createElement('div');
                 overlay.id = 'draftVisualZoomOverlay';
                 overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-                overlay.innerHTML = '<div style="position:relative;width:min(1180px,96vw);height:min(860px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
+                overlay.innerHTML = '<div style="position:relative;width:min(1240px,96vw);height:min(900px,92vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
                 document.body.appendChild(overlay);
-                const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
+                const close = () => {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = overlay.dataset.oldOverflow || '';
+                };
                 overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
                 document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
-                overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + .25); overlay._apply && overlay._apply(); });
-                overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(.25, (overlay._zoom || 1) - .25); overlay._apply && overlay._apply(); });
-                overlay.querySelector('[data-z="reset"]').addEventListener('click', () => { overlay._zoom = 1; overlay._apply && overlay._apply(); });
+                overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + 0.25); overlay._apply && overlay._apply(); });
+                overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(0.25, (overlay._zoom || 1) - 0.25); overlay._apply && overlay._apply(); });
+                overlay.querySelector('[data-z="reset"]').addEventListener('click', () => {
+                    overlay._zoom = 1;
+                    overlay._recalcFit && overlay._recalcFit();
+                    overlay._apply && overlay._apply();
+                    const vp = overlay.querySelector('[data-z="viewport"]');
+                    vp.scrollLeft = 0; vp.scrollTop = 0;
+                });
                 overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => {
                     if (!e.ctrlKey) return;
                     e.preventDefault();
-                    overlay._zoom = Math.max(.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? .15 : -.15)));
+                    overlay._zoom = Math.max(0.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? 0.15 : -0.15)));
                     overlay._apply && overlay._apply();
-                }, {passive:false});
+                }, { passive:false });
                 window.addEventListener('resize', () => {
-                    if (overlay.style.display === 'none' || !overlay._baseWidth || !overlay._baseHeight) return;
-                    const viewport = overlay.querySelector('[data-z="viewport"]');
-                    const availW = Math.max(160, viewport.clientWidth - 8);
-                    const availH = Math.max(120, viewport.clientHeight - 8);
-                    overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
-                    if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
+                    if (overlay.style.display === 'none') return;
+                    overlay._recalcFit && overlay._recalcFit();
                     overlay._apply && overlay._apply();
                 });
             }
+        
             const viewport = overlay.querySelector('[data-z="viewport"]');
             const content = overlay.querySelector('[data-z="content"]');
             content.innerHTML = '';
         
-            const originalTag = visual.tagName ? visual.tagName.toLowerCase() : '';
-            let baseWidth = 0, baseHeight = 0, clone;
-        
-            if (originalTag === 'img') {
-                baseWidth = visual.naturalWidth || visual.width || visual.clientWidth || 800;
-                baseHeight = visual.naturalHeight || visual.height || visual.clientHeight || 600;
-                clone = document.createElement('img');
-                clone.src = visual.currentSrc || visual.src;
-                clone.alt = visual.alt || '';
-                clone.decoding = 'sync';
-                clone.loading = 'eager';
-            } else if (originalTag === 'canvas') {
-                baseWidth = visual.width || visual.clientWidth || 800;
-                baseHeight = visual.height || visual.clientHeight || 600;
-                clone = document.createElement('img');
-                try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
-                clone.decoding = 'sync';
-                clone.loading = 'eager';
-            } else {
-                clone = visual.cloneNode(true);
-                if (originalTag === 'svg') {
-                    const vb = visual.getAttribute('viewBox');
-                    if (vb) {
-                        const parts = vb.trim().split(/\s+/).map(Number);
-                        if (parts.length === 4) {
-                            baseWidth = parts[2] || 800;
-                            baseHeight = parts[3] || 600;
-                        }
-                    }
-                    if (!baseWidth || !baseHeight) {
-                        baseWidth = parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800;
-                        baseHeight = parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600;
-                    }
-                    clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-                }
-            }
-            if (!baseWidth || !baseHeight) {
-                const rect = visual.getBoundingClientRect();
-                baseWidth = rect.width || 800;
-                baseHeight = rect.height || 600;
-            }
-        
-            clone.removeAttribute && clone.removeAttribute('id');
-            clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;';
-            content.appendChild(clone);
-        
-            overlay._baseWidth = baseWidth;
-            overlay._baseHeight = baseHeight;
-            const availW = Math.max(160, viewport.clientWidth - 8);
-            const availH = Math.max(120, viewport.clientHeight - 8);
-            overlay._fitScale = Math.min(availW / baseWidth, availH / baseHeight);
-            if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
-            overlay._zoom = 1;
-        
-            overlay._apply = () => {
-                const zoom = overlay._zoom || 1;
-                const scale = overlay._fitScale * zoom;
-                const w = Math.max(40, Math.round(overlay._baseWidth * scale));
-                const h = Math.max(40, Math.round(overlay._baseHeight * scale));
-                content.style.width = w + 'px';
-                content.style.height = h + 'px';
-                clone.style.width = w + 'px';
-                clone.style.height = h + 'px';
-                overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
-            };
-        
-            const finalize = () => { overlay._apply(); };
-            if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = finalize;
-            else setTimeout(finalize, 0);
-        
             overlay.dataset.oldOverflow = document.body.style.overflow || '';
             document.body.style.overflow = 'hidden';
             overlay.style.display = 'flex';
+        
+            const tag = visual.tagName ? visual.tagName.toLowerCase() : '';
+            let clone;
+            if (tag === 'canvas') {
+                clone = document.createElement('img');
+                try { clone.src = visual.toDataURL('image/png'); } catch (e) { return; }
+            } else if (tag === 'img') {
+                clone = document.createElement('img');
+                clone.src = visual.currentSrc || visual.src;
+                clone.alt = visual.alt || '';
+            } else {
+                clone = visual.cloneNode(true);
+            }
+            clone.removeAttribute && clone.removeAttribute('id');
+            clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:auto;';
+            if (tag === 'svg') clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            content.appendChild(clone);
+        
+            const getBaseSize = () => {
+                if (tag === 'img' || tag === 'canvas') {
+                    const w = visual.naturalWidth || visual.width || visual.clientWidth || clone.naturalWidth || clone.width || clone.clientWidth || 800;
+                    const h = visual.naturalHeight || visual.height || visual.clientHeight || clone.naturalHeight || clone.height || clone.clientHeight || 600;
+                    return { width: w, height: h };
+                }
+                if (tag === 'svg') {
+                    const vb = visual.getAttribute('viewBox');
+                    if (vb) {
+                        const parts = vb.trim().split(/\s+/).map(Number);
+                        if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) return { width: parts[2], height: parts[3] };
+                    }
+                    return {
+                        width: parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800,
+                        height: parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600
+                    };
+                }
+                const rect = visual.getBoundingClientRect();
+                return { width: rect.width || 800, height: rect.height || 600 };
+            };
+        
+            const init = () => {
+                const dims = getBaseSize();
+                overlay._baseWidth = Math.max(1, dims.width);
+                overlay._baseHeight = Math.max(1, dims.height);
+                overlay._zoom = 1;
+                overlay._recalcFit = () => {
+                    const availW = Math.max(200, viewport.clientWidth - 16);
+                    const availH = Math.max(160, viewport.clientHeight - 16);
+                    overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
+                    if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
+                };
+                overlay._apply = () => {
+                    const zoom = overlay._zoom || 1;
+                    const scale = (overlay._fitScale || 1) * zoom;
+                    const w = Math.max(40, Math.round(overlay._baseWidth * scale));
+                    const h = Math.max(40, Math.round(overlay._baseHeight * scale));
+                    content.style.width = w + 'px';
+                    content.style.height = h + 'px';
+                    clone.style.width = w + 'px';
+                    clone.style.height = h + 'px';
+                    overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
+                };
+                overlay._recalcFit();
+                overlay._apply();
+                viewport.scrollLeft = 0;
+                viewport.scrollTop = 0;
+            };
+        
+            const runInit = () => requestAnimationFrame(() => requestAnimationFrame(init));
+            if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = runInit;
+            else runInit();
         };
         window.openTheoryModalLocal = function(dataId) {
             let el = document.getElementById(dataId);
