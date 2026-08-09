@@ -554,6 +554,22 @@
         }
     };
 
+    // Третий сюжет формируем напрямую из уже существующих заданий тренажёра «Участок».
+    // Никаких дополнительных/выдуманных прототипов здесь нет: используются catalogPrototypes.
+    const story3Scenario = {
+        id: 'plot-story-3-trainer',
+        title: 'Сюжет 3. СНТ «Прибор», 2-я Линия, д. 26',
+        common: `${commonText}${imageHTML}`,
+        imageHTML,
+        tasks: {
+            1: catalogPrototypes.filter(task => task.examNumber === 1),
+            2: catalogPrototypes.filter(task => task.examNumber === 2),
+            3: catalogPrototypes.filter(task => task.examNumber === 3),
+            4: catalogPrototypes.filter(task => task.examNumber === 4),
+            5: catalogPrototypes.filter(task => task.examNumber === 5)
+        }
+    };
+
     window.ogePracticeDatabase = window.ogePracticeDatabase || {};
     window.ogePracticeDatabase.plot = {
         title: 'Участок',
@@ -564,6 +580,6 @@
             imageHTML,
             prototypes: catalogPrototypes
         },
-        scenarios: [story1Scenario, story2Scenario]
+        scenarios: [story1Scenario, story2Scenario, story3Scenario]
     };
 })();
