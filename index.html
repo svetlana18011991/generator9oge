@@ -1438,6 +1438,7 @@ body.auth-locked > :not(#passwordGate){
         <a href="https://t.me/interactiv_matematika" target="_blank" class="social-btn">Telegram</a>
         <a href="https://vk.com/interaktiv_matematika" target="_blank" class="social-btn">ВКонтакте</a>
         <a href="https://max.ru/c/-70932227200385/AZ29lb4dRPk" target="_blank" class="social-btn">МАКС</a>
+        <a href="https://shkatulka.sistema-math.ru/" target="_blank" class="social-btn">Мой сайт</a>
         
         <div style="margin-top: 30px; background: #2a2a2a; border-left: 4px solid #4CAF50; padding: 15px; border-radius: 0 8px 8px 0; text-align: left;">
             <h4 style="margin: 0 0 8px 0; color: #4CAF50; font-size: 1.05em;">📌 Добро пожаловать в генератор!</h4>
@@ -2513,6 +2514,9 @@ body.auth-locked > :not(#passwordGate){
                 const imageHTML = proto.imageHTML || proto.svg_code || '';
                 const useDraftDiagram = Number(proto.examNumber) !== 5;
                 const standaloneText = `${commonText}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`;
+                const theoryTaskText = imageHTML
+                    ? `${commonTextOnly}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`
+                    : `<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`;
                 const analogTasks = selectedPrototypes
                     .filter(other => other !== proto && Number(other.examNumber) === Number(proto.examNumber))
                     .map(other => ({
@@ -2546,7 +2550,7 @@ body.auth-locked > :not(#passwordGate){
                     beforeAnswersHTML: protoIndex === 0 ? `<h4 style="margin:18px 0 8px; color:#0F766E;">${theme.title}. Каталог прототипов</h4>` : '',
                     theory: {
                         svg_code: proto.theoryImageHTML || imageHTML,
-                        theory_task: standaloneText,
+                        theory_task: theoryTaskText,
                         theory_sol: proto.solution || 'Разбор пока не добавлен.',
                         tasks: analogTasks
                     }
@@ -2694,7 +2698,7 @@ body.auth-locked > :not(#passwordGate){
                                 printLayout: chosen.printLayout || (diagramHTML ? 'image-grid' : ''),
                                 printGridHeight: chosen.printGridHeight || 125,
                                 beforeHTML: taskNumber === 1 ? introHTML : '',
-                                afterHTML: taskNumber === 4 ? '</div>' : '',
+                                afterHTML: taskNumber === 5 ? '</div>' : '',
                                 beforePrintHTML: taskNumber === 1 ? printIntro : '',
                                 beforeAnswersHTML: taskNumber === 1 ? `<h4 style="margin:18px 0 8px; color:#003399;">Комплект ${setNumber}. ${theme.title} · ${scenario.title || `Сюжет ${state.scenarioIndex + 1}`}</h4>` : '',
                                 theory: {
@@ -3268,11 +3272,21 @@ body.auth-locked > :not(#passwordGate){
                 let theoryHtml = "";
                 if (item.theory) {
                     theoryHtml = `
+                        <style>
+                            .theory-task-layout-${taskCounter}{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;min-width:0;}
+                            .theory-main-diagram-${taskCounter}{flex:0 1 340px;max-width:340px;min-width:220px;overflow:hidden;margin:0 auto;}
+                            .theory-main-diagram-${taskCounter} img,.theory-main-diagram-${taskCounter} svg,.theory-main-diagram-${taskCounter} canvas,.theory-main-diagram-${taskCounter} picture{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:320px!important;object-fit:contain!important;margin:0 auto!important;box-sizing:border-box!important;}
+                            .theory-main-text-${taskCounter}{flex:1 1 320px;min-width:0;overflow-wrap:anywhere;}
+                            @media (max-width:720px){.theory-main-diagram-${taskCounter}{flex-basis:100%;max-width:520px;min-width:0}.theory-main-text-${taskCounter}{flex-basis:100%;}}
+                        </style>
                         <div id="theory-solution-${taskCounter}">
                             <h3>Разбор аналогичного задания</h3>
-                            <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
+                            <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;overflow:hidden;'>
                                 <p style='margin-top:0;'><b>Задача:</b></p>
-                                <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
+                                <div class="theory-task-layout-${taskCounter}">
+                                    ${theorySvgCode ? '<div class="theory-main-diagram-' + taskCounter + '" title="Нажмите, чтобы увеличить" style="cursor:zoom-in;" onclick="window.openDraftVisualZoom(this)">' + theorySvgCode + '</div>' : ''}
+                                    <div class="theory-main-text-${taskCounter}">${item.theory.theory_task}</div>
+                                </div>
                                 <p style='margin-top: 20px;'><b>Решение:</b></p>
                                 <div>${item.theory.theory_sol}</div>
                                 <div style="display:flex;justify-content:flex-end;margin-top:18px;padding-top:12px;border-top:1px solid #e6e6e6;">

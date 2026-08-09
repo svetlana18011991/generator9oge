@@ -332,20 +332,33 @@
             { imageHTML: '', theoryImageHTML: '', printCompact: true })
     ];
 
-    window.ogePracticeDatabase = window.ogePracticeDatabase || {};
-    const theme = window.ogePracticeDatabase.tariff || {
-        title: 'Тарифы',
-        sourceStatus: 'active',
-        scenarios: []
-    };
-    theme.title = theme.title || 'Тарифы';
-    theme.sourceStatus = theme.sourceStatus || 'active';
-    theme.catalog = {
-        title: 'Каталог прототипов',
+    // В актуальном банке ФИПИ для темы «Тарифы» используется один сюжет.
+    // Как и в теме «План квартиры», комплект собирается из этого единственного
+    // сюжета: генератор выбирает по одному варианту каждого задания №1–5.
+    const scenario = {
+        id: 'tariff-plot-1',
+        title: 'Сюжет 1. Тарифы',
         common: `${commonText}${imageHTML}`,
         imageHTML,
-        prototypes: catalogPrototypes
+        tasks: {
+            1: catalogPrototypes.filter(t => t.examNumber === 1),
+            2: catalogPrototypes.filter(t => t.examNumber === 2),
+            3: catalogPrototypes.filter(t => t.examNumber === 3),
+            4: catalogPrototypes.filter(t => t.examNumber === 4),
+            5: catalogPrototypes.filter(t => t.examNumber === 5)
+        }
     };
-    if (!Array.isArray(theme.scenarios)) theme.scenarios = [];
-    window.ogePracticeDatabase.tariff = theme;
+
+    window.ogePracticeDatabase = window.ogePracticeDatabase || {};
+    window.ogePracticeDatabase.tariff = {
+        title: 'Тарифы',
+        sourceStatus: 'active',
+        catalog: {
+            title: 'Каталог прототипов',
+            common: `${commonText}${imageHTML}`,
+            imageHTML,
+            prototypes: catalogPrototypes
+        },
+        scenarios: [scenario]
+    };
 })();
