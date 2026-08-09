@@ -12,6 +12,7 @@
     <script src="motivation_template.js?v=motivation-v43"></script>
     <!-- Связанные практические комплекты ОГЭ 1–5 -->
     <script src="oge_practice.js?v=37"></script>
+    <script src="tariff_practice.js?v=20260809-1"></script>
     <script src="apartment_practice.js?v=38"></script>
     <script src="tires_practice.js?v=53"></script>
     <script src="task6.js"></script>
@@ -2968,6 +2969,39 @@ body.auth-locked > :not(#passwordGate){
 
     function hideTooltip() { tooltip.style.display = 'none'; }
 
+    function buildInlineScratchpadHTML(draftId) {
+        return `<div id="draw-wrapper-${draftId}" style="display:none; margin-top:12px; width:100%; clear:both;">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px;background:#e3f2fd;padding:7px 10px;border-radius:8px;border:1px solid #bbdefb;color:#333;">
+                <button onclick="window.setTool('${draftId}', 'pointer')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Указатель">👆</button>
+                <button onclick="window.setTool('${draftId}', 'pen')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Карандаш">🖊️</button>
+                <button onclick="window.setTool('${draftId}', 'highlighter')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Выделитель">🖍️</button>
+                <button onclick="window.undoCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Отменить">↶</button>
+                <button onclick="window.redoCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Повторить">↷</button>
+                <select id="tool-select-${draftId}" onchange="window.setTool('${draftId}', this.value)" style="background:#fff;border:1px solid #90caf9;border-radius:4px;padding:4px 7px;font-size:13px;cursor:pointer;color:#003399;font-weight:500;">
+                    <option value="" disabled selected hidden>🔺 Фигуры</option>
+                    <option value="line">📏 Прямая</option>
+                    <option value="vector">↗️ Вектор</option>
+                    <option value="circle">⭕ Окружность</option>
+                    <option value="triangle">🔺 Треугольник</option>
+                    <option value="cylinder">🛢️ Цилиндр</option>
+                    <option value="cone">🍦 Конус</option>
+                    <option value="sphere">🔮 Сфера</option>
+                </select>
+                <input type="color" id="color-${draftId}" value="#003399" style="cursor:pointer;height:28px;width:34px;border:none;background:transparent;padding:0;" title="Цвет">
+                <input type="range" id="size-${draftId}" min="1" max="15" value="3" style="cursor:pointer;width:70px;" title="Толщина линии">
+                <button onclick="window.setTool('${draftId}', 'eraser')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Ластик">🧽</button>
+                <div style="flex-grow:1;"></div>
+                <button onclick="window.clearCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Очистить всё">🗑️</button>
+                <input type="hidden" id="tool-${draftId}" value="pen">
+            </div>
+            <div style="height:280px;overflow-y:auto;overflow-x:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;">
+                <div style="position:relative;width:100%;height:720px;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">
+                    <canvas id="canvas-${draftId}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
+                </div>
+            </div>
+        </div>`;
+    }
+
     function openTheoryModalLocal(dataId) {
         let el = document.getElementById(dataId);
         if(el) {
@@ -3215,24 +3249,32 @@ body.auth-locked > :not(#passwordGate){
                 let theoryHtml = "";
                 if (item.theory) {
                     theoryHtml = `
-                        <h3>Разбор аналогичного задания</h3>
-                        <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
-                            <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
-                            <p style='margin-top: 20px;'><b>Решение:</b></p>
-                            <div>${item.theory.theory_sol}</div>
+                        <div id="theory-solution-${taskCounter}">
+                            <h3>Разбор аналогичного задания</h3>
+                            <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
+                                <p style='margin-top:0;'><b>Задача:</b></p>
+                                <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
+                                <p style='margin-top: 20px;'><b>Решение:</b></p>
+                                <div>${item.theory.theory_sol}</div>
+                                <div style="display:flex;justify-content:flex-end;margin-top:18px;padding-top:12px;border-top:1px solid #e6e6e6;">
+                                    <button type="button" onclick="document.getElementById('theory-solution-${taskCounter}').style.display='none'" style="background:#fff3e0;color:#e65100;border:1px solid #ffb74d;border-radius:7px;padding:8px 17px;font-weight:700;cursor:pointer;">Скрыть</button>
+                                </div>
+                            </div>
                         </div>
+                        <h4 style='color: #ff8c00;'>Задачи для отработки:</h4>
+                        <ul style='padding-left:20px;'>
                     `;
-                    if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
-                        theoryHtml += `<h4 style='color: #ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
-                        item.theory.tasks.forEach(t => {
+                    if (Array.isArray(item.theory.tasks)) {
+                        item.theory.tasks.forEach((t, practiceIndex) => {
                             let tSvgCode = t.svg_code || "";
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
                             let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px;">${tSvgCode}</div>` : '';
-                            theoryHtml += `<li style='margin-bottom:15px;'>${t.text}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
+                            const practiceDraftId = `practice-${taskCounter}-${practiceIndex + 1}`;
+                            const practiceScratchpad = buildInlineScratchpadHTML(practiceDraftId);
+                            theoryHtml += `<li style='margin-bottom:18px;'><div style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;min-width:0;">${t.text}${tSvg}</div><button type="button" onclick="window.toggleCanvas('${practiceDraftId}')" title="Открыть черновик" style="flex:0 0 auto;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:18px;padding:5px 9px;cursor:pointer;">✏️</button></div><div style="margin-top:7px;"><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></div>${practiceScratchpad}</li>`;
                         });
-                        theoryHtml += `</ul>`;
                     }
+                    theoryHtml += `</ul>`;
                 }
 
                 window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
@@ -3326,36 +3368,14 @@ body.auth-locked > :not(#passwordGate){
                         object-fit:contain !important;
                         margin:0 !important;
                     }
-                    .draft-zoom-panel-${taskCounter} {
-                        display:none;
-                        position:absolute;
-                        inset:0;
-                        overflow:auto;
-                        z-index:6;
-                        background:rgba(255,255,255,.98);
-                        padding:18px;
-                        box-sizing:border-box;
-                        cursor:zoom-out;
-                    }
-                    .draft-zoom-panel-${taskCounter} img,
-                    .draft-zoom-panel-${taskCounter} svg,
-                    .draft-zoom-panel-${taskCounter} picture,
-                    .draft-zoom-panel-${taskCounter} canvas {
-                        display:block !important;
-                        width:1200px !important;
-                        max-width:none !important;
-                        max-height:none !important;
-                        height:auto !important;
-                        margin:0 auto !important;
-                        object-fit:contain !important;
-                    }
-                </style><div id="draft-diagram-card-${taskCounter}" class="draft-diagram-card-${taskCounter}">${draftDiagramSource}</div><div id="draft-zoom-panel-${taskCounter}" class="draft-zoom-panel-${taskCounter}" onclick="window.toggleDraftZoom('${taskCounter}', true, event)">${draftDiagramSource}</div>` : "";
+                </style><div id="draft-diagram-card-${taskCounter}" class="draft-diagram-card-${taskCounter}">${draftDiagramSource}</div>` : "";
                 
                 let scratchpadHTML = `<div id="draw-wrapper-${taskCounter}" style="display:none; margin-top: 20px; width: 100%; transition: all 0.3s ease; clear: both;">
                     <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px; background: #e3f2fd; padding: 8px 15px; border-radius: 8px; border: 1px solid #bbdefb; color: #333;">
                         <button onclick="window.setTool('${taskCounter}', 'pointer')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Указатель (Перетаскивание)">👆</button>
                         <button onclick="window.setTool('${taskCounter}', 'zoom')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Лупа: открыть чертёж в большом модальном окне">🔍</button>
                         <button onclick="window.setTool('${taskCounter}', 'pen')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Карандаш">🖊️</button>
+                        <button onclick="window.setTool('${taskCounter}', 'highlighter')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Выделитель — полупрозрачный маркер">🖍️</button>
                         <button onclick="window.undoCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Отменить действие">↶</button>
                         <button onclick="window.redoCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Повторить действие">↷</button>
                         <select id="tool-select-${taskCounter}" onchange="window.setTool('${taskCounter}', this.value)" style="background: #fff; border: 1px solid #90caf9; border-radius: 4px; padding: 4px 8px; font-size: 14px; cursor: pointer; outline: none; color: #003399; font-weight: 500;">
@@ -3375,7 +3395,7 @@ body.auth-locked > :not(#passwordGate){
                         <button onclick="window.clearCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
                         <input type="hidden" id="tool-${taskCounter}" value="pen">
                     </div>
-                    <div style="position:relative; background-color: #fff; background-size: 20px 20px; background-image: linear-gradient(to right, #d2e3f2 1px, transparent 1px), linear-gradient(to bottom, #d2e3f2 1px, transparent 1px); border: 2px solid #bbdefb; border-radius: 8px; overflow: hidden; height: 390px;">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action: none; cursor: crosshair;"></canvas></div>
+                    <div style="height:320px;overflow:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;"><div style="position:relative;width:100%;height:320px;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas></div></div>
                 </div>`;
 
                 currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content: space-between;"><div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size: 1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width: 350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding: 10px 15px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; font-weight: bold; width: 150px; outline: none; transition: 0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
@@ -3411,7 +3431,48 @@ body.auth-locked > :not(#passwordGate){
 
     window.CANVAS_LOGIC_SCRIPT = `
         window.mainCanvases = {};
-        
+
+        window.openDraftVisualZoom = window.openDraftVisualZoom || function(sourceEl) {
+            if (!sourceEl) return;
+            const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
+            if (!visual) return;
+            let overlay = document.getElementById('draftVisualZoomOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'draftVisualZoomOverlay';
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
+                overlay.innerHTML = '<div style="position:relative;width:min(1100px,96vw);height:min(820px,90vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Исходный размер" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box;background:#fff;"><div data-z="content" style="transform-origin:center center;transition:transform .12s ease;"></div></div></div>';
+                document.body.appendChild(overlay);
+                const close = () => { overlay.style.display = 'none'; document.body.style.overflow = overlay.dataset.oldOverflow || ''; };
+                overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
+                overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._scale = Math.min(4, (overlay._scale || 1) + .25); overlay._apply(); });
+                overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._scale = Math.max(.5, (overlay._scale || 1) - .25); overlay._apply(); });
+                overlay.querySelector('[data-z="reset"]').addEventListener('click', () => { overlay._scale = 1; overlay._apply(); });
+                overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); overlay._scale = Math.max(.5, Math.min(4, (overlay._scale || 1) + (e.deltaY < 0 ? .15 : -.15))); overlay._apply(); }, {passive:false});
+            }
+            const content = overlay.querySelector('[data-z="content"]');
+            content.innerHTML = '';
+            let clone;
+            if (visual.tagName && visual.tagName.toLowerCase() === 'canvas') {
+                clone = document.createElement('img');
+                try { clone.src = visual.toDataURL('image/png'); } catch(e) { return; }
+            } else clone = visual.cloneNode(true);
+            clone.removeAttribute && clone.removeAttribute('id');
+            clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;min-width:min(760px,82vw);object-fit:contain;margin:auto;';
+            if (clone.tagName && clone.tagName.toLowerCase() === 'svg') {
+                const vb = clone.getAttribute('viewBox');
+                if (!clone.getAttribute('width')) clone.setAttribute('width', vb ? Math.max(760, Number(vb.split(/\s+/)[2]) * 2) : 900);
+                if (!clone.getAttribute('height') && vb) clone.setAttribute('height', Math.max(520, Number(vb.split(/\s+/)[3]) * 2));
+            }
+            content.appendChild(clone);
+            overlay._scale = 1;
+            overlay._apply = () => { content.style.transform = 'scale(' + overlay._scale + ')'; overlay.querySelector('[data-z="reset"]').textContent = Math.round(overlay._scale * 100) + '%'; };
+            overlay._apply();
+            overlay.dataset.oldOverflow = document.body.style.overflow || '';
+            document.body.style.overflow = 'hidden';
+            overlay.style.display = 'flex';
+        };
         window.openTheoryModalLocal = function(dataId) {
             let el = document.getElementById(dataId);
             if(el) {
@@ -3431,117 +3492,15 @@ body.auth-locked > :not(#passwordGate){
             }
             if (opening) setTimeout(() => window.initMainCanvas(id), 50);
         };
-        window.toggleDraftZoom = function(id, forceClose, event) {
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-
-            const existing = document.getElementById('draft-zoom-modal-global');
-            if (existing) {
-                existing.remove();
-                document.body.style.overflow = existing.dataset.previousBodyOverflow || '';
-                return;
-            }
-            if (forceClose === true) return;
-
-            const card = document.getElementById('draft-diagram-card-' + id);
-            if (!card || !card.innerHTML.trim()) return;
-
-            const previousBodyOverflow = document.body.style.overflow || '';
-            const overlay = document.createElement('div');
-            overlay.id = 'draft-zoom-modal-global';
-            overlay.dataset.previousBodyOverflow = previousBodyOverflow;
-            overlay.setAttribute('role', 'dialog');
-            overlay.setAttribute('aria-modal', 'true');
-            overlay.setAttribute('aria-label', 'Увеличенный чертёж');
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(7,18,31,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;';
-
-            const isPresentationZoom = String(id).indexOf('pres-') === 0;
-            const modal = document.createElement('div');
-            modal.style.cssText = isPresentationZoom
-                ? 'position:relative;width:min(78vw,1240px);height:76vh;background:#fff;border:3px solid #19b8b0;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;'
-                : 'position:relative;width:min(86vw,1420px);height:82vh;background:#fff;border:3px solid #19b8b0;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;';
-
-            const head = document.createElement('div');
-            head.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e9fbf9;border-bottom:1px solid #9adfd9;color:#073b4c;font:700 17px Arial,sans-serif;';
-            head.innerHTML = '<span style="font-size:23px;">🔍</span><span>Увеличенный чертёж</span><span style="margin-left:auto;font-size:13px;font-weight:500;color:#526273;">Нажмите на чертёж ещё раз, чтобы закрыть</span>';
-
-            const closeButton = document.createElement('button');
-            closeButton.type = 'button';
-            closeButton.innerHTML = '&times;';
-            closeButton.title = 'Закрыть';
-            closeButton.style.cssText = 'margin-left:6px;width:38px;height:38px;border:1px solid #ef7f1a;border-radius:10px;background:#fff;color:#d95f02;font:700 28px/30px Arial;cursor:pointer;';
-            head.appendChild(closeButton);
-
-            const viewport = document.createElement('div');
-            viewport.style.cssText = isPresentationZoom
-                ? 'flex:1 1 auto;min-height:0;overflow:hidden;background:#f4f8fb;padding:34px 52px;box-sizing:border-box;cursor:zoom-out;'
-                : 'flex:1 1 auto;min-height:0;overflow:hidden;background:#f4f8fb;padding:28px;box-sizing:border-box;cursor:zoom-out;';
-
-            const diagram = document.createElement('div');
-            const sourceMedia = card.querySelector('img,svg,picture,canvas');
-            if (sourceMedia) {
-                diagram.appendChild(sourceMedia.cloneNode(true));
-            } else {
-                diagram.innerHTML = card.innerHTML;
-            }
-            diagram.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;';
-
-            diagram.querySelectorAll('img,svg,picture,canvas').forEach(function(media) {
-                media.style.setProperty('display', 'block', 'important');
-                media.style.setProperty('width', 'auto', 'important');
-                media.style.setProperty('height', 'auto', 'important');
-                media.style.setProperty('min-width', '0', 'important');
-                media.style.setProperty('min-height', '0', 'important');
-                media.style.setProperty('max-width', '100%', 'important');
-                media.style.setProperty('max-height', '100%', 'important');
-                media.style.setProperty('margin', 'auto', 'important');
-                media.style.setProperty('object-fit', 'contain', 'important');
-                media.style.setProperty('cursor', 'zoom-out', 'important');
-                media.style.setProperty('box-sizing', 'border-box', 'important');
-            });
-
-            viewport.appendChild(diagram);
-            modal.appendChild(head);
-            modal.appendChild(viewport);
-            overlay.appendChild(modal);
-            document.body.appendChild(overlay);
-            document.body.style.overflow = 'hidden';
-
-            const closeZoom = function() {
-                const current = document.getElementById('draft-zoom-modal-global');
-                if (current) {
-                    const oldOverflow = current.dataset.previousBodyOverflow || '';
-                    current.remove();
-                    document.body.style.overflow = oldOverflow;
-                }
-                document.removeEventListener('keydown', onKeyDown);
-            };
-            const onKeyDown = function(keyEvent) {
-                if (keyEvent.key === 'Escape') closeZoom();
-            };
-
-            closeButton.addEventListener('click', function(clickEvent) {
-                clickEvent.preventDefault();
-                clickEvent.stopPropagation();
-                closeZoom();
-            });
-            overlay.addEventListener('click', function(clickEvent) {
-                if (clickEvent.target === overlay) closeZoom();
-            });
-            diagram.addEventListener('click', function(clickEvent) {
-                clickEvent.preventDefault();
-                clickEvent.stopPropagation();
-                closeZoom();
-            });
-            document.addEventListener('keydown', onKeyDown);
-
-        };
         window.initMainCanvas = function(id) {
-            if (window.mainCanvases[id]) return;
             let canvas = document.getElementById('canvas-' + id); 
             if(!canvas) return;
+            if (window.mainCanvases[id] && window.mainCanvases[id].canvas === canvas) return;
+            if (window.mainCanvases[id] && window.mainCanvases[id].canvas !== canvas) delete window.mainCanvases[id];
             let ctx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.clientWidth || 750; 
-            canvas.height = canvas.parentElement.clientHeight || 250; 
+            const canvasRect = canvas.getBoundingClientRect();
+            canvas.width = Math.max(1, Math.round(canvasRect.width || canvas.clientWidth || canvas.parentElement.clientWidth || 750));
+            canvas.height = Math.max(1, Math.round(canvasRect.height || canvas.clientHeight || canvas.parentElement.clientHeight || 250)); 
             ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             
             let objects = []; let currentObj = null; let draggingObj = null; let action = null; 
@@ -3556,7 +3515,7 @@ body.auth-locked > :not(#passwordGate){
 
             function getRawBounds(obj) {
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                if (obj.tool === 'pen' || obj.tool === 'eraser') {
+                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
                     if(!obj.points || obj.points.length === 0) return {minX:0, minY:0, maxX:0, maxY:0};
                     obj.points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
                 } else {
@@ -3566,14 +3525,16 @@ body.auth-locked > :not(#passwordGate){
                     else if (obj.tool === 'triangle') { minX = Math.min(sx, ex, sx + dx/2); maxX = Math.max(sx, ex, sx + dx/2); minY = Math.min(sy, ey); maxY = Math.max(sy, ey); }
                     else if (obj.tool === 'cylinder' || obj.tool === 'cone') { minX = sx - rx; maxX = sx + rx; let h = ry * 0.2; minY = Math.min(sy - h, ey - h); maxY = Math.max(sy + h, ey + h); }
                 }
-                let pad = parseFloat(obj.size) || 3; return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+                let pad = obj.tool === 'highlighter' ? Math.max(12, (parseFloat(obj.size) || 3) * 4) / 2 : (parseFloat(obj.size) || 3); return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
             }
             
             function drawObj(ctx, obj, isSelected) {
                 ctx.save(); let cx = obj.cx || 0; let cy = obj.cy || 0; let s = obj.scale || 1;
                 ctx.translate((obj.x || 0) + cx, (obj.y || 0) + cy); ctx.rotate(obj.angle || 0); ctx.scale(s, s); ctx.translate(-cx, -cy);
                 ctx.strokeStyle = obj.color; ctx.lineWidth = obj.size;
-                if (obj.tool === 'pen' || obj.tool === 'eraser') {
+                ctx.globalAlpha = obj.tool === 'highlighter' ? 0.28 : 1;
+                if (obj.tool === 'highlighter') ctx.lineWidth = Math.max(12, (parseFloat(obj.size) || 3) * 4);
+                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
                     ctx.globalCompositeOperation = obj.tool === 'eraser' ? 'destination-out' : 'source-over';
                     if(obj.tool === 'eraser') ctx.lineWidth = obj.size * 3;
                     ctx.beginPath();
@@ -3601,6 +3562,8 @@ body.auth-locked > :not(#passwordGate){
                     else if (obj.tool === 'cone') { let w = rx, h = ry * 0.2; if(w>0 && h>0){ctx.moveTo(sx, sy); ctx.lineTo(sx - w, ey); ctx.moveTo(sx, sy); ctx.lineTo(sx + w, ey); ctx.stroke(); ctx.beginPath(); ctx.ellipse(sx, ey, w, h, 0, 0, Math.PI); ctx.stroke(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.ellipse(sx, ey, w, h, 0, Math.PI, 2*Math.PI); ctx.stroke(); ctx.setLineDash([]);} }
                     else if (obj.tool === 'sphere') { ctx.arc(sx, sy, r, 0, 2 * Math.PI); ctx.stroke(); if(r>0){ctx.beginPath(); ctx.ellipse(sx, sy, r, r*0.3, 0, 0, Math.PI); ctx.stroke(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.ellipse(sx, sy, r, r*0.3, 0, Math.PI, 2*Math.PI); ctx.stroke(); ctx.setLineDash([]);} }
                 }
+                ctx.globalAlpha = 1;
+                ctx.globalCompositeOperation = 'source-over';
                 if (isSelected) {
                     let b = getRawBounds(obj); ctx.strokeStyle = 'rgba(255, 140, 0, 0.7)'; ctx.lineWidth = 1.5 / s; ctx.setLineDash([5 / s, 5 / s]); ctx.strokeRect(b.minX - 5, b.minY - 5, b.maxX - b.minX + 10, b.maxY - b.minY + 10); ctx.setLineDash([]);
                     let rotHX = (b.minX + b.maxX)/2; let rotHY = b.minY - 25; ctx.beginPath(); ctx.moveTo(rotHX, b.minY - 5); ctx.lineTo(rotHX, rotHY); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(rotHX, rotHY, 5 / s, 0, Math.PI*2); ctx.fill(); ctx.stroke();
@@ -3617,14 +3580,14 @@ body.auth-locked > :not(#passwordGate){
                 isDrawing = true; let p = getPos(e); 
                 let tool = document.getElementById('tool-' + id).value; let color = document.getElementById('color-' + id).value; let size = document.getElementById('size-' + id).value;
                 if (tool === 'zoom') {
-                    const card = document.getElementById('draft-diagram-card-' + id);
-                    let clientX = e.clientX, clientY = e.clientY;
-                    if (e.touches && e.touches.length) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-                    if (card) {
-                        const r = card.getBoundingClientRect();
-                        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) window.toggleDraftZoom(id, false, e);
-                    }
                     isDrawing = false;
+                    const card = document.getElementById('draft-diagram-card-' + id);
+                    const visual = card && card.querySelector('svg,img,picture,canvas');
+                    if (visual) {
+                        const point = (e.touches && e.touches[0]) ? e.touches[0] : e;
+                        const r = visual.getBoundingClientRect();
+                        if (point.clientX >= r.left && point.clientX <= r.right && point.clientY >= r.top && point.clientY <= r.bottom) window.openDraftVisualZoom(visual);
+                    }
                     if (e.cancelable) e.preventDefault();
                     return;
                 }
@@ -3638,7 +3601,7 @@ body.auth-locked > :not(#passwordGate){
                     }
                     if (!hitHandle) { draggingObj = null; action = null; for (let i = objects.length - 1; i >= 0; i--) { if (objects[i].tool === 'eraser') continue; let lp = getLocalPos(p, objects[i]); let b = getRawBounds(objects[i]); if (lp.x >= b.minX && lp.x <= b.maxX && lp.y >= b.minY && lp.y <= b.maxY) { draggingObj = objects[i]; action = 'move'; dragStartX = p.x; dragStartY = p.y; break; } } }
                     renderAll();
-                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
+                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'highlighter' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
                 if (e.cancelable) e.preventDefault();
             }
 
@@ -3649,7 +3612,7 @@ body.auth-locked > :not(#passwordGate){
                     else if (action === 'scale') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentDist = Math.hypot(p.x - tx, p.y - ty); draggingObj.scale = Math.max(0.1, initialScale * (currentDist / dragStartDist)); }
                     else if (action === 'rotate') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentAngle = Math.atan2(p.y - ty, p.x - tx); draggingObj.angle = initialAngle + (currentAngle - dragStartAngle); }
                     renderAll();
-                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
+                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'highlighter' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
             }
 
             function stopDraw() { if(!isDrawing) return; isDrawing = false; let changed = false; if (currentObj) { let b = getRawBounds(currentObj); currentObj.cx = (b.minX + b.maxX) / 2; currentObj.cy = (b.minY + b.maxY) / 2; objects.push(currentObj); currentObj = null; changed = true; } else if (draggingObj && action) { changed = true; } action = null; if (changed) saveHistory(); renderAll(); }
@@ -3665,7 +3628,7 @@ body.auth-locked > :not(#passwordGate){
         window.redoCanvas = function(id) { if (window.mainCanvases[id] && window.mainCanvases[id].redo) window.mainCanvases[id].redo(); };
         window.setTool = function(id, tool) {
             let t = document.getElementById('tool-' + id); if(t) t.value = tool; 
-            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
+            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
             let canvas = document.getElementById('canvas-' + id);
             if(canvas) {
                 if (tool === 'eraser') { canvas.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>🧽</text></svg>') 0 20, auto"; } 
