@@ -2517,7 +2517,8 @@ body.auth-locked > :not(#passwordGate){
 
             selectedPrototypes.forEach((proto, protoIndex) => {
                 const imageHTML = proto.imageHTML || proto.svg_code || '';
-                const useDraftDiagram = Number(proto.examNumber) !== 5;
+                const forceTaskImage = Boolean(proto.showImageInTask);
+                const useDraftDiagram = Number(proto.examNumber) !== 5 || forceTaskImage;
                 const standaloneText = `${commonText}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`;
                 const theoryTaskText = imageHTML
                     ? `${commonTextOnly}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`
@@ -2684,7 +2685,8 @@ body.auth-locked > :not(#passwordGate){
                             const key = `${state.themeId}:${state.scenarioIndex}:${taskNumber}:${chosenPair.originalIndex}`;
                             usage.set(key, (usage.get(key) || 0) + 1);
                             const standaloneText = makeOgePracticeStandalone(theme.title, scenario, setNumber, taskNumber, chosen);
-                            const useDraftDiagram = taskNumber !== 5;
+                            const forceTaskImage = Boolean(chosen.showImageInTask);
+                            const useDraftDiagram = taskNumber !== 5 || forceTaskImage;
                             scenarioTasks.push({
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
