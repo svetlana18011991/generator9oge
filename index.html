@@ -20,6 +20,7 @@
     <script src="sheets_practice.js?v=20260810-1"></script>
     <script src="plot_plan_base64.js?v=20260810-1"></script>
     <script src="plot_practice.js?v=20260810-1"></script>
+    <script src="villages_practice.js?v=20260810-2"></script>
     <script src="practice_scenario_overrides.js?v=20260809-4"></script>
     <script src="task6.js"></script>
     <script src="task7.js"></script>
@@ -3282,8 +3283,9 @@ body.auth-locked > :not(#passwordGate){
                         <style>
                             .theory-shell-${taskCounter}{background:#fff7ed;border:1px solid #fdba74;border-radius:14px;padding:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);}
                             .theory-card-${taskCounter}{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
-                            .theory-task-layout-${taskCounter}{display:grid;grid-template-columns:minmax(240px,360px) minmax(0,1fr);gap:18px;align-items:start;min-width:0;}
-                            .theory-main-diagram-${taskCounter}{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;max-width:360px;overflow:auto;margin:0 auto;}
+                            .theory-task-layout-${taskCounter}{display:block;min-width:0;}
+                            .theory-task-layout-${taskCounter}::after{content:"";display:block;clear:both;}
+                            .theory-main-diagram-${taskCounter}{float:left;width:min(42%,360px);background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;overflow:auto;margin:0 18px 12px 0;box-sizing:border-box;}
                             .theory-main-diagram-${taskCounter} img,.theory-main-diagram-${taskCounter} svg,.theory-main-diagram-${taskCounter} canvas,.theory-main-diagram-${taskCounter} picture{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;margin:0 auto!important;box-sizing:border-box!important;}
                             .theory-main-text-${taskCounter}{min-width:0;overflow-wrap:anywhere;line-height:1.58;font-size:16px;}
                             .theory-main-text-${taskCounter} p{margin:0 0 10px;}
@@ -3293,7 +3295,7 @@ body.auth-locked > :not(#passwordGate){
                             .theory-solution-box-${taskCounter} p{margin:0 0 10px;}
                             .theory-practice-list-${taskCounter}{padding-left:0;list-style:none;margin:12px 0 0;}
                             .theory-practice-item-${taskCounter}{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:12px;}
-                            @media (max-width:760px){.theory-task-layout-${taskCounter}{grid-template-columns:1fr;}.theory-main-diagram-${taskCounter}{max-width:520px;}}
+                            @media (max-width:760px){.theory-main-diagram-${taskCounter}{float:none;width:auto;max-width:520px;margin:0 auto 12px;}}
                         </style>
                         <div id="theory-solution-${taskCounter}" class="theory-shell-${taskCounter}">
                             <h3 style="margin:0 0 12px;color:#c2410c;">Разбор аналогичного задания</h3>
