@@ -42,6 +42,7 @@
             printLayout: options.imageHTML ? 'image-grid' : 'grid',
             printGridHeight: options.imageHTML ? 110 : 96,
             printCompact: Boolean(options.printCompact),
+            showImageInTask: Boolean(options.showImageInTask),
             sourceCode: options.sourceCode || ''
         };
     }
