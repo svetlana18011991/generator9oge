@@ -23,7 +23,8 @@
     <script src="villages_practice.js?v=20260810-2"></script>
     <script src="practice_scenario_overrides.js?v=20260809-4"></script>
     <script src="practice_solution_overrides.js?v=20260813-1"></script>
-    <script src="task6.js"></script>
+    <script src="task6.js?v=20260813-2"></script>
+    <script src="task6_extra.js?v=20260813-1"></script>
     <script src="task7.js"></script>
    <script src="task8.js"></script>
     <script src="task9.js"></script>
@@ -218,6 +219,36 @@
         .btn-settings { background: #333; color: #aaa; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 15px; font-size: 0.85em; transition: 0.2s; }
         .btn-settings:hover { background: #444; color: #fff; }
         .proto-list { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #555; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9em; }
+
+        /* Дополнительные прототипы — по той же схеме, что в генераторе ЕГЭ */
+        .extra-task-panel {
+            margin-top: 12px;
+            padding: 12px 0 0 0;
+            border-top: 1px dashed rgba(45, 212, 191, 0.44);
+        }
+        .extra-task-panel .row-header { margin-bottom: 0; gap: 12px; }
+        .extra-task-panel .row-header label {
+            font-size: 1.02em;
+            font-weight: 700;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-width: 0;
+        }
+        .extra-task-title { color: #FBBF24; font-weight: 800; white-space: nowrap; }
+        .extra-task-panel .btn-settings { margin-left: 0; padding: 6px 10px; font-size: 0.82em; }
+        .extra-task-panel .count-stepper input[type="number"] { width: 58px; }
+        @media (max-width: 760px) {
+            .extra-task-panel .row-header { align-items: flex-start; }
+            .extra-task-title { white-space: normal; }
+        }
+
+        .btn-random-variant {
+            width:100%; border:2px solid #14B8A6; background:#14B8A6; color:#071513;
+            border-radius:9px; padding:13px 15px; font-size:1.05em; font-weight:900;
+            cursor:pointer; transition:.22s; margin: 0 0 18px 0;
+        }
+        .btn-random-variant:hover { filter:brightness(1.08); box-shadow:0 0 18px rgba(45,212,191,.35); transform:translateY(-1px); }
+
         .proto-item { display: flex; align-items: flex-start; gap: 8px; color: #bbb; cursor: pointer; }
         .proto-item input { margin-top: 3px; cursor: pointer; }
         .proto-select-all { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; color: #ff8c00; font-weight: bold; background: rgba(255,140,0,0.08); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 4px; cursor: pointer; }
@@ -1545,6 +1576,8 @@ body.auth-locked > :not(#passwordGate){
             <div id="task-total-note" class="task-total-note">Набор заданий сброшен.</div>
         </div>
 
+        <button type="button" class="btn-random-variant" onclick="generateRandomOgeVariant(event)">🎲 Сгенерировать случайный вариант</button>
+
         <div id="dynamic-tasks"></div>
 
         <button class="btn-generate" onclick="safeGenerateVariant(event)">Сгенерировать вариант</button>
@@ -2726,6 +2759,47 @@ body.auth-locked > :not(#passwordGate){
         return { trainerTasks, scenarioTasks };
     }
 
+
+    function getExtraTaskData(tid) {
+        const extraDb = window.extraDatabase || window.additionalDatabase || {};
+        const numericId = parseInt(String(tid).replace(/\D/g, ''), 10);
+        return extraDb[tid] || extraDb[`task${numericId}`] || extraDb[numericId] || null;
+    }
+
+    function getPrototypeData(tid, kind = 'main') {
+        return kind === 'extra' ? getExtraTaskData(tid) : window.database[tid];
+    }
+
+    function getPrototypePanelId(tid, kind = 'main') {
+        return kind === 'extra' ? `protos-extra-${tid}` : `protos-${tid}`;
+    }
+
+    function getPrototypeCheckboxId(tid, idx, kind = 'main') {
+        return kind === 'extra' ? `proto-extra-${tid}-${idx}` : `proto-${tid}-${idx}`;
+    }
+
+    function getPrototypeMasterId(tid, kind = 'main') {
+        return kind === 'extra' ? `proto-all-extra-${tid}` : `proto-all-${tid}`;
+    }
+
+    function buildRegularPrototypeListHTML(tid, data, kind = 'main') {
+        if (!data || !Array.isArray(data.prototypes)) return '';
+        const kindArg = kind === 'extra' ? `, 'extra'` : '';
+        let html = `
+            <label class="proto-select-all" title="Выбрать или снять все прототипы этого блока">
+                <input type="checkbox" id="${getPrototypeMasterId(tid, kind)}" checked onchange="toggleAllProtos('${tid}', this.checked${kindArg})">
+                <span>Выбрать все / снять все</span>
+            </label>`;
+        data.prototypes.forEach((p, idx) => {
+            html += `
+            <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event${kindArg})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+                <input type="checkbox" id="${getPrototypeCheckboxId(tid, idx, kind)}" checked onchange="syncProtoMaster('${tid}'${kindArg})">
+                <span class="proto-label-text">${idx + 1}. ${p.desc || `Прототип ${idx + 1}`} 👁️</span>
+            </label>`;
+        });
+        return html;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('dynamic-tasks');
         const hasRegularDatabase = window.database && Object.keys(window.database).length > 0;
@@ -2742,19 +2816,28 @@ body.auth-locked > :not(#passwordGate){
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
-            let listHTML = `
-                <label class="proto-select-all" title="Выбрать или снять все прототипы этого задания">
-                    <input type="checkbox" id="proto-all-${tid}" checked onchange="toggleAllProtos('${tid}', this.checked)">
-                    <span>Выбрать все / снять все</span>
-                </label>`;
+            const listHTML = buildRegularPrototypeListHTML(tid, data, 'main');
+            const extraData = getExtraTaskData(tid);
+            let extraHTML = '';
 
-            data.prototypes.forEach((p, idx) => {
-                listHTML += `
-                <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event)" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
-                    <input type="checkbox" id="proto-${tid}-${idx}" checked onchange="syncProtoMaster('${tid}')">
-                    <span class="proto-label-text">${idx + 1}. ${p.desc} 👁️</span>
-                </label>`;
-            });
+            if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
+                const extraListHTML = buildRegularPrototypeListHTML(tid, extraData, 'extra');
+                extraHTML = `
+                <div class="extra-task-panel">
+                    <div class="row-header">
+                        <label onclick="toggleSettings('${tid}', 'extra')">
+                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
+                            <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
+                        </label>
+                        <div class="count-stepper" onclick="event.stopPropagation();">
+                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', -1, event)" title="Уменьшить количество дополнительных заданий">−</button>
+                            <input type="number" id="count-extra-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
+                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', 1, event)" title="Добавить дополнительное задание в генерацию">+</button>
+                        </div>
+                    </div>
+                    <div id="protos-extra-${tid}" class="proto-list">${extraListHTML}</div>
+                </div>`;
+            }
 
             container.innerHTML += `
             <div class="task-row">
@@ -2766,16 +2849,17 @@ body.auth-locked > :not(#passwordGate){
                     <div class="count-stepper" onclick="event.stopPropagation();">
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', -1, event)" title="Уменьшить количество">−</button>
                         <input type="number" id="count-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
-                        <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Увеличить количество">+</button>
+                        <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Добавить задание в генерацию">+</button>
                     </div>
                 </div>
                 <div id="protos-${tid}" class="proto-list">${listHTML}</div>
+                ${extraHTML}
             </div>`;
         }
 
         syncPracticeThemeMaster();
         syncPracticeCountWithThemes();
-        setPracticeMode('trainer');
+        // Тренажёр и сюжетные комплекты доступны одновременно; отдельный режим переключать не требуется.
         updateTaskTotal();
         if (window.MathJax) {
             MathJax.typesetPromise([container]).catch(err => console.log(err.message));
@@ -2839,34 +2923,34 @@ body.auth-locked > :not(#passwordGate){
         if(currentInteractiveHTML) renderPreview();
     }
 
-    function toggleSettings(tid) {
-        let el = document.getElementById(`protos-${tid}`);
+    function toggleSettings(tid, kind = 'main') {
+        const el = document.getElementById(getPrototypePanelId(tid, kind));
         if (el) el.style.display = (el.style.display === 'grid') ? 'none' : 'grid';
     }
 
-    function toggleAllProtos(tid, checked) {
-        const data = window.database[tid];
+    function toggleAllProtos(tid, checked, kind = 'main') {
+        const data = getPrototypeData(tid, kind);
         if (!data || !data.prototypes) return;
 
         data.prototypes.forEach((p, idx) => {
-            const cb = document.getElementById(`proto-${tid}-${idx}`);
+            const cb = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
             if (cb) cb.checked = checked;
         });
 
-        const master = document.getElementById(`proto-all-${tid}`);
+        const master = document.getElementById(getPrototypeMasterId(tid, kind));
         if (master) {
             master.checked = checked;
             master.indeterminate = false;
         }
     }
 
-    function syncProtoMaster(tid) {
-        const data = window.database[tid];
-        const master = document.getElementById(`proto-all-${tid}`);
+    function syncProtoMaster(tid, kind = 'main') {
+        const data = getPrototypeData(tid, kind);
+        const master = document.getElementById(getPrototypeMasterId(tid, kind));
         if (!data || !data.prototypes || !master) return;
 
         const boxes = data.prototypes
-            .map((p, idx) => document.getElementById(`proto-${tid}-${idx}`))
+            .map((p, idx) => document.getElementById(getPrototypeCheckboxId(tid, idx, kind)))
             .filter(Boolean);
 
         const checkedCount = boxes.filter(cb => cb.checked).length;
@@ -2980,10 +3064,77 @@ body.auth-locked > :not(#passwordGate){
     }
 
 
+    function generateRandomOgeVariant(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const btn = event && event.currentTarget ? event.currentTarget : null;
+        const infoBoard = document.getElementById('info-board');
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.oldText = btn.textContent;
+            btn.textContent = '🎲 Собираю вариант...';
+        }
+
+        setTimeout(() => {
+            try {
+                resetTaskCounts();
+
+                // Для заданий 1–5 выбираем один случайный сюжетный комплект.
+                const scenarioThemes = getOgeScenarioThemeIds();
+                if (scenarioThemes.length) {
+                    document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]').forEach(cb => { cb.checked = false; });
+                    const themeId = scenarioThemes[Math.floor(Math.random() * scenarioThemes.length)];
+                    const cb = document.getElementById(`practice-scenario-theme-${themeId}`);
+                    if (cb) cb.checked = true;
+                    const count = document.getElementById('count-practice-scenarios');
+                    if (count) count.value = 1;
+                    // Сюжетный комплект выбран счётчиком; переключатель режима не требуется.
+                }
+
+                // В случайный экзаменационный вариант берём по одному ОСНОВНОМУ заданию 6+.
+                // Дополнительные прототипы остаются отдельной тренировочной опцией и сюда не подмешиваются.
+                getUniqueTaskIds().forEach(tid => {
+                    const input = document.getElementById(`count-${tid}`);
+                    if (input) input.value = 1;
+                    const data = window.database[tid];
+                    if (data && Array.isArray(data.prototypes)) {
+                        data.prototypes.forEach((p, idx) => {
+                            const box = document.getElementById(`proto-${tid}-${idx}`);
+                            if (box) box.checked = true;
+                        });
+                        syncProtoMaster(tid, 'main');
+                    }
+                });
+
+                updateTaskTotal();
+                generateVariant();
+                const output = document.getElementById('output-section');
+                if (output) output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+                console.error(err);
+                if (infoBoard) {
+                    infoBoard.style.display = 'block';
+                    infoBoard.innerHTML = '<b>Не удалось собрать случайный вариант:</b> ' + (err && err.message ? err.message : err);
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = btn.dataset.oldText || '🎲 Сгенерировать случайный вариант';
+                }
+            }
+        }, 0);
+    }
+
+
     const tooltip = document.getElementById('proto-tooltip');
-    function showTooltip(tid, index, e) {
-        let p = window.database[tid].prototypes[index];
-        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${p.tasks[0].text}</div>`;
+    function showTooltip(tid, index, e, kind = 'main') {
+        const data = getPrototypeData(tid, kind);
+        const p = data && data.prototypes ? data.prototypes[index] : null;
+        if (!p) return;
+        const firstTask = Array.isArray(p.tasks) && p.tasks.length ? p.tasks[0] : null;
+        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${firstTask ? firstTask.text : (p.theory_task || '')}</div>`;
         if (window.autoFixSVGArrows) window.autoFixSVGArrows(tooltip);
         tooltip.style.display = 'block';
         if (window.MathJax) MathJax.typesetPromise([tooltip]);
@@ -3144,12 +3295,22 @@ body.auth-locked > :not(#passwordGate){
         const practiceTaskIds = [];
         if (trainerTasks.length > 0) practiceTaskIds.push('__oge_trainer__');
         if (scenarioTasks.length > 0) practiceTaskIds.push('__oge_scenarios__');
-        let sortedTaskIds = [...practiceTaskIds, ...getUniqueTaskIds()];
+        const regularTaskIds = [];
+        getUniqueTaskIds().forEach(baseTid => {
+            regularTaskIds.push(baseTid);
+            const extraData = getExtraTaskData(baseTid);
+            if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
+                regularTaskIds.push(`__extra__${baseTid}`);
+            }
+        });
+        let sortedTaskIds = [...practiceTaskIds, ...regularTaskIds];
 
         for (let tid of sortedTaskIds) {
             const isTrainerBlock = tid === '__oge_trainer__';
             const isScenarioBlock = tid === '__oge_scenarios__';
             const isPracticeBlock = isTrainerBlock || isScenarioBlock;
+            const isExtraBlock = !isPracticeBlock && String(tid).startsWith('__extra__');
+            const baseTid = isExtraBlock ? String(tid).replace(/^__extra__/, '') : tid;
             const selectedScenarioThemeTitles = getOgeScenarioThemeIds()
                 .filter(themeId => {
                     const checkbox = document.getElementById(`practice-scenario-theme-${themeId}`);
@@ -3164,20 +3325,21 @@ body.auth-locked > :not(#passwordGate){
                 ? { title: 'Задания 1–5. Тренажёры по прототипам' }
                 : (isScenarioBlock
                     ? { title: scenarioBlockTitle }
-                    : window.database[tid]);
+                    : (isExtraBlock ? getExtraTaskData(baseTid) : window.database[baseTid]));
             let finalTasks = [];
 
             if (isPracticeBlock) {
                 finalTasks = isTrainerBlock ? trainerTasks : scenarioTasks;
                 window.selectedBlockTitles.push(blockData.title);
             } else {
-                const countInput = document.getElementById(`count-${tid}`);
+                if (!blockData || !Array.isArray(blockData.prototypes)) continue;
+                const countInput = document.getElementById(isExtraBlock ? `count-extra-${baseTid}` : `count-${baseTid}`);
                 if (!countInput) continue;
                 const requiredCount = parseInt(countInput.value, 10) || 0;
                 if (requiredCount <= 0) continue;
 
                 const selectedProtos = blockData.prototypes.filter((p, idx) => {
-                    const checkbox = document.getElementById(`proto-${tid}-${idx}`);
+                    const checkbox = document.getElementById(isExtraBlock ? `proto-extra-${baseTid}-${idx}` : `proto-${baseTid}-${idx}`);
                     return checkbox && checkbox.checked;
                 });
                 if (selectedProtos.length === 0) continue;
@@ -3375,7 +3537,7 @@ body.auth-locked > :not(#passwordGate){
                 let drawBtn = `<button class="btn-settings" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; font-size: 18px; padding: 8px 12px;" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик">✏️</button>`;
                 let helpBtn = includeExplanations && item.theory ? `<button id="btn-help-${taskCounter}" class="btn-settings btn-help" style="display:none; background: #e3f2fd; color: #003399; border: 1px solid #003399; font-weight: bold; padding: 10px 15px;" onclick="window.openTheoryModalLocal('theory-data-${taskCounter}')">РАЗБОР</button><div id="theory-data-${taskCounter}" style="display:none;">${encodeURIComponent(theoryHtml)}</div>` : "";
 
-                const draftDiagramTaskNum = parseInt(String(tid).replace(/\D/g, '')) || 0;
+                const draftDiagramTaskNum = parseInt(String(baseTid).replace(/\D/g, '')) || 0;
                 const needsDraftDiagram = Boolean(item.forceDraftDiagram) || [1, 2, 3, 8, 11].includes(draftDiagramTaskNum);
                 let draftDiagramSource = "";
                 if (needsDraftDiagram) {
