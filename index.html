@@ -11,21 +11,12 @@
     <script src="battle_template.js?v=47"></script>
     <script src="motivation_template.js?v=motivation-v43"></script>
     <!-- Связанные практические комплекты ОГЭ 1–5 -->
-    <script src="oge_practice.js?v=20260809-4"></script>
-    <script src="tariff_plot_base64.js?v=20260809-2"></script>
-    <script src="tariff_practice.js?v=20260809-2"></script>
+    <script src="oge_practice.js?v=37"></script>
     <script src="apartment_practice.js?v=38"></script>
     <script src="tires_practice.js?v=53"></script>
-    <script src="stove_practice.js?v=20260810-1"></script>
-    <script src="sheets_practice.js?v=20260810-1"></script>
-    <script src="plot_plan_base64.js?v=20260810-1"></script>
-    <script src="plot_practice.js?v=20260810-1"></script>
-    <script src="villages_practice.js?v=20260810-2"></script>
-    <script src="practice_scenario_overrides.js?v=20260809-4"></script>
-    <script src="practice_solution_overrides.js?v=20260813-1"></script>
-    <script src="task6.js?v=20260813-2"></script>
-    <script src="task6_extra.js?v=20260813-1"></script>
-    <script src="task7.js?v=20260814-2"></script>
+    <script src="task6.js"></script>
+    <script src="task7.js?v=20260816-1"></script>
+    <script src="task7_extra.js?v=20260816-1"></script>
    <script src="task8.js"></script>
     <script src="task9.js"></script>
     <script src="task10.js"></script>
@@ -219,36 +210,6 @@
         .btn-settings { background: #333; color: #aaa; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 15px; font-size: 0.85em; transition: 0.2s; }
         .btn-settings:hover { background: #444; color: #fff; }
         .proto-list { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #555; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9em; }
-
-        /* Дополнительные прототипы — по той же схеме, что в генераторе ЕГЭ */
-        .extra-task-panel {
-            margin-top: 12px;
-            padding: 12px 0 0 0;
-            border-top: 1px dashed rgba(45, 212, 191, 0.44);
-        }
-        .extra-task-panel .row-header { margin-bottom: 0; gap: 12px; }
-        .extra-task-panel .row-header label {
-            font-size: 1.02em;
-            font-weight: 700;
-            flex-wrap: wrap;
-            gap: 10px;
-            min-width: 0;
-        }
-        .extra-task-title { color: #FBBF24; font-weight: 800; white-space: nowrap; }
-        .extra-task-panel .btn-settings { margin-left: 0; padding: 6px 10px; font-size: 0.82em; }
-        .extra-task-panel .count-stepper input[type="number"] { width: 58px; }
-        @media (max-width: 760px) {
-            .extra-task-panel .row-header { align-items: flex-start; }
-            .extra-task-title { white-space: normal; }
-        }
-
-        .btn-random-variant {
-            width:100%; border:2px solid #14B8A6; background:#14B8A6; color:#071513;
-            border-radius:9px; padding:13px 15px; font-size:1.05em; font-weight:900;
-            cursor:pointer; transition:.22s; margin: 0 0 18px 0;
-        }
-        .btn-random-variant:hover { filter:brightness(1.08); box-shadow:0 0 18px rgba(45,212,191,.35); transform:translateY(-1px); }
-
         .proto-item { display: flex; align-items: flex-start; gap: 8px; color: #bbb; cursor: pointer; }
         .proto-item input { margin-top: 3px; cursor: pointer; }
         .proto-select-all { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; color: #ff8c00; font-weight: bold; background: rgba(255,140,0,0.08); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 4px; cursor: pointer; }
@@ -1476,7 +1437,6 @@ body.auth-locked > :not(#passwordGate){
         <a href="https://t.me/interactiv_matematika" target="_blank" class="social-btn">Telegram</a>
         <a href="https://vk.com/interaktiv_matematika" target="_blank" class="social-btn">ВКонтакте</a>
         <a href="https://max.ru/c/-70932227200385/AZ29lb4dRPk" target="_blank" class="social-btn">МАКС</a>
-        <a href="https://shkatulka.sistema-math.ru/" target="_blank" class="social-btn">Мой сайт</a>
         
         <div style="margin-top: 30px; background: #2a2a2a; border-left: 4px solid #4CAF50; padding: 15px; border-radius: 0 8px 8px 0; text-align: left;">
             <h4 style="margin: 0 0 8px 0; color: #4CAF50; font-size: 1.05em;">📌 Добро пожаловать в генератор!</h4>
@@ -1575,8 +1535,6 @@ body.auth-locked > :not(#passwordGate){
             <button type="button" class="task-total-reset" onclick="resetTaskCounts()">🔄 Сбросить набор</button>
             <div id="task-total-note" class="task-total-note">Набор заданий сброшен.</div>
         </div>
-
-        <button type="button" class="btn-random-variant" onclick="generateRandomOgeVariant(event)">🎲 Сгенерировать случайный вариант</button>
 
         <div id="dynamic-tasks"></div>
 
@@ -2425,8 +2383,6 @@ body.auth-locked > :not(#passwordGate){
             .oge-practice-sticky::-webkit-scrollbar-track { background:transparent; }
             .oge-practice-common p { line-height:1.45; }
             .oge-practice-common svg, .oge-practice-common img { display:block; max-width:100%; height:auto; margin:12px auto; }
-            .practice-zoomable-diagram { cursor:zoom-in; }
-            .practice-zoomable-diagram img, img.practice-zoomable-diagram, .practice-zoomable-diagram svg, svg.practice-zoomable-diagram { cursor:zoom-in; image-rendering:-webkit-optimize-contrast; image-rendering:crisp-edges; }
             .oge-practice-common table, table.common-table { width:100%; border-collapse:collapse !important; border-spacing:0 !important; border:2px solid #111 !important; margin:10px 0; font-size:0.94em; background:#fff; color:#111; }
             .oge-practice-common th, .oge-practice-common td, table.common-table th, table.common-table td { border:1.5px solid #111 !important; padding:6px 7px; text-align:center; vertical-align:middle; }
             .oge-practice-common th, table.common-table th { background:#f0f0f0; font-weight:700; }
@@ -2438,9 +2394,8 @@ body.auth-locked > :not(#passwordGate){
     function makeOgePracticeIntro(themeTitle, scenario, setNumber) {
         const stickyText = stripDiagramsFromHTML(scenario.common || '');
         const introDiagram = scenario.imageHTML || extractFirstDiagramHTML(scenario.common || '');
-        const zoomableIntroDiagram = makePracticeZoomableDiagram(introDiagram);
-        const introDiagramHTML = zoomableIntroDiagram
-            ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${zoomableIntroDiagram}</div>`
+        const introDiagramHTML = introDiagram
+            ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${introDiagram}</div>`
             : '';
         return `${ogePracticeOutputStyles()}<div class="oge-practice-sticky-scope"><div class="oge-practice-common oge-practice-sticky" style="padding:13px 15px;">
             <h3 style="margin-bottom:8px;">Практический комплект ${setNumber}. ${themeTitle}</h3>
@@ -2473,20 +2428,6 @@ body.auth-locked > :not(#passwordGate){
         const holder = document.createElement('div');
         holder.innerHTML = html;
         holder.querySelectorAll('svg, img, picture, canvas').forEach(el => el.remove());
-        return holder.innerHTML;
-    }
-
-    function makePracticeZoomableDiagram(html) {
-        if (!html) return '';
-        const holder = document.createElement('div');
-        holder.innerHTML = html;
-        const visual = holder.querySelector('img, svg, picture, canvas');
-        if (!visual) return html;
-        const target = visual.closest('picture') || visual;
-        target.classList.add('practice-zoomable-diagram');
-        target.style.cursor = 'zoom-in';
-        target.setAttribute('title', 'Нажмите, чтобы увеличить изображение');
-        target.setAttribute('onclick', 'window.openDraftVisualZoom(this)');
         return holder.innerHTML;
     }
 
@@ -2544,31 +2485,26 @@ body.auth-locked > :not(#passwordGate){
             const commonText = theme.catalog && theme.catalog.common ? theme.catalog.common : '';
             const commonImageHTML = theme.catalog && theme.catalog.imageHTML ? theme.catalog.imageHTML : extractFirstDiagramHTML(commonText);
             const commonTextOnly = stripDiagramsFromHTML(commonText);
-            const commonZoomableImageHTML = makePracticeZoomableDiagram(commonImageHTML);
-            const commonIntroDiagram = commonZoomableImageHTML ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${commonZoomableImageHTML}</div>` : '';
+            const commonIntroDiagram = commonImageHTML ? `<div class="oge-practice-intro-diagram" style="float:left; width:42%; max-width:300px; min-width:220px; margin:2px 16px 9px 0;">${commonImageHTML}</div>` : '';
             const lastStickyProtoIndex = selectedPrototypes.reduce((lastIndex, proto, index) => Number(proto.examNumber) !== 5 ? index : lastIndex, -1);
             const commonIntro = commonText ? `<div class="oge-practice-sticky-scope">${ogePracticeOutputStyles()}<div class="oge-practice-common oge-practice-sticky" style="padding:13px 15px;"><h3 style="margin-bottom:8px;">${theme.title}. Общее условие</h3><div class="oge-practice-common-body" style="font-size:0.82em; line-height:1.28;">${commonIntroDiagram}${commonTextOnly}<div style="clear:both;"></div></div></div>` : '';
             const commonPrintIntro = commonText ? `${ogePracticeOutputStyles()}<div class="oge-practice-common"><h3>${theme.title}. Общее условие</h3><div>${commonTextOnly}</div></div>` : '';
 
             selectedPrototypes.forEach((proto, protoIndex) => {
                 const imageHTML = proto.imageHTML || proto.svg_code || '';
-                const forceTaskImage = Boolean(proto.showImageInTask);
-                const useDraftDiagram = Number(proto.examNumber) !== 5 || forceTaskImage;
+                const useDraftDiagram = Number(proto.examNumber) !== 5;
                 const standaloneText = `${commonText}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`;
-                const theoryTaskText = imageHTML
-                    ? `${commonTextOnly}<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`
-                    : `<div><b>Прототип ${proto.id || ''}.</b> ${proto.text || ''}</div>`;
                 const analogTasks = selectedPrototypes
                     .filter(other => other !== proto && Number(other.examNumber) === Number(proto.examNumber))
                     .map(other => ({
                         text: `<b>Прототип ${other.id || ''}.</b> ${other.text || ''}`,
                         answer: String(other.answer ?? ''),
-                        svg_code: other.showImageInTask ? (other.theoryImageHTML || other.imageHTML || other.svg_code || '') : ''
+                        svg_code: ''
                     }));
                 trainerTasks.push({
                     text: proto.text || '',
                     displayText: `<div style="margin-bottom:5px;"><span style="display:inline-block; background:#eaf2ff; color:#003399; border:1px solid #99b7df; border-radius:6px; padding:2px 8px; font-weight:800;">${proto.id || ''}</span></div>${proto.text || ''}`,
-                    displaySvg: forceTaskImage ? imageHTML : '',
+                    displaySvg: '',
                     printSvg: useDraftDiagram ? imageHTML : '',
                     draftSvg: useDraftDiagram ? imageHTML : '',
                     standaloneText,
@@ -2591,7 +2527,7 @@ body.auth-locked > :not(#passwordGate){
                     beforeAnswersHTML: protoIndex === 0 ? `<h4 style="margin:18px 0 8px; color:#0F766E;">${theme.title}. Каталог прототипов</h4>` : '',
                     theory: {
                         svg_code: proto.theoryImageHTML || imageHTML,
-                        theory_task: theoryTaskText,
+                        theory_task: standaloneText,
                         theory_sol: proto.solution || 'Разбор пока не добавлен.',
                         tasks: analogTasks
                     }
@@ -2715,17 +2651,16 @@ body.auth-locked > :not(#passwordGate){
                                 .map(pair => ({
                                     text: `<b>${pair.other.typeId || `Задание ${taskNumber}`}.</b> ${pair.other.text || ''}`,
                                     answer: String(pair.other.answer ?? ''),
-                                    svg_code: pair.other.showImageInTask ? (pair.other.theoryImageHTML || pair.other.imageHTML || pair.other.svg_code || '') : ''
+                                    svg_code: ''
                                 }));
                             const key = `${state.themeId}:${state.scenarioIndex}:${taskNumber}:${chosenPair.originalIndex}`;
                             usage.set(key, (usage.get(key) || 0) + 1);
                             const standaloneText = makeOgePracticeStandalone(theme.title, scenario, setNumber, taskNumber, chosen);
-                            const forceTaskImage = Boolean(chosen.showImageInTask);
-                            const useDraftDiagram = taskNumber !== 5 || forceTaskImage;
+                            const useDraftDiagram = taskNumber !== 5;
                             scenarioTasks.push({
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
-                                displaySvg: forceTaskImage ? (chosen.imageHTML || chosen.svg_code || '') : '',
+                                displaySvg: '',
                                 printSvg: useDraftDiagram ? (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '',
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
@@ -2740,7 +2675,7 @@ body.auth-locked > :not(#passwordGate){
                                 printLayout: chosen.printLayout || (diagramHTML ? 'image-grid' : ''),
                                 printGridHeight: chosen.printGridHeight || 125,
                                 beforeHTML: taskNumber === 1 ? introHTML : '',
-                                afterHTML: taskNumber === 5 ? '</div>' : '',
+                                afterHTML: taskNumber === 4 ? '</div>' : '',
                                 beforePrintHTML: taskNumber === 1 ? printIntro : '',
                                 beforeAnswersHTML: taskNumber === 1 ? `<h4 style="margin:18px 0 8px; color:#003399;">Комплект ${setNumber}. ${theme.title} · ${scenario.title || `Сюжет ${state.scenarioIndex + 1}`}</h4>` : '',
                                 theory: {
@@ -2759,47 +2694,6 @@ body.auth-locked > :not(#passwordGate){
         return { trainerTasks, scenarioTasks };
     }
 
-
-    function getExtraTaskData(tid) {
-        const extraDb = window.extraDatabase || window.additionalDatabase || {};
-        const numericId = parseInt(String(tid).replace(/\D/g, ''), 10);
-        return extraDb[tid] || extraDb[`task${numericId}`] || extraDb[numericId] || null;
-    }
-
-    function getPrototypeData(tid, kind = 'main') {
-        return kind === 'extra' ? getExtraTaskData(tid) : window.database[tid];
-    }
-
-    function getPrototypePanelId(tid, kind = 'main') {
-        return kind === 'extra' ? `protos-extra-${tid}` : `protos-${tid}`;
-    }
-
-    function getPrototypeCheckboxId(tid, idx, kind = 'main') {
-        return kind === 'extra' ? `proto-extra-${tid}-${idx}` : `proto-${tid}-${idx}`;
-    }
-
-    function getPrototypeMasterId(tid, kind = 'main') {
-        return kind === 'extra' ? `proto-all-extra-${tid}` : `proto-all-${tid}`;
-    }
-
-    function buildRegularPrototypeListHTML(tid, data, kind = 'main') {
-        if (!data || !Array.isArray(data.prototypes)) return '';
-        const kindArg = kind === 'extra' ? `, 'extra'` : '';
-        let html = `
-            <label class="proto-select-all" title="Выбрать или снять все прототипы этого блока">
-                <input type="checkbox" id="${getPrototypeMasterId(tid, kind)}" checked onchange="toggleAllProtos('${tid}', this.checked${kindArg})">
-                <span>Выбрать все / снять все</span>
-            </label>`;
-        data.prototypes.forEach((p, idx) => {
-            html += `
-            <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event${kindArg})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
-                <input type="checkbox" id="${getPrototypeCheckboxId(tid, idx, kind)}" checked onchange="syncProtoMaster('${tid}'${kindArg})">
-                <span class="proto-label-text">${idx + 1}. ${p.desc || `Прототип ${idx + 1}`} 👁️</span>
-            </label>`;
-        });
-        return html;
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('dynamic-tasks');
         const hasRegularDatabase = window.database && Object.keys(window.database).length > 0;
@@ -2816,28 +2710,19 @@ body.auth-locked > :not(#passwordGate){
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
-            const listHTML = buildRegularPrototypeListHTML(tid, data, 'main');
-            const extraData = getExtraTaskData(tid);
-            let extraHTML = '';
+            let listHTML = `
+                <label class="proto-select-all" title="Выбрать или снять все прототипы этого задания">
+                    <input type="checkbox" id="proto-all-${tid}" checked onchange="toggleAllProtos('${tid}', this.checked)">
+                    <span>Выбрать все / снять все</span>
+                </label>`;
 
-            if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
-                const extraListHTML = buildRegularPrototypeListHTML(tid, extraData, 'extra');
-                extraHTML = `
-                <div class="extra-task-panel">
-                    <div class="row-header">
-                        <label onclick="toggleSettings('${tid}', 'extra')">
-                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
-                            <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
-                        </label>
-                        <div class="count-stepper" onclick="event.stopPropagation();">
-                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', -1, event)" title="Уменьшить количество дополнительных заданий">−</button>
-                            <input type="number" id="count-extra-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
-                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', 1, event)" title="Добавить дополнительное задание в генерацию">+</button>
-                        </div>
-                    </div>
-                    <div id="protos-extra-${tid}" class="proto-list">${extraListHTML}</div>
-                </div>`;
-            }
+            data.prototypes.forEach((p, idx) => {
+                listHTML += `
+                <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event)" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+                    <input type="checkbox" id="proto-${tid}-${idx}" checked onchange="syncProtoMaster('${tid}')">
+                    <span class="proto-label-text">${idx + 1}. ${p.desc} 👁️</span>
+                </label>`;
+            });
 
             container.innerHTML += `
             <div class="task-row">
@@ -2849,17 +2734,16 @@ body.auth-locked > :not(#passwordGate){
                     <div class="count-stepper" onclick="event.stopPropagation();">
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', -1, event)" title="Уменьшить количество">−</button>
                         <input type="number" id="count-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
-                        <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Добавить задание в генерацию">+</button>
+                        <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Увеличить количество">+</button>
                     </div>
                 </div>
                 <div id="protos-${tid}" class="proto-list">${listHTML}</div>
-                ${extraHTML}
             </div>`;
         }
 
         syncPracticeThemeMaster();
         syncPracticeCountWithThemes();
-        // Тренажёр и сюжетные комплекты доступны одновременно; отдельный режим переключать не требуется.
+        setPracticeMode('trainer');
         updateTaskTotal();
         if (window.MathJax) {
             MathJax.typesetPromise([container]).catch(err => console.log(err.message));
@@ -2923,34 +2807,34 @@ body.auth-locked > :not(#passwordGate){
         if(currentInteractiveHTML) renderPreview();
     }
 
-    function toggleSettings(tid, kind = 'main') {
-        const el = document.getElementById(getPrototypePanelId(tid, kind));
+    function toggleSettings(tid) {
+        let el = document.getElementById(`protos-${tid}`);
         if (el) el.style.display = (el.style.display === 'grid') ? 'none' : 'grid';
     }
 
-    function toggleAllProtos(tid, checked, kind = 'main') {
-        const data = getPrototypeData(tid, kind);
+    function toggleAllProtos(tid, checked) {
+        const data = window.database[tid];
         if (!data || !data.prototypes) return;
 
         data.prototypes.forEach((p, idx) => {
-            const cb = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
+            const cb = document.getElementById(`proto-${tid}-${idx}`);
             if (cb) cb.checked = checked;
         });
 
-        const master = document.getElementById(getPrototypeMasterId(tid, kind));
+        const master = document.getElementById(`proto-all-${tid}`);
         if (master) {
             master.checked = checked;
             master.indeterminate = false;
         }
     }
 
-    function syncProtoMaster(tid, kind = 'main') {
-        const data = getPrototypeData(tid, kind);
-        const master = document.getElementById(getPrototypeMasterId(tid, kind));
+    function syncProtoMaster(tid) {
+        const data = window.database[tid];
+        const master = document.getElementById(`proto-all-${tid}`);
         if (!data || !data.prototypes || !master) return;
 
         const boxes = data.prototypes
-            .map((p, idx) => document.getElementById(getPrototypeCheckboxId(tid, idx, kind)))
+            .map((p, idx) => document.getElementById(`proto-${tid}-${idx}`))
             .filter(Boolean);
 
         const checkedCount = boxes.filter(cb => cb.checked).length;
@@ -3064,77 +2948,10 @@ body.auth-locked > :not(#passwordGate){
     }
 
 
-    function generateRandomOgeVariant(event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        const btn = event && event.currentTarget ? event.currentTarget : null;
-        const infoBoard = document.getElementById('info-board');
-        if (btn) {
-            btn.disabled = true;
-            btn.dataset.oldText = btn.textContent;
-            btn.textContent = '🎲 Собираю вариант...';
-        }
-
-        setTimeout(() => {
-            try {
-                resetTaskCounts();
-
-                // Для заданий 1–5 выбираем один случайный сюжетный комплект.
-                const scenarioThemes = getOgeScenarioThemeIds();
-                if (scenarioThemes.length) {
-                    document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]').forEach(cb => { cb.checked = false; });
-                    const themeId = scenarioThemes[Math.floor(Math.random() * scenarioThemes.length)];
-                    const cb = document.getElementById(`practice-scenario-theme-${themeId}`);
-                    if (cb) cb.checked = true;
-                    const count = document.getElementById('count-practice-scenarios');
-                    if (count) count.value = 1;
-                    // Сюжетный комплект выбран счётчиком; переключатель режима не требуется.
-                }
-
-                // В случайный экзаменационный вариант берём по одному ОСНОВНОМУ заданию 6+.
-                // Дополнительные прототипы остаются отдельной тренировочной опцией и сюда не подмешиваются.
-                getUniqueTaskIds().forEach(tid => {
-                    const input = document.getElementById(`count-${tid}`);
-                    if (input) input.value = 1;
-                    const data = window.database[tid];
-                    if (data && Array.isArray(data.prototypes)) {
-                        data.prototypes.forEach((p, idx) => {
-                            const box = document.getElementById(`proto-${tid}-${idx}`);
-                            if (box) box.checked = true;
-                        });
-                        syncProtoMaster(tid, 'main');
-                    }
-                });
-
-                updateTaskTotal();
-                generateVariant();
-                const output = document.getElementById('output-section');
-                if (output) output.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (err) {
-                console.error(err);
-                if (infoBoard) {
-                    infoBoard.style.display = 'block';
-                    infoBoard.innerHTML = '<b>Не удалось собрать случайный вариант:</b> ' + (err && err.message ? err.message : err);
-                }
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = btn.dataset.oldText || '🎲 Сгенерировать случайный вариант';
-                }
-            }
-        }, 0);
-    }
-
-
     const tooltip = document.getElementById('proto-tooltip');
-    function showTooltip(tid, index, e, kind = 'main') {
-        const data = getPrototypeData(tid, kind);
-        const p = data && data.prototypes ? data.prototypes[index] : null;
-        if (!p) return;
-        const firstTask = Array.isArray(p.tasks) && p.tasks.length ? p.tasks[0] : null;
-        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${firstTask ? firstTask.text : (p.theory_task || '')}</div>`;
+    function showTooltip(tid, index, e) {
+        let p = window.database[tid].prototypes[index];
+        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${p.tasks[0].text}</div>`;
         if (window.autoFixSVGArrows) window.autoFixSVGArrows(tooltip);
         tooltip.style.display = 'block';
         if (window.MathJax) MathJax.typesetPromise([tooltip]);
@@ -3151,39 +2968,6 @@ body.auth-locked > :not(#passwordGate){
     }
 
     function hideTooltip() { tooltip.style.display = 'none'; }
-
-    function buildInlineScratchpadHTML(draftId) {
-        return `<div id="draw-wrapper-${draftId}" style="display:none; margin-top:12px; width:100%; clear:both;">
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px;background:#e3f2fd;padding:7px 10px;border-radius:8px;border:1px solid #bbdefb;color:#333;">
-                <button onclick="window.setTool('${draftId}', 'pointer')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Указатель">👆</button>
-                <button onclick="window.setTool('${draftId}', 'pen')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Карандаш">🖊️</button>
-                <button onclick="window.setTool('${draftId}', 'highlighter')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Выделитель">🖍️</button>
-                <button onclick="window.undoCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Отменить">↶</button>
-                <button onclick="window.redoCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Повторить">↷</button>
-                <select id="tool-select-${draftId}" onchange="window.setTool('${draftId}', this.value)" style="background:#fff;border:1px solid #90caf9;border-radius:4px;padding:4px 7px;font-size:13px;cursor:pointer;color:#003399;font-weight:500;">
-                    <option value="" disabled selected hidden>🔺 Фигуры</option>
-                    <option value="line">📏 Прямая</option>
-                    <option value="vector">↗️ Вектор</option>
-                    <option value="circle">⭕ Окружность</option>
-                    <option value="triangle">🔺 Треугольник</option>
-                    <option value="cylinder">🛢️ Цилиндр</option>
-                    <option value="cone">🍦 Конус</option>
-                    <option value="sphere">🔮 Сфера</option>
-                </select>
-                <input type="color" id="color-${draftId}" value="#003399" style="cursor:pointer;height:28px;width:34px;border:none;background:transparent;padding:0;" title="Цвет">
-                <input type="range" id="size-${draftId}" min="1" max="15" value="3" style="cursor:pointer;width:70px;" title="Толщина линии">
-                <button onclick="window.setTool('${draftId}', 'eraser')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Ластик">🧽</button>
-                <div style="flex-grow:1;"></div>
-                <button onclick="window.clearCanvas('${draftId}')" style="background:none;border:none;cursor:pointer;font-size:19px;" title="Очистить всё">🗑️</button>
-                <input type="hidden" id="tool-${draftId}" value="pen">
-            </div>
-            <div style="height:280px;overflow-y:auto;overflow-x:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;">
-                <div style="position:relative;width:100%;height:720px;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">
-                    <canvas id="canvas-${draftId}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
-                </div>
-            </div>
-        </div>`;
-    }
 
     function openTheoryModalLocal(dataId) {
         let el = document.getElementById(dataId);
@@ -3295,22 +3079,12 @@ body.auth-locked > :not(#passwordGate){
         const practiceTaskIds = [];
         if (trainerTasks.length > 0) practiceTaskIds.push('__oge_trainer__');
         if (scenarioTasks.length > 0) practiceTaskIds.push('__oge_scenarios__');
-        const regularTaskIds = [];
-        getUniqueTaskIds().forEach(baseTid => {
-            regularTaskIds.push(baseTid);
-            const extraData = getExtraTaskData(baseTid);
-            if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
-                regularTaskIds.push(`__extra__${baseTid}`);
-            }
-        });
-        let sortedTaskIds = [...practiceTaskIds, ...regularTaskIds];
+        let sortedTaskIds = [...practiceTaskIds, ...getUniqueTaskIds()];
 
         for (let tid of sortedTaskIds) {
             const isTrainerBlock = tid === '__oge_trainer__';
             const isScenarioBlock = tid === '__oge_scenarios__';
             const isPracticeBlock = isTrainerBlock || isScenarioBlock;
-            const isExtraBlock = !isPracticeBlock && String(tid).startsWith('__extra__');
-            const baseTid = isExtraBlock ? String(tid).replace(/^__extra__/, '') : tid;
             const selectedScenarioThemeTitles = getOgeScenarioThemeIds()
                 .filter(themeId => {
                     const checkbox = document.getElementById(`practice-scenario-theme-${themeId}`);
@@ -3325,21 +3099,20 @@ body.auth-locked > :not(#passwordGate){
                 ? { title: 'Задания 1–5. Тренажёры по прототипам' }
                 : (isScenarioBlock
                     ? { title: scenarioBlockTitle }
-                    : (isExtraBlock ? getExtraTaskData(baseTid) : window.database[baseTid]));
+                    : window.database[tid]);
             let finalTasks = [];
 
             if (isPracticeBlock) {
                 finalTasks = isTrainerBlock ? trainerTasks : scenarioTasks;
                 window.selectedBlockTitles.push(blockData.title);
             } else {
-                if (!blockData || !Array.isArray(blockData.prototypes)) continue;
-                const countInput = document.getElementById(isExtraBlock ? `count-extra-${baseTid}` : `count-${baseTid}`);
+                const countInput = document.getElementById(`count-${tid}`);
                 if (!countInput) continue;
                 const requiredCount = parseInt(countInput.value, 10) || 0;
                 if (requiredCount <= 0) continue;
 
                 const selectedProtos = blockData.prototypes.filter((p, idx) => {
-                    const checkbox = document.getElementById(isExtraBlock ? `proto-extra-${baseTid}-${idx}` : `proto-${baseTid}-${idx}`);
+                    const checkbox = document.getElementById(`proto-${tid}-${idx}`);
                     return checkbox && checkbox.checked;
                 });
                 if (selectedProtos.length === 0) continue;
@@ -3443,54 +3216,24 @@ body.auth-locked > :not(#passwordGate){
                 let theoryHtml = "";
                 if (item.theory) {
                     theoryHtml = `
-                        <style>
-                            .theory-shell-${taskCounter}{background:#fff7ed;border:1px solid #fdba74;border-radius:14px;padding:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.05);}
-                            .theory-card-${taskCounter}{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
-                            .theory-task-layout-${taskCounter}{display:block;min-width:0;}
-                            .theory-task-layout-${taskCounter}::after{content:"";display:block;clear:both;}
-                            .theory-main-diagram-${taskCounter}{float:left;width:min(42%,360px);background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;overflow:auto;margin:0 18px 12px 0;box-sizing:border-box;}
-                            .theory-main-diagram-${taskCounter} img,.theory-main-diagram-${taskCounter} svg,.theory-main-diagram-${taskCounter} canvas,.theory-main-diagram-${taskCounter} picture{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;margin:0 auto!important;box-sizing:border-box!important;}
-                            .theory-main-text-${taskCounter}{min-width:0;overflow-wrap:anywhere;line-height:1.58;font-size:16px;}
-                            .theory-main-text-${taskCounter} p{margin:0 0 10px;}
-                            .theory-main-text-${taskCounter} table,.theory-solution-box-${taskCounter} table{width:100%;border-collapse:collapse;margin:10px 0;background:#fff;}
-                            .theory-main-text-${taskCounter} th,.theory-main-text-${taskCounter} td,.theory-solution-box-${taskCounter} th,.theory-solution-box-${taskCounter} td{border:1px solid #cbd5e1;padding:6px 8px;text-align:center;vertical-align:middle;}
-                            .theory-solution-box-${taskCounter}{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:13px 15px;line-height:1.6;font-size:16px;overflow-wrap:anywhere;}
-                            .theory-solution-box-${taskCounter} p{margin:0 0 10px;}
-                            .theory-practice-list-${taskCounter}{padding-left:0;list-style:none;margin:12px 0 0;}
-                            .theory-practice-item-${taskCounter}{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:12px;}
-                            @media (max-width:760px){.theory-main-diagram-${taskCounter}{float:none;width:auto;max-width:520px;margin:0 auto 12px;}}
-                        </style>
-                        <div id="theory-solution-${taskCounter}" class="theory-shell-${taskCounter}">
-                            <h3 style="margin:0 0 12px;color:#c2410c;">Разбор аналогичного задания</h3>
-                            <div class="theory-card-${taskCounter}">
-                                <div style="font-weight:800;margin-bottom:10px;">Задача</div>
-                                <div class="theory-task-layout-${taskCounter}">
-                                    ${theorySvgCode ? '<div class="theory-main-diagram-' + taskCounter + '" title="Нажмите, чтобы увеличить" style="cursor:zoom-in;" onclick="window.openDraftVisualZoom(this)">' + theorySvgCode + '</div>' : ''}
-                                    <div class="theory-main-text-${taskCounter}">${item.theory.theory_task}</div>
-                                </div>
-                            </div>
-                            <div class="theory-card-${taskCounter}">
-                                <div style="font-weight:800;margin-bottom:10px;">Решение</div>
-                                <div class="theory-solution-box-${taskCounter}">${item.theory.theory_sol}</div>
-                            </div>
-                            <div style="display:flex;justify-content:flex-end;margin-top:4px;padding-top:8px;border-top:1px solid #fed7aa;">
-                                <button type="button" onclick="document.getElementById('theory-solution-${taskCounter}').style.display='none'" style="background:#fff;color:#c2410c;border:1px solid #fdba74;border-radius:7px;padding:8px 17px;font-weight:700;cursor:pointer;">Скрыть</button>
-                            </div>
+                        <h3>Разбор аналогичного задания</h3>
+                        <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
+                            <p style='margin-top:0;'><b>Задача:</b></p>
+                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
+                            <p style='margin-top: 20px;'><b>Решение:</b></p>
+                            <div>${item.theory.theory_sol}</div>
                         </div>
-                        <h4 style='color:#c2410c;margin:16px 0 10px;'>Задачи для отработки:</h4>
-                        <ul class="theory-practice-list-${taskCounter}">
                     `;
-                    if (Array.isArray(item.theory.tasks)) {
-                        item.theory.tasks.forEach((t, practiceIndex) => {
+                    if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
+                        theoryHtml += `<h4 style='color: #ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
+                        item.theory.tasks.forEach(t => {
                             let tSvgCode = t.svg_code || "";
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
                             let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px;">${tSvgCode}</div>` : '';
-                            const practiceDraftId = `practice-${taskCounter}-${practiceIndex + 1}`;
-                            const practiceScratchpad = buildInlineScratchpadHTML(practiceDraftId);
-                            theoryHtml += `<li class="theory-practice-item-${taskCounter}"><div style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;min-width:0;line-height:1.55;">${t.text}${tSvg}</div><button type="button" onclick="window.toggleCanvas('${practiceDraftId}')" title="Открыть черновик" style="flex:0 0 auto;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:18px;padding:5px 9px;cursor:pointer;">✏️</button></div><div style="margin-top:9px;"><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></div>${practiceScratchpad}</li>`;
+                            theoryHtml += `<li style='margin-bottom:15px;'>${t.text}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
                         });
+                        theoryHtml += `</ul>`;
                     }
-                    theoryHtml += `</ul>`;
                 }
 
                 window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
@@ -3537,7 +3280,7 @@ body.auth-locked > :not(#passwordGate){
                 let drawBtn = `<button class="btn-settings" style="background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; font-size: 18px; padding: 8px 12px;" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик">✏️</button>`;
                 let helpBtn = includeExplanations && item.theory ? `<button id="btn-help-${taskCounter}" class="btn-settings btn-help" style="display:none; background: #e3f2fd; color: #003399; border: 1px solid #003399; font-weight: bold; padding: 10px 15px;" onclick="window.openTheoryModalLocal('theory-data-${taskCounter}')">РАЗБОР</button><div id="theory-data-${taskCounter}" style="display:none;">${encodeURIComponent(theoryHtml)}</div>` : "";
 
-                const draftDiagramTaskNum = parseInt(String(baseTid).replace(/\D/g, '')) || 0;
+                const draftDiagramTaskNum = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 const needsDraftDiagram = Boolean(item.forceDraftDiagram) || [1, 2, 3, 8, 11].includes(draftDiagramTaskNum);
                 let draftDiagramSource = "";
                 if (needsDraftDiagram) {
@@ -3584,14 +3327,36 @@ body.auth-locked > :not(#passwordGate){
                         object-fit:contain !important;
                         margin:0 !important;
                     }
-                </style><div id="draft-diagram-card-${taskCounter}" class="draft-diagram-card-${taskCounter}">${draftDiagramSource}</div>` : "";
+                    .draft-zoom-panel-${taskCounter} {
+                        display:none;
+                        position:absolute;
+                        inset:0;
+                        overflow:auto;
+                        z-index:6;
+                        background:rgba(255,255,255,.98);
+                        padding:18px;
+                        box-sizing:border-box;
+                        cursor:zoom-out;
+                    }
+                    .draft-zoom-panel-${taskCounter} img,
+                    .draft-zoom-panel-${taskCounter} svg,
+                    .draft-zoom-panel-${taskCounter} picture,
+                    .draft-zoom-panel-${taskCounter} canvas {
+                        display:block !important;
+                        width:1200px !important;
+                        max-width:none !important;
+                        max-height:none !important;
+                        height:auto !important;
+                        margin:0 auto !important;
+                        object-fit:contain !important;
+                    }
+                </style><div id="draft-diagram-card-${taskCounter}" class="draft-diagram-card-${taskCounter}">${draftDiagramSource}</div><div id="draft-zoom-panel-${taskCounter}" class="draft-zoom-panel-${taskCounter}" onclick="window.toggleDraftZoom('${taskCounter}', true, event)">${draftDiagramSource}</div>` : "";
                 
                 let scratchpadHTML = `<div id="draw-wrapper-${taskCounter}" style="display:none; margin-top: 20px; width: 100%; transition: all 0.3s ease; clear: both;">
                     <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px; background: #e3f2fd; padding: 8px 15px; border-radius: 8px; border: 1px solid #bbdefb; color: #333;">
                         <button onclick="window.setTool('${taskCounter}', 'pointer')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Указатель (Перетаскивание)">👆</button>
                         <button onclick="window.setTool('${taskCounter}', 'zoom')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Лупа: открыть чертёж в большом модальном окне">🔍</button>
                         <button onclick="window.setTool('${taskCounter}', 'pen')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Карандаш">🖊️</button>
-                        <button onclick="window.setTool('${taskCounter}', 'highlighter')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Выделитель — полупрозрачный маркер">🖍️</button>
                         <button onclick="window.undoCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Отменить действие">↶</button>
                         <button onclick="window.redoCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Повторить действие">↷</button>
                         <select id="tool-select-${taskCounter}" onchange="window.setTool('${taskCounter}', this.value)" style="background: #fff; border: 1px solid #90caf9; border-radius: 4px; padding: 4px 8px; font-size: 14px; cursor: pointer; outline: none; color: #003399; font-weight: 500;">
@@ -3611,12 +3376,10 @@ body.auth-locked > :not(#passwordGate){
                         <button onclick="window.clearCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
                         <input type="hidden" id="tool-${taskCounter}" value="pen">
                     </div>
-                    <div style="height:320px;overflow:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;"><div style="position:relative;width:100%;height:320px;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas></div></div>
+                    <div style="position:relative; background-color: #fff; background-size: 20px 20px; background-image: linear-gradient(to right, #d2e3f2 1px, transparent 1px), linear-gradient(to bottom, #d2e3f2 1px, transparent 1px); border: 2px solid #bbdefb; border-radius: 8px; overflow: hidden; height: 390px;">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action: none; cursor: crosshair;"></canvas></div>
                 </div>`;
 
-                const inlineTaskSvg = (item.showImageInTask && mainSvg) ? `<div style="margin:0 0 12px 0; max-width:620px;">${mainSvg}</div>` : "";
-                const sideTaskSvg = (mainSvg && !item.showImageInTask) ? `<div style="flex-shrink:0; min-width:150px; max-width: 350px;">${mainSvg}</div>` : "";
-                currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content: space-between;"><div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size: 1.1em; padding-top:2px;">${taskCounter}.</div>${sideTaskSvg}<div style="flex-grow:1; min-width:0;"><div>${inlineTaskSvg}${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding: 10px 15px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; font-weight: bold; width: 150px; outline: none; transition: 0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
+                currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content: space-between;"><div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size: 1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width: 350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding: 10px 15px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; font-weight: bold; width: 150px; outline: none; transition: 0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
                 
                 if (item.printLayout === 'image-grid') {
                     const gridHeight = item.printGridHeight || 105;
@@ -3647,246 +3410,9 @@ body.auth-locked > :not(#passwordGate){
         if (hasContent) { document.getElementById('output-section').style.display = 'block'; document.getElementById('btn-group').style.display = 'flex'; renderPreview(); }
     }
 
-    window.openDraftVisualZoom = window.openDraftVisualZoom || function(sourceEl) {
-        if (!sourceEl) return;
-        const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
-        if (!visual) return;
-    
-        let overlay = document.getElementById('draftVisualZoomOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'draftVisualZoomOverlay';
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-            overlay.innerHTML = '<div style="position:relative;width:min(1240px,96vw);height:min(900px,92vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
-            document.body.appendChild(overlay);
-            const close = () => {
-                overlay.style.display = 'none';
-                document.body.style.overflow = overlay.dataset.oldOverflow || '';
-            };
-            overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
-            document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
-            overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + 0.25); overlay._apply && overlay._apply(); });
-            overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(0.25, (overlay._zoom || 1) - 0.25); overlay._apply && overlay._apply(); });
-            overlay.querySelector('[data-z="reset"]').addEventListener('click', () => {
-                overlay._zoom = 1;
-                overlay._recalcFit && overlay._recalcFit();
-                overlay._apply && overlay._apply();
-                const vp = overlay.querySelector('[data-z="viewport"]');
-                vp.scrollLeft = 0; vp.scrollTop = 0;
-            });
-            overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => {
-                if (!e.ctrlKey) return;
-                e.preventDefault();
-                overlay._zoom = Math.max(0.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? 0.15 : -0.15)));
-                overlay._apply && overlay._apply();
-            }, { passive:false });
-            window.addEventListener('resize', () => {
-                if (overlay.style.display === 'none') return;
-                overlay._recalcFit && overlay._recalcFit();
-                overlay._apply && overlay._apply();
-            });
-        }
-    
-        const viewport = overlay.querySelector('[data-z="viewport"]');
-        const content = overlay.querySelector('[data-z="content"]');
-        content.innerHTML = '';
-    
-        overlay.dataset.oldOverflow = document.body.style.overflow || '';
-        document.body.style.overflow = 'hidden';
-        overlay.style.display = 'flex';
-    
-        const tag = visual.tagName ? visual.tagName.toLowerCase() : '';
-        let clone;
-        if (tag === 'canvas') {
-            clone = document.createElement('img');
-            try { clone.src = visual.toDataURL('image/png'); } catch (e) { return; }
-        } else if (tag === 'img') {
-            clone = document.createElement('img');
-            clone.src = visual.currentSrc || visual.src;
-            clone.alt = visual.alt || '';
-        } else {
-            clone = visual.cloneNode(true);
-        }
-        clone.removeAttribute && clone.removeAttribute('id');
-        clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:auto;';
-        if (tag === 'svg') clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        content.appendChild(clone);
-    
-        const getBaseSize = () => {
-            if (tag === 'img' || tag === 'canvas') {
-                const w = visual.naturalWidth || visual.width || visual.clientWidth || clone.naturalWidth || clone.width || clone.clientWidth || 800;
-                const h = visual.naturalHeight || visual.height || visual.clientHeight || clone.naturalHeight || clone.height || clone.clientHeight || 600;
-                return { width: w, height: h };
-            }
-            if (tag === 'svg') {
-                const vb = visual.getAttribute('viewBox');
-                if (vb) {
-                    const parts = vb.trim().split(/\s+/).map(Number);
-                    if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) return { width: parts[2], height: parts[3] };
-                }
-                return {
-                    width: parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800,
-                    height: parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600
-                };
-            }
-            const rect = visual.getBoundingClientRect();
-            return { width: rect.width || 800, height: rect.height || 600 };
-        };
-    
-        const init = () => {
-            const dims = getBaseSize();
-            overlay._baseWidth = Math.max(1, dims.width);
-            overlay._baseHeight = Math.max(1, dims.height);
-            overlay._zoom = 1;
-            overlay._recalcFit = () => {
-                const availW = Math.max(200, viewport.clientWidth - 16);
-                const availH = Math.max(160, viewport.clientHeight - 16);
-                overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
-                if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
-            };
-            overlay._apply = () => {
-                const zoom = overlay._zoom || 1;
-                const scale = (overlay._fitScale || 1) * zoom;
-                const w = Math.max(40, Math.round(overlay._baseWidth * scale));
-                const h = Math.max(40, Math.round(overlay._baseHeight * scale));
-                content.style.width = w + 'px';
-                content.style.height = h + 'px';
-                clone.style.width = w + 'px';
-                clone.style.height = h + 'px';
-                overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
-            };
-            overlay._recalcFit();
-            overlay._apply();
-            viewport.scrollLeft = 0;
-            viewport.scrollTop = 0;
-        };
-    
-        const runInit = () => requestAnimationFrame(() => requestAnimationFrame(init));
-        if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = runInit;
-        else runInit();
-    };
-
     window.CANVAS_LOGIC_SCRIPT = `
         window.mainCanvases = {};
-
-        window.openDraftVisualZoom = window.openDraftVisualZoom || function(sourceEl) {
-            if (!sourceEl) return;
-            const visual = sourceEl.matches && sourceEl.matches('svg,img,picture,canvas') ? sourceEl : sourceEl.querySelector('svg,img,picture,canvas');
-            if (!visual) return;
         
-            let overlay = document.getElementById('draftVisualZoomOverlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'draftVisualZoomOverlay';
-                overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;';
-                overlay.innerHTML = '<div style="position:relative;width:min(1240px,96vw);height:min(900px,92vh);background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;background:#eef6ff;border-bottom:1px solid #c9dff2;"><button type="button" data-z="out" title="Уменьшить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">−</button><button type="button" data-z="reset" title="Вписать в окно" style="font-size:16px;border:1px solid #90caf9;background:#fff;border-radius:8px;height:36px;cursor:pointer;">100%</button><button type="button" data-z="in" title="Увеличить" style="font-size:20px;border:1px solid #90caf9;background:#fff;border-radius:8px;min-width:38px;height:36px;cursor:pointer;">+</button><button type="button" data-z="close" title="Закрыть" style="margin-left:auto;font-size:24px;border:1px solid #ffcc80;background:#fff3e0;color:#e65100;border-radius:8px;width:38px;height:36px;cursor:pointer;">×</button></div><div data-z="viewport" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#fff;"><div data-z="content" style="display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:visible;"></div></div></div>';
-                document.body.appendChild(overlay);
-                const close = () => {
-                    overlay.style.display = 'none';
-                    document.body.style.overflow = overlay.dataset.oldOverflow || '';
-                };
-                overlay.addEventListener('click', e => { if (e.target === overlay || e.target.closest('[data-z="close"]')) close(); });
-                document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') close(); });
-                overlay.querySelector('[data-z="in"]').addEventListener('click', () => { overlay._zoom = Math.min(8, (overlay._zoom || 1) + 0.25); overlay._apply && overlay._apply(); });
-                overlay.querySelector('[data-z="out"]').addEventListener('click', () => { overlay._zoom = Math.max(0.25, (overlay._zoom || 1) - 0.25); overlay._apply && overlay._apply(); });
-                overlay.querySelector('[data-z="reset"]').addEventListener('click', () => {
-                    overlay._zoom = 1;
-                    overlay._recalcFit && overlay._recalcFit();
-                    overlay._apply && overlay._apply();
-                    const vp = overlay.querySelector('[data-z="viewport"]');
-                    vp.scrollLeft = 0; vp.scrollTop = 0;
-                });
-                overlay.querySelector('[data-z="viewport"]').addEventListener('wheel', e => {
-                    if (!e.ctrlKey) return;
-                    e.preventDefault();
-                    overlay._zoom = Math.max(0.25, Math.min(8, (overlay._zoom || 1) + (e.deltaY < 0 ? 0.15 : -0.15)));
-                    overlay._apply && overlay._apply();
-                }, { passive:false });
-                window.addEventListener('resize', () => {
-                    if (overlay.style.display === 'none') return;
-                    overlay._recalcFit && overlay._recalcFit();
-                    overlay._apply && overlay._apply();
-                });
-            }
-        
-            const viewport = overlay.querySelector('[data-z="viewport"]');
-            const content = overlay.querySelector('[data-z="content"]');
-            content.innerHTML = '';
-        
-            overlay.dataset.oldOverflow = document.body.style.overflow || '';
-            document.body.style.overflow = 'hidden';
-            overlay.style.display = 'flex';
-        
-            const tag = visual.tagName ? visual.tagName.toLowerCase() : '';
-            let clone;
-            if (tag === 'canvas') {
-                clone = document.createElement('img');
-                try { clone.src = visual.toDataURL('image/png'); } catch (e) { return; }
-            } else if (tag === 'img') {
-                clone = document.createElement('img');
-                clone.src = visual.currentSrc || visual.src;
-                clone.alt = visual.alt || '';
-            } else {
-                clone = visual.cloneNode(true);
-            }
-            clone.removeAttribute && clone.removeAttribute('id');
-            clone.style.cssText = 'display:block;max-width:none!important;max-height:none!important;width:auto!important;height:auto!important;margin:auto;image-rendering:auto;';
-            if (tag === 'svg') clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            content.appendChild(clone);
-        
-            const getBaseSize = () => {
-                if (tag === 'img' || tag === 'canvas') {
-                    const w = visual.naturalWidth || visual.width || visual.clientWidth || clone.naturalWidth || clone.width || clone.clientWidth || 800;
-                    const h = visual.naturalHeight || visual.height || visual.clientHeight || clone.naturalHeight || clone.height || clone.clientHeight || 600;
-                    return { width: w, height: h };
-                }
-                if (tag === 'svg') {
-                    const vb = visual.getAttribute('viewBox');
-                    if (vb) {
-                        const parts = vb.trim().split(/\s+/).map(Number);
-                        if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) return { width: parts[2], height: parts[3] };
-                    }
-                    return {
-                        width: parseFloat(visual.getAttribute('width')) || visual.clientWidth || 800,
-                        height: parseFloat(visual.getAttribute('height')) || visual.clientHeight || 600
-                    };
-                }
-                const rect = visual.getBoundingClientRect();
-                return { width: rect.width || 800, height: rect.height || 600 };
-            };
-        
-            const init = () => {
-                const dims = getBaseSize();
-                overlay._baseWidth = Math.max(1, dims.width);
-                overlay._baseHeight = Math.max(1, dims.height);
-                overlay._zoom = 1;
-                overlay._recalcFit = () => {
-                    const availW = Math.max(200, viewport.clientWidth - 16);
-                    const availH = Math.max(160, viewport.clientHeight - 16);
-                    overlay._fitScale = Math.min(availW / overlay._baseWidth, availH / overlay._baseHeight);
-                    if (!isFinite(overlay._fitScale) || overlay._fitScale <= 0) overlay._fitScale = 1;
-                };
-                overlay._apply = () => {
-                    const zoom = overlay._zoom || 1;
-                    const scale = (overlay._fitScale || 1) * zoom;
-                    const w = Math.max(40, Math.round(overlay._baseWidth * scale));
-                    const h = Math.max(40, Math.round(overlay._baseHeight * scale));
-                    content.style.width = w + 'px';
-                    content.style.height = h + 'px';
-                    clone.style.width = w + 'px';
-                    clone.style.height = h + 'px';
-                    overlay.querySelector('[data-z="reset"]').textContent = Math.round(zoom * 100) + '%';
-                };
-                overlay._recalcFit();
-                overlay._apply();
-                viewport.scrollLeft = 0;
-                viewport.scrollTop = 0;
-            };
-        
-            const runInit = () => requestAnimationFrame(() => requestAnimationFrame(init));
-            if (clone.tagName && clone.tagName.toLowerCase() === 'img' && !clone.complete) clone.onload = runInit;
-            else runInit();
-        };
         window.openTheoryModalLocal = function(dataId) {
             let el = document.getElementById(dataId);
             if(el) {
@@ -3906,15 +3432,117 @@ body.auth-locked > :not(#passwordGate){
             }
             if (opening) setTimeout(() => window.initMainCanvas(id), 50);
         };
+        window.toggleDraftZoom = function(id, forceClose, event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+
+            const existing = document.getElementById('draft-zoom-modal-global');
+            if (existing) {
+                existing.remove();
+                document.body.style.overflow = existing.dataset.previousBodyOverflow || '';
+                return;
+            }
+            if (forceClose === true) return;
+
+            const card = document.getElementById('draft-diagram-card-' + id);
+            if (!card || !card.innerHTML.trim()) return;
+
+            const previousBodyOverflow = document.body.style.overflow || '';
+            const overlay = document.createElement('div');
+            overlay.id = 'draft-zoom-modal-global';
+            overlay.dataset.previousBodyOverflow = previousBodyOverflow;
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.setAttribute('aria-label', 'Увеличенный чертёж');
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(7,18,31,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;';
+
+            const isPresentationZoom = String(id).indexOf('pres-') === 0;
+            const modal = document.createElement('div');
+            modal.style.cssText = isPresentationZoom
+                ? 'position:relative;width:min(78vw,1240px);height:76vh;background:#fff;border:3px solid #19b8b0;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;'
+                : 'position:relative;width:min(86vw,1420px);height:82vh;background:#fff;border:3px solid #19b8b0;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;';
+
+            const head = document.createElement('div');
+            head.style.cssText = 'flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#e9fbf9;border-bottom:1px solid #9adfd9;color:#073b4c;font:700 17px Arial,sans-serif;';
+            head.innerHTML = '<span style="font-size:23px;">🔍</span><span>Увеличенный чертёж</span><span style="margin-left:auto;font-size:13px;font-weight:500;color:#526273;">Нажмите на чертёж ещё раз, чтобы закрыть</span>';
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.innerHTML = '&times;';
+            closeButton.title = 'Закрыть';
+            closeButton.style.cssText = 'margin-left:6px;width:38px;height:38px;border:1px solid #ef7f1a;border-radius:10px;background:#fff;color:#d95f02;font:700 28px/30px Arial;cursor:pointer;';
+            head.appendChild(closeButton);
+
+            const viewport = document.createElement('div');
+            viewport.style.cssText = isPresentationZoom
+                ? 'flex:1 1 auto;min-height:0;overflow:hidden;background:#f4f8fb;padding:34px 52px;box-sizing:border-box;cursor:zoom-out;'
+                : 'flex:1 1 auto;min-height:0;overflow:hidden;background:#f4f8fb;padding:28px;box-sizing:border-box;cursor:zoom-out;';
+
+            const diagram = document.createElement('div');
+            const sourceMedia = card.querySelector('img,svg,picture,canvas');
+            if (sourceMedia) {
+                diagram.appendChild(sourceMedia.cloneNode(true));
+            } else {
+                diagram.innerHTML = card.innerHTML;
+            }
+            diagram.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box;';
+
+            diagram.querySelectorAll('img,svg,picture,canvas').forEach(function(media) {
+                media.style.setProperty('display', 'block', 'important');
+                media.style.setProperty('width', 'auto', 'important');
+                media.style.setProperty('height', 'auto', 'important');
+                media.style.setProperty('min-width', '0', 'important');
+                media.style.setProperty('min-height', '0', 'important');
+                media.style.setProperty('max-width', '100%', 'important');
+                media.style.setProperty('max-height', '100%', 'important');
+                media.style.setProperty('margin', 'auto', 'important');
+                media.style.setProperty('object-fit', 'contain', 'important');
+                media.style.setProperty('cursor', 'zoom-out', 'important');
+                media.style.setProperty('box-sizing', 'border-box', 'important');
+            });
+
+            viewport.appendChild(diagram);
+            modal.appendChild(head);
+            modal.appendChild(viewport);
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+
+            const closeZoom = function() {
+                const current = document.getElementById('draft-zoom-modal-global');
+                if (current) {
+                    const oldOverflow = current.dataset.previousBodyOverflow || '';
+                    current.remove();
+                    document.body.style.overflow = oldOverflow;
+                }
+                document.removeEventListener('keydown', onKeyDown);
+            };
+            const onKeyDown = function(keyEvent) {
+                if (keyEvent.key === 'Escape') closeZoom();
+            };
+
+            closeButton.addEventListener('click', function(clickEvent) {
+                clickEvent.preventDefault();
+                clickEvent.stopPropagation();
+                closeZoom();
+            });
+            overlay.addEventListener('click', function(clickEvent) {
+                if (clickEvent.target === overlay) closeZoom();
+            });
+            diagram.addEventListener('click', function(clickEvent) {
+                clickEvent.preventDefault();
+                clickEvent.stopPropagation();
+                closeZoom();
+            });
+            document.addEventListener('keydown', onKeyDown);
+
+        };
         window.initMainCanvas = function(id) {
+            if (window.mainCanvases[id]) return;
             let canvas = document.getElementById('canvas-' + id); 
             if(!canvas) return;
-            if (window.mainCanvases[id] && window.mainCanvases[id].canvas === canvas) return;
-            if (window.mainCanvases[id] && window.mainCanvases[id].canvas !== canvas) delete window.mainCanvases[id];
             let ctx = canvas.getContext('2d');
-            const canvasRect = canvas.getBoundingClientRect();
-            canvas.width = Math.max(1, Math.round(canvasRect.width || canvas.clientWidth || canvas.parentElement.clientWidth || 750));
-            canvas.height = Math.max(1, Math.round(canvasRect.height || canvas.clientHeight || canvas.parentElement.clientHeight || 250)); 
+            canvas.width = canvas.parentElement.clientWidth || 750; 
+            canvas.height = canvas.parentElement.clientHeight || 250; 
             ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             
             let objects = []; let currentObj = null; let draggingObj = null; let action = null; 
@@ -3929,7 +3557,7 @@ body.auth-locked > :not(#passwordGate){
 
             function getRawBounds(obj) {
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
+                if (obj.tool === 'pen' || obj.tool === 'eraser') {
                     if(!obj.points || obj.points.length === 0) return {minX:0, minY:0, maxX:0, maxY:0};
                     obj.points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
                 } else {
@@ -3939,16 +3567,14 @@ body.auth-locked > :not(#passwordGate){
                     else if (obj.tool === 'triangle') { minX = Math.min(sx, ex, sx + dx/2); maxX = Math.max(sx, ex, sx + dx/2); minY = Math.min(sy, ey); maxY = Math.max(sy, ey); }
                     else if (obj.tool === 'cylinder' || obj.tool === 'cone') { minX = sx - rx; maxX = sx + rx; let h = ry * 0.2; minY = Math.min(sy - h, ey - h); maxY = Math.max(sy + h, ey + h); }
                 }
-                let pad = obj.tool === 'highlighter' ? Math.max(12, (parseFloat(obj.size) || 3) * 4) / 2 : (parseFloat(obj.size) || 3); return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+                let pad = parseFloat(obj.size) || 3; return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
             }
             
             function drawObj(ctx, obj, isSelected) {
                 ctx.save(); let cx = obj.cx || 0; let cy = obj.cy || 0; let s = obj.scale || 1;
                 ctx.translate((obj.x || 0) + cx, (obj.y || 0) + cy); ctx.rotate(obj.angle || 0); ctx.scale(s, s); ctx.translate(-cx, -cy);
                 ctx.strokeStyle = obj.color; ctx.lineWidth = obj.size;
-                ctx.globalAlpha = obj.tool === 'highlighter' ? 0.28 : 1;
-                if (obj.tool === 'highlighter') ctx.lineWidth = Math.max(12, (parseFloat(obj.size) || 3) * 4);
-                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
+                if (obj.tool === 'pen' || obj.tool === 'eraser') {
                     ctx.globalCompositeOperation = obj.tool === 'eraser' ? 'destination-out' : 'source-over';
                     if(obj.tool === 'eraser') ctx.lineWidth = obj.size * 3;
                     ctx.beginPath();
@@ -3976,8 +3602,6 @@ body.auth-locked > :not(#passwordGate){
                     else if (obj.tool === 'cone') { let w = rx, h = ry * 0.2; if(w>0 && h>0){ctx.moveTo(sx, sy); ctx.lineTo(sx - w, ey); ctx.moveTo(sx, sy); ctx.lineTo(sx + w, ey); ctx.stroke(); ctx.beginPath(); ctx.ellipse(sx, ey, w, h, 0, 0, Math.PI); ctx.stroke(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.ellipse(sx, ey, w, h, 0, Math.PI, 2*Math.PI); ctx.stroke(); ctx.setLineDash([]);} }
                     else if (obj.tool === 'sphere') { ctx.arc(sx, sy, r, 0, 2 * Math.PI); ctx.stroke(); if(r>0){ctx.beginPath(); ctx.ellipse(sx, sy, r, r*0.3, 0, 0, Math.PI); ctx.stroke(); ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.ellipse(sx, sy, r, r*0.3, 0, Math.PI, 2*Math.PI); ctx.stroke(); ctx.setLineDash([]);} }
                 }
-                ctx.globalAlpha = 1;
-                ctx.globalCompositeOperation = 'source-over';
                 if (isSelected) {
                     let b = getRawBounds(obj); ctx.strokeStyle = 'rgba(255, 140, 0, 0.7)'; ctx.lineWidth = 1.5 / s; ctx.setLineDash([5 / s, 5 / s]); ctx.strokeRect(b.minX - 5, b.minY - 5, b.maxX - b.minX + 10, b.maxY - b.minY + 10); ctx.setLineDash([]);
                     let rotHX = (b.minX + b.maxX)/2; let rotHY = b.minY - 25; ctx.beginPath(); ctx.moveTo(rotHX, b.minY - 5); ctx.lineTo(rotHX, rotHY); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(rotHX, rotHY, 5 / s, 0, Math.PI*2); ctx.fill(); ctx.stroke();
@@ -3994,14 +3618,14 @@ body.auth-locked > :not(#passwordGate){
                 isDrawing = true; let p = getPos(e); 
                 let tool = document.getElementById('tool-' + id).value; let color = document.getElementById('color-' + id).value; let size = document.getElementById('size-' + id).value;
                 if (tool === 'zoom') {
-                    isDrawing = false;
                     const card = document.getElementById('draft-diagram-card-' + id);
-                    const visual = card && card.querySelector('svg,img,picture,canvas');
-                    if (visual) {
-                        const point = (e.touches && e.touches[0]) ? e.touches[0] : e;
-                        const r = visual.getBoundingClientRect();
-                        if (point.clientX >= r.left && point.clientX <= r.right && point.clientY >= r.top && point.clientY <= r.bottom) window.openDraftVisualZoom(visual);
+                    let clientX = e.clientX, clientY = e.clientY;
+                    if (e.touches && e.touches.length) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                    if (card) {
+                        const r = card.getBoundingClientRect();
+                        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) window.toggleDraftZoom(id, false, e);
                     }
+                    isDrawing = false;
                     if (e.cancelable) e.preventDefault();
                     return;
                 }
@@ -4015,7 +3639,7 @@ body.auth-locked > :not(#passwordGate){
                     }
                     if (!hitHandle) { draggingObj = null; action = null; for (let i = objects.length - 1; i >= 0; i--) { if (objects[i].tool === 'eraser') continue; let lp = getLocalPos(p, objects[i]); let b = getRawBounds(objects[i]); if (lp.x >= b.minX && lp.x <= b.maxX && lp.y >= b.minY && lp.y <= b.maxY) { draggingObj = objects[i]; action = 'move'; dragStartX = p.x; dragStartY = p.y; break; } } }
                     renderAll();
-                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'highlighter' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
+                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
                 if (e.cancelable) e.preventDefault();
             }
 
@@ -4026,7 +3650,7 @@ body.auth-locked > :not(#passwordGate){
                     else if (action === 'scale') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentDist = Math.hypot(p.x - tx, p.y - ty); draggingObj.scale = Math.max(0.1, initialScale * (currentDist / dragStartDist)); }
                     else if (action === 'rotate') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentAngle = Math.atan2(p.y - ty, p.x - tx); draggingObj.angle = initialAngle + (currentAngle - dragStartAngle); }
                     renderAll();
-                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'highlighter' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
+                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
             }
 
             function stopDraw() { if(!isDrawing) return; isDrawing = false; let changed = false; if (currentObj) { let b = getRawBounds(currentObj); currentObj.cx = (b.minX + b.maxX) / 2; currentObj.cy = (b.minY + b.maxY) / 2; objects.push(currentObj); currentObj = null; changed = true; } else if (draggingObj && action) { changed = true; } action = null; if (changed) saveHistory(); renderAll(); }
@@ -4042,7 +3666,7 @@ body.auth-locked > :not(#passwordGate){
         window.redoCanvas = function(id) { if (window.mainCanvases[id] && window.mainCanvases[id].redo) window.mainCanvases[id].redo(); };
         window.setTool = function(id, tool) {
             let t = document.getElementById('tool-' + id); if(t) t.value = tool; 
-            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
+            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
             let canvas = document.getElementById('canvas-' + id);
             if(canvas) {
                 if (tool === 'eraser') { canvas.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>🧽</text></svg>') 0 20, auto"; } 

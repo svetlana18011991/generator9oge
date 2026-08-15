@@ -127,6 +127,16 @@
         ]
     };
 
+    // Совместимость с генераторами, которые умеют отдельный блок «Дополнительно».
     window.extraDatabase[7] = task7Extra;
     window.extraDatabase['task7'] = task7Extra;
+
+    // Текущий ОГЭ-index отображает базы из window.database.
+    // Поэтому дополнительные прототипы задания 7 регистрируем отдельной строкой
+    // сразу после основного задания 7.
+    window.database = window.database || {};
+    window.database['task7extra'] = {
+        ...task7Extra,
+        title: 'Задание 7. Дополнительно'
+    };
 })();
