@@ -15,6 +15,7 @@
     <script src="apartment_practice.js?v=38"></script>
     <script src="tires_practice.js?v=53"></script>
     <script src="task6.js"></script>
+    <script src="task6_extra.js?v=20260816-1"></script>
     <script src="task7.js?v=20260816-1"></script>
     <script src="task7_extra.js?v=20260816-1"></script>
    <script src="task8.js"></script>
@@ -210,6 +211,25 @@
         .btn-settings { background: #333; color: #aaa; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 15px; font-size: 0.85em; transition: 0.2s; }
         .btn-settings:hover { background: #444; color: #fff; }
         .proto-list { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #555; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9em; }
+
+        /* Дополнительные прототипы внутри строки задания — как в генераторе ЕГЭ */
+        .extra-task-panel {
+            margin-top: 12px;
+            padding: 12px 0 0 0;
+            border-top: 1px dashed rgba(20, 184, 166, 0.42);
+        }
+        .extra-task-panel .row-header { margin-bottom: 0; gap: 12px; }
+        .extra-task-panel .row-header label {
+            font-size: 1.02em; font-weight: 700; flex-wrap: wrap; gap: 10px; min-width: 0;
+        }
+        .extra-task-title { color: #5EEAD4; font-weight: 800; white-space: nowrap; }
+        .extra-task-panel .btn-settings { margin-left: 0; padding: 6px 10px; font-size: 0.82em; }
+        .extra-task-panel .count-stepper input[type="number"] { width: 58px; }
+        .extra-task-note { display: none; }
+        @media (max-width: 760px) {
+            .extra-task-panel .row-header { align-items: flex-start; }
+            .extra-task-title { white-space: normal; }
+        }
         .proto-item { display: flex; align-items: flex-start; gap: 8px; color: #bbb; cursor: pointer; }
         .proto-item input { margin-top: 3px; cursor: pointer; }
         .proto-select-all { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; color: #ff8c00; font-weight: bold; background: rgba(255,140,0,0.08); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 4px; cursor: pointer; }
@@ -2694,6 +2714,61 @@ body.auth-locked > :not(#passwordGate){
         return { trainerTasks, scenarioTasks };
     }
 
+
+
+    // ===== Дополнительные прототипы: единый механизм как в ЕГЭ =====
+    function getExtraTaskData(tid) {
+        const extraDb = window.extraDatabase || window.additionalDatabase || {};
+        const numericId = parseInt(String(tid).replace(/\D/g, ''), 10);
+        return extraDb[tid] || extraDb[`task${numericId}`] || extraDb[numericId] || null;
+    }
+
+    function getPrototypeData(tid, kind = 'main') {
+        return (kind === 'extra') ? getExtraTaskData(tid) : window.database[tid];
+    }
+
+    function getPrototypePanelId(tid, kind = 'main') {
+        return (kind === 'extra') ? `protos-extra-${tid}` : `protos-${tid}`;
+    }
+
+    function getPrototypeCheckboxId(tid, idx, kind = 'main') {
+        return (kind === 'extra') ? `proto-extra-${tid}-${idx}` : `proto-${tid}-${idx}`;
+    }
+
+    function getPrototypeMasterId(tid, kind = 'main') {
+        return (kind === 'extra') ? `proto-all-extra-${tid}` : `proto-all-${tid}`;
+    }
+
+    function getPrototypeDisplayLabel(p, idx, kind = 'main') {
+        const candidates = p ? [p.short_desc, p.label, p.desc, p.title, p.name] : [];
+        let label = String(candidates.find(value => String(value || '').trim()) || '').trim();
+        if (kind === 'extra') {
+            label = label
+                .replace(/^(?:Прототип|Тип)\s*№?\s*\d+\s*[.:;\-–—)]*\s*/i, '')
+                .replace(/^6\.Д\d+\.\s*/i, '')
+                .trim();
+        }
+        return label || `Тема ${idx + 1}`;
+    }
+
+    function buildPrototypeListHTML(tid, data, kind = 'main') {
+        if (!data || !Array.isArray(data.prototypes)) return '';
+        const kindArg = (kind === 'extra') ? `, 'extra'` : '';
+        let listHTML = `
+                <label class="proto-select-all" title="Выбрать или снять все прототипы этого блока">
+                    <input type="checkbox" id="${getPrototypeMasterId(tid, kind)}" checked onchange="toggleAllProtos('${tid}', this.checked${kindArg})">
+                    <span>Выбрать все / снять все</span>
+                </label>`;
+        data.prototypes.forEach((p, idx) => {
+            listHTML += `
+                <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event${kindArg})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+                    <input type="checkbox" id="${getPrototypeCheckboxId(tid, idx, kind)}" checked onchange="syncProtoMaster('${tid}'${kindArg})">
+                    <span class="proto-label-text">${idx + 1}. ${getPrototypeDisplayLabel(p, idx, kind)} 👁️</span>
+                </label>`;
+        });
+        return listHTML;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('dynamic-tasks');
         const hasRegularDatabase = window.database && Object.keys(window.database).length > 0;
@@ -2710,19 +2785,28 @@ body.auth-locked > :not(#passwordGate){
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
-            let listHTML = `
-                <label class="proto-select-all" title="Выбрать или снять все прототипы этого задания">
-                    <input type="checkbox" id="proto-all-${tid}" checked onchange="toggleAllProtos('${tid}', this.checked)">
-                    <span>Выбрать все / снять все</span>
-                </label>`;
+            const listHTML = buildPrototypeListHTML(tid, data, 'main');
+            const extraData = getExtraTaskData(tid);
+            let extraHTML = '';
 
-            data.prototypes.forEach((p, idx) => {
-                listHTML += `
-                <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event)" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
-                    <input type="checkbox" id="proto-${tid}-${idx}" checked onchange="syncProtoMaster('${tid}')">
-                    <span class="proto-label-text">${idx + 1}. ${p.desc} 👁️</span>
-                </label>`;
-            });
+            if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
+                const extraListHTML = buildPrototypeListHTML(tid, extraData, 'extra');
+                extraHTML = `
+                <div class="extra-task-panel">
+                    <div class="row-header">
+                        <label onclick="toggleSettings('${tid}', 'extra')">
+                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
+                            <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
+                        </label>
+                        <div class="count-stepper" onclick="event.stopPropagation();">
+                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', -1, event)" title="Уменьшить количество">−</button>
+                            <input type="number" id="count-extra-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
+                            <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', 1, event)" title="Увеличить количество">+</button>
+                        </div>
+                    </div>
+                    <div id="protos-extra-${tid}" class="proto-list">${extraListHTML}</div>
+                </div>`;
+            }
 
             container.innerHTML += `
             <div class="task-row">
@@ -2738,6 +2822,7 @@ body.auth-locked > :not(#passwordGate){
                     </div>
                 </div>
                 <div id="protos-${tid}" class="proto-list">${listHTML}</div>
+                ${extraHTML}
             </div>`;
         }
 
@@ -2807,36 +2892,27 @@ body.auth-locked > :not(#passwordGate){
         if(currentInteractiveHTML) renderPreview();
     }
 
-    function toggleSettings(tid) {
-        let el = document.getElementById(`protos-${tid}`);
+    function toggleSettings(tid, kind = 'main') {
+        let el = document.getElementById(getPrototypePanelId(tid, kind));
         if (el) el.style.display = (el.style.display === 'grid') ? 'none' : 'grid';
     }
 
-    function toggleAllProtos(tid, checked) {
-        const data = window.database[tid];
+    function toggleAllProtos(tid, checked, kind = 'main') {
+        const data = getPrototypeData(tid, kind);
         if (!data || !data.prototypes) return;
-
         data.prototypes.forEach((p, idx) => {
-            const cb = document.getElementById(`proto-${tid}-${idx}`);
+            const cb = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
             if (cb) cb.checked = checked;
         });
-
-        const master = document.getElementById(`proto-all-${tid}`);
-        if (master) {
-            master.checked = checked;
-            master.indeterminate = false;
-        }
+        const master = document.getElementById(getPrototypeMasterId(tid, kind));
+        if (master) { master.checked = checked; master.indeterminate = false; }
     }
 
-    function syncProtoMaster(tid) {
-        const data = window.database[tid];
-        const master = document.getElementById(`proto-all-${tid}`);
+    function syncProtoMaster(tid, kind = 'main') {
+        const data = getPrototypeData(tid, kind);
+        const master = document.getElementById(getPrototypeMasterId(tid, kind));
         if (!data || !data.prototypes || !master) return;
-
-        const boxes = data.prototypes
-            .map((p, idx) => document.getElementById(`proto-${tid}-${idx}`))
-            .filter(Boolean);
-
+        const boxes = data.prototypes.map((p, idx) => document.getElementById(getPrototypeCheckboxId(tid, idx, kind))).filter(Boolean);
         const checkedCount = boxes.filter(cb => cb.checked).length;
         master.checked = checkedCount === boxes.length;
         master.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
@@ -2949,9 +3025,12 @@ body.auth-locked > :not(#passwordGate){
 
 
     const tooltip = document.getElementById('proto-tooltip');
-    function showTooltip(tid, index, e) {
-        let p = window.database[tid].prototypes[index];
-        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${p.tasks[0].text}</div>`;
+    function showTooltip(tid, index, e, kind = 'main') {
+        let data = getPrototypeData(tid, kind);
+        if (!data || !data.prototypes || !data.prototypes[index]) return;
+        let p = data.prototypes[index];
+        const firstTaskText = p.tasks && p.tasks[0] ? p.tasks[0].text : (p.theory_task || '');
+        tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${firstTaskText}</div>`;
         if (window.autoFixSVGArrows) window.autoFixSVGArrows(tooltip);
         tooltip.style.display = 'block';
         if (window.MathJax) MathJax.typesetPromise([tooltip]);
@@ -3072,47 +3151,59 @@ body.auth-locked > :not(#passwordGate){
         const practiceGroups = buildOgePracticeTasks(infoBoard, orderedTasks);
         const trainerTasks = practiceGroups.trainerTasks || [];
         const scenarioTasks = practiceGroups.scenarioTasks || [];
-        // Единственное специальное правило для заданий 1–5:
-        // они всегда стоят раньше заданий 6+ и всегда упорядочены.
-        // Все остальные пользовательские настройки применяются без изменений.
-        // Тренажёр сохраняет порядок каталога, а каждый сюжетный комплект — порядок №1, №2, №3, №4, №5.
-        const practiceTaskIds = [];
-        if (trainerTasks.length > 0) practiceTaskIds.push('__oge_trainer__');
-        if (scenarioTasks.length > 0) practiceTaskIds.push('__oge_scenarios__');
-        let sortedTaskIds = [...practiceTaskIds, ...getUniqueTaskIds()];
 
-        for (let tid of sortedTaskIds) {
-            const isTrainerBlock = tid === '__oge_trainer__';
-            const isScenarioBlock = tid === '__oge_scenarios__';
-            const isPracticeBlock = isTrainerBlock || isScenarioBlock;
-            const selectedScenarioThemeTitles = getOgeScenarioThemeIds()
-                .filter(themeId => {
-                    const checkbox = document.getElementById(`practice-scenario-theme-${themeId}`);
-                    return checkbox && checkbox.checked;
-                })
-                .map(themeId => window.ogePracticeDatabase?.[themeId]?.title)
-                .filter(Boolean);
-            const scenarioBlockTitle = selectedScenarioThemeTitles.length === 1
-                ? `Задания 1–5. ${selectedScenarioThemeTitles[0]}`
-                : 'Задания 1–5. Комплекты по сюжетам';
-            const blockData = isTrainerBlock
-                ? { title: 'Задания 1–5. Тренажёры по прототипам' }
-                : (isScenarioBlock
-                    ? { title: scenarioBlockTitle }
-                    : window.database[tid]);
+        const selectedScenarioThemeTitles = getOgeScenarioThemeIds()
+            .filter(themeId => {
+                const checkbox = document.getElementById(`practice-scenario-theme-${themeId}`);
+                return checkbox && checkbox.checked;
+            })
+            .map(themeId => window.ogePracticeDatabase?.[themeId]?.title)
+            .filter(Boolean);
+        const scenarioBlockTitle = selectedScenarioThemeTitles.length === 1
+            ? `Задания 1–5. ${selectedScenarioThemeTitles[0]}`
+            : 'Задания 1–5. Комплекты по сюжетам';
+
+        // Сначала связанные задания ОГЭ 1–5, затем основные и дополнительные блоки 6+.
+        const generationBlocks = [];
+        if (trainerTasks.length > 0) {
+            generationBlocks.push({ tid: '__oge_trainer__', kind: 'practice', data: { title: 'Задания 1–5. Тренажёры по прототипам' }, tasks: trainerTasks });
+        }
+        if (scenarioTasks.length > 0) {
+            generationBlocks.push({ tid: '__oge_scenarios__', kind: 'practice', data: { title: scenarioBlockTitle }, tasks: scenarioTasks });
+        }
+
+        getUniqueTaskIds().forEach(tid => {
+            const mainCountInput = document.getElementById(`count-${tid}`);
+            const mainCount = mainCountInput ? (parseInt(mainCountInput.value, 10) || 0) : 0;
+            if (mainCount > 0 && window.database[tid]) {
+                generationBlocks.push({ tid, kind: 'main', data: window.database[tid], requiredCount: mainCount });
+            }
+
+            const extraData = getExtraTaskData(tid);
+            const extraCountInput = document.getElementById(`count-extra-${tid}`);
+            const extraCount = extraCountInput ? (parseInt(extraCountInput.value, 10) || 0) : 0;
+            if (extraData && extraCount > 0) {
+                generationBlocks.push({ tid, kind: 'extra', data: extraData, requiredCount: extraCount });
+            }
+        });
+
+        for (const block of generationBlocks) {
+            let tid = block.tid;
+            const kind = block.kind || 'main';
+            const isPracticeBlock = kind === 'practice';
+            const sourceData = block.data;
+            const blockData = (kind === 'extra') ? { ...sourceData, title: 'Дополнительно' } : sourceData;
             let finalTasks = [];
 
             if (isPracticeBlock) {
-                finalTasks = isTrainerBlock ? trainerTasks : scenarioTasks;
+                finalTasks = block.tasks || [];
                 window.selectedBlockTitles.push(blockData.title);
             } else {
-                const countInput = document.getElementById(`count-${tid}`);
-                if (!countInput) continue;
-                const requiredCount = parseInt(countInput.value, 10) || 0;
-                if (requiredCount <= 0) continue;
+                const requiredCount = block.requiredCount || 0;
+                if (requiredCount <= 0 || !sourceData || !Array.isArray(sourceData.prototypes)) continue;
 
-                const selectedProtos = blockData.prototypes.filter((p, idx) => {
-                    const checkbox = document.getElementById(`proto-${tid}-${idx}`);
+                const selectedProtos = sourceData.prototypes.filter((p, idx) => {
+                    const checkbox = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
                     return checkbox && checkbox.checked;
                 });
                 if (selectedProtos.length === 0) continue;
@@ -3147,14 +3238,12 @@ body.auth-locked > :not(#passwordGate){
                     })).filter(pool => pool.tasks.length > 0);
 
                     if (!orderedTasks) pools = shuffleArray(pools);
-
                     const maxTasksInProto = Math.max(...pools.map(pool => pool.tasks.length));
                     const roundTasks = [];
 
                     for (let layerIndex = 0; layerIndex < maxTasksInProto; layerIndex++) {
                         let layerPools = pools.filter(pool => pool.tasks[layerIndex]);
                         if (!orderedTasks) layerPools = shuffleArray(layerPools);
-
                         layerPools.forEach(pool => {
                             const task = pool.tasks[layerIndex];
                             roundTasks.push({
@@ -3169,7 +3258,6 @@ body.auth-locked > :not(#passwordGate){
 
                 const oneFullRound = buildPrototypeRound();
                 if (oneFullRound.length === 0) continue;
-
                 while (finalTasks.length < actualCount) {
                     const cycleTasks = orderedTasks ? [...oneFullRound] : buildPrototypeRound();
                     const needNow = actualCount - finalTasks.length;
