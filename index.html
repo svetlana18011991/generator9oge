@@ -1328,6 +1328,13 @@ body.auth-locked > :not(#passwordGate){
 }
 </style>
 
+
+<style id="task7-stacked-layout-style">
+@media (max-width: 720px) {
+  .task7-interactive-diagram { width:100% !important; min-width:0 !important; max-width:100% !important; }
+  .task7-choices { grid-template-columns:1fr !important; }
+}
+</style>
 </head>
 <body class="auth-locked">
 
@@ -3315,7 +3322,7 @@ body.auth-locked > :not(#passwordGate){
                         <h3>Разбор аналогичного задания</h3>
                         <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
                             <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
+                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
                             <p style='margin-top: 20px;'><b>Решение:</b></p>
                             <div>${item.theory.theory_sol}</div>
                         </div>
@@ -3325,7 +3332,7 @@ body.auth-locked > :not(#passwordGate){
                         item.theory.tasks.forEach(t => {
                             let tSvgCode = t.svg_code || "";
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
-                            let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px;">${tSvgCode}</div>` : '';
+                            let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px; background:transparent; border-radius:8px; padding:0; display:inline-block;">${tSvgCode}</div>` : '';
                             theoryHtml += `<li style='margin-bottom:15px;'>${t.text}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
                         });
                         theoryHtml += `</ul>`;
@@ -3377,19 +3384,16 @@ body.auth-locked > :not(#passwordGate){
                 let helpBtn = includeExplanations && item.theory ? `<button id="btn-help-${taskCounter}" class="btn-settings btn-help" style="display:none; background: #e3f2fd; color: #003399; border: 1px solid #003399; font-weight: bold; padding: 10px 15px;" onclick="window.openTheoryModalLocal('theory-data-${taskCounter}')">РАЗБОР</button><div id="theory-data-${taskCounter}" style="display:none;">${encodeURIComponent(theoryHtml)}</div>` : "";
 
                 const draftDiagramTaskNum = parseInt(String(tid).replace(/\D/g, '')) || 0;
-                const needsDraftDiagram = Boolean(item.forceDraftDiagram) || [1, 2, 3, 8, 11].includes(draftDiagramTaskNum);
-                let draftDiagramSource = "";
-                if (needsDraftDiagram) {
-                    draftDiagramSource = item.draftSvg || standaloneSvg || mainSvg || "";
-                    if (draftDiagramSource) { let tmpDraft = document.createElement('div'); tmpDraft.innerHTML = draftDiagramSource; window.autoFixSVGArrows(tmpDraft); draftDiagramSource = tmpDraft.innerHTML; }
-                    if (!draftDiagramSource && standaloneText) {
-                        let tmpDiagram = document.createElement('div');
-                        tmpDiagram.innerHTML = standaloneText;
-                        window.autoFixSVGArrows(tmpDiagram);
-                        let foundDiagram = tmpDiagram.querySelector('svg, img, picture, canvas');
-                        if (foundDiagram) draftDiagramSource = foundDiagram.outerHTML;
-                    }
+                let draftDiagramSource = item.draftSvg || standaloneSvg || mainSvg || "";
+                if (draftDiagramSource) { let tmpDraft = document.createElement('div'); tmpDraft.innerHTML = draftDiagramSource; window.autoFixSVGArrows(tmpDraft); draftDiagramSource = tmpDraft.innerHTML; }
+                if (!draftDiagramSource && standaloneText) {
+                    let tmpDiagram = document.createElement('div');
+                    tmpDiagram.innerHTML = standaloneText;
+                    window.autoFixSVGArrows(tmpDiagram);
+                    let foundDiagram = tmpDiagram.querySelector('svg, img, picture, canvas');
+                    if (foundDiagram) draftDiagramSource = foundDiagram.outerHTML;
                 }
+                const needsDraftDiagram = Boolean(item.forceDraftDiagram) || Boolean(draftDiagramSource) || [1, 2, 3, 8, 11].includes(draftDiagramTaskNum);
                 const isTropinkiDraft = /(?:Тропинк|Tropinka|План сюжета[^<]{0,80}Тропинки)/i.test(String(draftDiagramSource || '') + ' ' + String(item.text || '') + ' ' + String(item.typeTitle || ''));
                 const draftDiagramWidth = isTropinkiDraft ? 'min(42%, 350px)' : 'min(62%, 620px)';
                 let draftDiagramHTML = (needsDraftDiagram && draftDiagramSource) ? `<style>
@@ -3400,11 +3404,11 @@ body.auth-locked > :not(#passwordGate){
                         width:${draftDiagramWidth};
                         max-width:calc(100% - 24px);
                         height:auto;
-                        background:#fff;
-                        border:1px solid #d7d7d7;
-                        border-radius:8px;
-                        box-shadow:0 2px 8px rgba(0,0,0,0.08);
-                        padding:10px;
+                        background:transparent;
+                        border:none;
+                        border-radius:0;
+                        box-shadow:none;
+                        padding:0;
                         box-sizing:border-box;
                         display:block;
                         overflow:visible;
@@ -3429,7 +3433,7 @@ body.auth-locked > :not(#passwordGate){
                         inset:0;
                         overflow:auto;
                         z-index:6;
-                        background:rgba(255,255,255,.98);
+                        background:rgba(255,255,255,.15);
                         padding:18px;
                         box-sizing:border-box;
                         cursor:zoom-out;
@@ -3475,7 +3479,31 @@ body.auth-locked > :not(#passwordGate){
                     <div style="position:relative; background-color: #fff; background-size: 20px 20px; background-image: linear-gradient(to right, #d2e3f2 1px, transparent 1px), linear-gradient(to bottom, #d2e3f2 1px, transparent 1px); border: 2px solid #bbdefb; border-radius: 8px; overflow: hidden; height: 390px;">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action: none; cursor: crosshair;"></canvas></div>
                 </div>`;
 
-                currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content: space-between;"><div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size: 1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; ${String(tid) === 'task7' ? 'width:300px; min-width:300px; max-width:300px;' : 'min-width:150px; max-width:350px;'}">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding: 10px 15px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; font-weight: bold; width: 150px; outline: none; transition: 0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
+                let interactiveTaskCore = '';
+                if (String(tid) === 'task7' && mainSvg) {
+                    // Для задания 7: условие на всю ширину -> рисунок -> варианты ответов.
+                    const task7Tmp = document.createElement('div');
+                    task7Tmp.innerHTML = renderText || '';
+                    const task7ChoicesEl = task7Tmp.querySelector('.task7-choices');
+                    if (task7ChoicesEl) {
+                        const task7ChoicesHTML = task7ChoicesEl.outerHTML;
+                        task7ChoicesEl.remove();
+                        const task7StatementHTML = task7Tmp.innerHTML;
+                        interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;">
+                            <div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>
+                            <div style="flex-grow:1; min-width:0;">
+                                <div style="width:100%;">${task7StatementHTML}</div>
+                                <div class="task7-interactive-diagram" style="width:min(72%,620px); min-width:360px; max-width:620px; margin:14px auto 8px;">${mainSvg}</div>
+                                <div style="width:100%;">${task7ChoicesHTML}</div>
+                                <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div>
+                            </div>
+                        </div>`;
+                    }
+                }
+                if (!interactiveTaskCore) {
+                    interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width:350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>`;
+                }
+                currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content:space-between;">${interactiveTaskCore}${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
                 
                 if (item.printLayout === 'image-grid') {
                     const gridHeight = item.printGridHeight || 105;
@@ -3833,6 +3861,8 @@ body.auth-locked > :not(#passwordGate){
         .timer-box { position: sticky; top: 20px; float: right; background: #fff; border: 2px solid #ff8c00; color: #ff8c00; padding: 10px 20px; border-radius: 8px; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-box { background: #fff; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; border-radius: 12px; border: 2px solid #ff8c00; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 30px; position: relative; text-align: left; font-size: 18px;}
+        #modal-content-box img, #modal-content-box svg { display:block; max-width:100%; height:auto; }
+        #modal-content-box .diagram-wrap, #modal-content-box .task7-diagram, #modal-content-box .numberline-diagram { background: transparent !important; }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 32px; line-height: 1; cursor: pointer; color: #888; transition: 0.2s; }
         .close-btn:hover { color: #ff8c00; }
         .btn-settings { background: #333; color: #aaa; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; transition: 0.2s; }
