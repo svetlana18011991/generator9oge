@@ -1341,7 +1341,7 @@ body.auth-locked > :not(#passwordGate){
 .task7-vertical-task .task7-interactive-diagram svg { display:block !important; width:100% !important; max-width:100% !important; height:auto !important; margin:0 auto !important; }
 .task7-vertical-task .task7-choices { width:100% !important; box-sizing:border-box; }
 @media (max-width:720px){
-  .task7-vertical-task .task7-interactive-diagram{width:100% !important; min-width:0 !important;}
+  .task7-vertical-task .task7-interactive-diagram{width:min(88%,380px) !important; min-width:0 !important;}
   .task7-vertical-task .task7-choices{grid-template-columns:1fr !important;}
 }
 </style>
@@ -1476,7 +1476,7 @@ body.auth-locked > :not(#passwordGate){
         
         <a href="https://t.me/interactiv_matematika" target="_blank" class="social-btn">Telegram</a>
         <a href="https://vk.com/interaktiv_matematika" target="_blank" class="social-btn">ВКонтакте</a>
-        <a href="https://max.ru/c/-70932227200385/AZ29lb4dRPk" target="_blank" class="social-btn">МАКС</a>
+        <a href="https://max.ru/channel_shkatulka_math" target="_blank" class="social-btn">МАКС</a>
         
         <div style="margin-top: 30px; background: #2a2a2a; border-left: 4px solid #4CAF50; padding: 15px; border-radius: 0 8px 8px 0; text-align: left;">
             <h4 style="margin: 0 0 8px 0; color: #4CAF50; font-size: 1.05em;">📌 Добро пожаловать в генератор!</h4>
@@ -3326,15 +3326,18 @@ body.auth-locked > :not(#passwordGate){
                     let tmp = document.createElement('div'); tmp.innerHTML = theorySvgCode; window.autoFixSVGArrows(tmp); theorySvgCode = tmp.innerHTML;
                 }
                 
+                const protectMathRelations = (value) => String(value ?? '')
+                    .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => '\\(' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\)')
+                    .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => '\\[' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\]');
                 let theoryHtml = "";
                 if (item.theory) {
                     theoryHtml = `
                         <h3>Разбор аналогичного задания</h3>
                         <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
                             <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${item.theory.theory_task}</div><div style='clear:both;'></div>
+                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
                             <p style='margin-top: 20px;'><b>Решение:</b></p>
-                            <div>${item.theory.theory_sol}</div>
+                            <div>${protectMathRelations(item.theory.theory_sol)}</div>
                         </div>
                     `;
                     if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
@@ -3343,10 +3346,11 @@ body.auth-locked > :not(#passwordGate){
                             let tSvgCode = t.svg_code || "";
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
                             let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px; background:transparent; border-radius:8px; padding:0; display:inline-block;">${tSvgCode}</div>` : '';
-                            theoryHtml += `<li style='margin-bottom:15px;'>${t.text}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
+                            theoryHtml += `<li style='margin-bottom:15px;'>${protectMathRelations(t.text)}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
                         });
                         theoryHtml += `</ul>`;
                     }
+                    theoryHtml += `<div style="display:flex; justify-content:flex-end; margin-top:24px; padding-top:12px; border-top:1px solid #e3e3e3;"><button type="button" onclick="document.getElementById('modal-overlay').style.display='none'" style="background:none; border:none; color:#666; font-size:16px; cursor:pointer; padding:6px 2px; text-decoration:underline; text-underline-offset:3px;">Скрыть разбор</button></div>`;
                 }
 
                 window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
@@ -3509,7 +3513,7 @@ body.auth-locked > :not(#passwordGate){
                         <div style="font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>
                         <div style="min-width:0; width:100%;">
                             <div class="task7-interactive-statement" style="width:100%; font-size:1em; line-height:1.5;">${task7StatementHTML}</div>
-                            ${task7DiagramHTML ? `<div class="task7-interactive-diagram" style="width:min(88%,760px); max-width:760px; margin:16px auto 12px;">${task7DiagramHTML}</div>` : ''}
+                            ${task7DiagramHTML ? `<div class="task7-interactive-diagram" style="width:min(46%,380px); max-width:380px; margin:12px auto 10px;">${task7DiagramHTML}</div>` : ''}
                             ${task7ChoicesHTML ? `<div class="task7-interactive-choices" style="width:100%; margin-top:8px;">${task7ChoicesHTML}</div>` : ''}
                             <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div>
                         </div>
