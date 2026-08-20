@@ -1345,6 +1345,7 @@ body.auth-locked > :not(#passwordGate){
   .task7-vertical-task .task7-choices{grid-template-columns:1fr !important;}
 }
 </style>
+<!-- THEORY_ANALOG_DRAFTS_V2_20260821 -->
 </head>
 <body class="auth-locked">
 
@@ -3329,28 +3330,81 @@ body.auth-locked > :not(#passwordGate){
                 const protectMathRelations = (value) => String(value ?? '')
                     .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => '\\(' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\)')
                     .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => '\\[' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\]');
+
+                const buildTheoryAnalogScratchpad = (analogId, diagramHTML) => {
+                    const diagramCard = diagramHTML ? `
+                        <div id="draft-diagram-card-${analogId}" style="position:absolute;left:12px;top:12px;width:min(46%,380px);max-width:calc(100% - 24px);z-index:1;pointer-events:none;background:transparent;">
+                            ${diagramHTML}
+                        </div>` : '';
+                    return `<div id="draw-wrapper-${analogId}" style="display:none; margin-top:12px; width:100%; clear:both;">
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:5px; background:#e3f2fd; padding:8px 15px; border-radius:8px; border:1px solid #bbdefb; color:#333;">
+                            <button onclick="window.setTool('${analogId}', 'pointer')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Указатель (Перетаскивание)">👆</button>
+                            <button onclick="window.setTool('${analogId}', 'zoom')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Лупа: открыть чертёж в большом модальном окне">🔍</button>
+                            <button onclick="window.setTool('${analogId}', 'pen')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Карандаш">🖊️</button>
+                            <button onclick="window.undoCanvas('${analogId}')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Отменить действие">↶</button>
+                            <button onclick="window.redoCanvas('${analogId}')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Повторить действие">↷</button>
+                            <select id="tool-select-${analogId}" onchange="window.setTool('${analogId}', this.value)" style="background:#fff;border:1px solid #90caf9;border-radius:4px;padding:4px 8px;font-size:14px;cursor:pointer;outline:none;color:#003399;font-weight:500;">
+                                <option value="" disabled selected hidden>🔺 Фигуры</option>
+                                <option value="line">📏 Прямая</option>
+                                <option value="vector">↗️ Вектор</option>
+                                <option value="circle">⭕ Окружность</option>
+                                <option value="triangle">🔺 Треугольник</option>
+                                <option value="cylinder">🛢️ Цилиндр</option>
+                                <option value="cone">🍦 Конус</option>
+                                <option value="sphere">🔮 Сфера</option>
+                            </select>
+                            <input type="color" id="color-${analogId}" value="#003399" style="cursor:pointer;height:30px;width:35px;border:none;background:transparent;padding:0;" title="Цвет">
+                            <input type="range" id="size-${analogId}" min="1" max="15" value="3" style="cursor:pointer;width:80px;" title="Толщина линии">
+                            <button onclick="window.setTool('${analogId}', 'eraser')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Ластик">🧽</button>
+                            <div style="flex-grow:1;"></div>
+                            <button onclick="window.clearCanvas('${analogId}')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Очистить всё">🗑️</button>
+                            <input type="hidden" id="tool-${analogId}" value="pen">
+                        </div>
+                        <div style="position:relative;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);border:2px solid #bbdefb;border-radius:8px;overflow:hidden;height:390px;">
+                            ${diagramCard}
+                            <canvas id="canvas-${analogId}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
+                        </div>
+                    </div>`;
+                };
+
                 let theoryHtml = "";
                 if (item.theory) {
+                    const solutionBlockId = `theory-solution-${taskCounter}`;
+                    const showSolutionId = `theory-show-solution-${taskCounter}`;
                     theoryHtml = `
                         <h3>Разбор аналогичного задания</h3>
-                        <div style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
+                        <div id="${solutionBlockId}" style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
                             <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height: 60px;'>${theorySvgCode ? '<div style="float:left; margin-right: 20px; margin-bottom: 10px; max-width: 300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
-                            <p style='margin-top: 20px;'><b>Решение:</b></p>
+                            <div style='min-height:60px;'>${theorySvgCode ? '<div style="float:left; margin-right:20px; margin-bottom:10px; max-width:300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
+                            <p style='margin-top:20px;'><b>Решение:</b></p>
                             <div>${protectMathRelations(item.theory.theory_sol)}</div>
+                            <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:10px;border-top:1px solid #e5e5e5;">
+                                <button type="button" onclick="document.getElementById('${solutionBlockId}').style.display='none';document.getElementById('${showSolutionId}').style.display='flex';" style="background:none;border:none;color:#666;font-size:15px;cursor:pointer;padding:5px 2px;text-decoration:underline;text-underline-offset:3px;">Скрыть решение</button>
+                            </div>
+                        </div>
+                        <div id="${showSolutionId}" style="display:none;justify-content:flex-end;margin:0 0 12px;">
+                            <button type="button" onclick="document.getElementById('${solutionBlockId}').style.display='block';this.parentElement.style.display='none';if(window.MathJax) MathJax.typesetPromise([document.getElementById('${solutionBlockId}')]);" style="background:#fff7ed;border:1px solid #fdba74;color:#c2410c;border-radius:7px;padding:7px 11px;font-weight:700;cursor:pointer;">Показать разбор решения</button>
                         </div>
                     `;
                     if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
-                        theoryHtml += `<h4 style='color: #ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
-                        item.theory.tasks.forEach(t => {
+                        theoryHtml += `<h4 style='color:#ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
+                        item.theory.tasks.forEach((t, analogIndex) => {
                             let tSvgCode = t.svg_code || "";
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
-                            let tSvg = tSvgCode ? `<br><div style="margin:10px 0; max-width:300px; background:transparent; border-radius:8px; padding:0; display:inline-block;">${tSvgCode}</div>` : '';
-                            theoryHtml += `<li style='margin-bottom:15px;'>${protectMathRelations(t.text)}${tSvg}<br><span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}"; this.style.border="none"; this.style.fontWeight="bold";'>Показать ответ</span></li>`;
+                            const tSvg = tSvgCode ? `<br><div style="margin:10px 0;max-width:300px;background:transparent;border-radius:8px;padding:0;display:inline-block;">${tSvgCode}</div>` : '';
+                            const analogId = `analog-${taskCounter}-${analogIndex + 1}`;
+                            const analogScratchpad = buildTheoryAnalogScratchpad(analogId, tSvgCode);
+                            theoryHtml += `<li style='margin-bottom:20px;'>
+                                ${protectMathRelations(t.text)}${tSvg}
+                                <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+                                    <span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}";this.style.border="none";this.style.fontWeight="bold";'>Показать ответ</span>
+                                    <button type="button" onclick="window.toggleCanvas('${analogId}')" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:18px;padding:6px 10px;cursor:pointer;" title="Открыть черновик для этого аналога">✏️</button>
+                                </div>
+                                ${analogScratchpad}
+                            </li>`;
                         });
                         theoryHtml += `</ul>`;
                     }
-                    theoryHtml += `<div style="display:flex; justify-content:flex-end; margin-top:24px; padding-top:12px; border-top:1px solid #e3e3e3;"><button type="button" onclick="document.getElementById('modal-overlay').style.display='none'" style="background:none; border:none; color:#666; font-size:16px; cursor:pointer; padding:6px 2px; text-decoration:underline; text-underline-offset:3px;">Скрыть разбор</button></div>`;
                 }
 
                 window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
@@ -3680,9 +3734,10 @@ body.auth-locked > :not(#passwordGate){
 
         };
         window.initMainCanvas = function(id) {
-            if (window.mainCanvases[id]) return;
-            let canvas = document.getElementById('canvas-' + id); 
+            let canvas = document.getElementById('canvas-' + id);
             if(!canvas) return;
+            if (window.mainCanvases[id] && window.mainCanvases[id].canvas === canvas) return;
+            if (window.mainCanvases[id] && window.mainCanvases[id].canvas !== canvas) delete window.mainCanvases[id];
             let ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.clientWidth || 750; 
             canvas.height = canvas.parentElement.clientHeight || 250; 
