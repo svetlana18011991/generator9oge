@@ -3322,7 +3322,13 @@ body.auth-locked > :not(#passwordGate){
                 let printSvg = item.printSvg !== undefined ? item.printSvg : mainSvg;
                 if (printSvg) { let tmp = document.createElement('div'); tmp.innerHTML = printSvg; window.autoFixSVGArrows(tmp); printSvg = tmp.innerHTML; }
                 
-                let theorySvgCode = item.theory && item.theory.svg_code ? item.theory.svg_code : "";
+                let theorySvgCode = "";
+                if (item.theory) {
+                    theorySvgCode = item.theory.svg_code || item.theory.theoryImageHTML || item.theory.imageHTML || item.theory.draftSvg || item.theory.standaloneSvg || "";
+                    if (!theorySvgCode && /координатн|числовой\s+прям|отмечен[аоы]?\s+(?:число|числа|точк)/i.test(String(item.theory.theory_task || ''))) {
+                        theorySvgCode = item.svg || item.svg_code || standaloneSvg || mainSvg || "";
+                    }
+                }
                 if (theorySvgCode) {
                     let tmp = document.createElement('div'); tmp.innerHTML = theorySvgCode; window.autoFixSVGArrows(tmp); theorySvgCode = tmp.innerHTML;
                 }
@@ -3375,7 +3381,7 @@ body.auth-locked > :not(#passwordGate){
                         <h3>Разбор аналогичного задания</h3>
                         <div id="${solutionBlockId}" style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
                             <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height:60px;'>${theorySvgCode ? '<div style="float:left; margin-right:20px; margin-bottom:10px; max-width:300px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
+                            <div style='min-height:60px;'>${theorySvgCode ? '<div style="float:left; margin-right:20px; margin-bottom:10px; max-width:240px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
                             <p style='margin-top:20px;'><b>Решение:</b></p>
                             <div>${protectMathRelations(item.theory.theory_sol)}</div>
                             <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:10px;border-top:1px solid #e5e5e5;">
@@ -3389,9 +3395,12 @@ body.auth-locked > :not(#passwordGate){
                     if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
                         theoryHtml += `<h4 style='color:#ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
                         item.theory.tasks.forEach((t, analogIndex) => {
-                            let tSvgCode = t.svg_code || "";
+                            let tSvgCode = t.svg_code || t.theoryImageHTML || t.imageHTML || t.draftSvg || t.standaloneSvg || t.gameSvg || "";
+                            if (!tSvgCode && theorySvgCode && /координатн|числовой\s+прям|отмечен[аоы]?\s+(?:число|числа|точк)/i.test(String(t.text || ''))) {
+                                tSvgCode = theorySvgCode;
+                            }
                             if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
-                            const tSvg = tSvgCode ? `<br><div style="margin:10px 0;max-width:300px;background:transparent;border-radius:8px;padding:0;display:inline-block;">${tSvgCode}</div>` : '';
+                            const tSvg = tSvgCode ? `<br><div style="margin:10px 0;max-width:240px;background:transparent;border-radius:8px;padding:0;display:block;">${tSvgCode}</div>` : '';
                             const analogId = `analog-${taskCounter}-${analogIndex + 1}`;
                             const analogScratchpad = buildTheoryAnalogScratchpad(analogId, tSvgCode);
                             theoryHtml += `<li style='margin-bottom:20px;'>
