@@ -1335,6 +1335,16 @@ body.auth-locked > :not(#passwordGate){
   .task7-choices { grid-template-columns:1fr !important; }
 }
 </style>
+
+<style id="task7-vertical-layout-fix">
+.task7-vertical-task .task7-interactive-diagram img,
+.task7-vertical-task .task7-interactive-diagram svg { display:block !important; width:100% !important; max-width:100% !important; height:auto !important; margin:0 auto !important; }
+.task7-vertical-task .task7-choices { width:100% !important; box-sizing:border-box; }
+@media (max-width:720px){
+  .task7-vertical-task .task7-interactive-diagram{width:100% !important; min-width:0 !important;}
+  .task7-vertical-task .task7-choices{grid-template-columns:1fr !important;}
+}
+</style>
 </head>
 <body class="auth-locked">
 
@@ -3480,25 +3490,30 @@ body.auth-locked > :not(#passwordGate){
                 </div>`;
 
                 let interactiveTaskCore = '';
-                if (String(tid) === 'task7' && mainSvg) {
-                    // Для задания 7: условие на всю ширину -> рисунок -> варианты ответов.
+                const interactiveTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
+                const isTask7Interactive = interactiveTaskNumber === 7;
+                if (isTask7Interactive) {
+                    // Задание 7 всегда верстаем вертикально:
+                    // условие на всю ширину -> координатная прямая -> варианты -> ответ/черновик.
+                    const task7DiagramHTML = mainSvg || standaloneSvg || item.svg || item.svg_code || '';
                     const task7Tmp = document.createElement('div');
                     task7Tmp.innerHTML = renderText || '';
                     const task7ChoicesEl = task7Tmp.querySelector('.task7-choices');
+                    let task7ChoicesHTML = '';
                     if (task7ChoicesEl) {
-                        const task7ChoicesHTML = task7ChoicesEl.outerHTML;
+                        task7ChoicesHTML = task7ChoicesEl.outerHTML;
                         task7ChoicesEl.remove();
-                        const task7StatementHTML = task7Tmp.innerHTML;
-                        interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;">
-                            <div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>
-                            <div style="flex-grow:1; min-width:0;">
-                                <div style="width:100%;">${task7StatementHTML}</div>
-                                <div class="task7-interactive-diagram" style="width:min(72%,620px); min-width:360px; max-width:620px; margin:14px auto 8px;">${mainSvg}</div>
-                                <div style="width:100%;">${task7ChoicesHTML}</div>
-                                <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div>
-                            </div>
-                        </div>`;
                     }
+                    const task7StatementHTML = task7Tmp.innerHTML;
+                    interactiveTaskCore = `<div class="task7-vertical-task" style="display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:14px; width:100%; flex-grow:1; min-width:0; align-items:start;">
+                        <div style="font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>
+                        <div style="min-width:0; width:100%;">
+                            <div class="task7-interactive-statement" style="width:100%; font-size:1em; line-height:1.5;">${task7StatementHTML}</div>
+                            ${task7DiagramHTML ? `<div class="task7-interactive-diagram" style="width:min(88%,760px); max-width:760px; margin:16px auto 12px;">${task7DiagramHTML}</div>` : ''}
+                            ${task7ChoicesHTML ? `<div class="task7-interactive-choices" style="width:100%; margin-top:8px;">${task7ChoicesHTML}</div>` : ''}
+                            <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div>
+                        </div>
+                    </div>`;
                 }
                 if (!interactiveTaskCore) {
                     interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width:350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>`;
