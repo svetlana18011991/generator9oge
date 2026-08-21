@@ -16,8 +16,8 @@
     <script src="tires_practice.js?v=53"></script>
     <script src="task6.js"></script>
     <script src="task6_extra.js?v=20260816-2"></script>
-    <script src="task7.js?v=20260821-mathfix3"></script>
-    <script src="task7_extra.js?v=20260821-mathfix3"></script>
+    <script src="task7.js?v=20260821-theorydrawings2"></script>
+    <script src="task7_extra.js?v=20260821-theorydrawings2"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -3337,6 +3337,28 @@ body.auth-locked > :not(#passwordGate){
                     .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => '\\(' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\)')
                     .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => '\\[' + inner.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\]');
 
+                // Для задания 7 всегда раскладываем содержимое так:
+                // условие -> чертёж -> варианты ответов.
+                const splitTask7TheoryHTML = (value) => {
+                    const holder = document.createElement('div');
+                    holder.innerHTML = protectMathRelations(value || '');
+                    let choicesEl = holder.querySelector('.task7-choices');
+                    // Резерв для старых дополнительных прототипов без класса.
+                    if (!choicesEl) {
+                        const grids = Array.from(holder.querySelectorAll('div')).filter(el => {
+                            const st = String(el.getAttribute('style') || '').toLowerCase();
+                            return st.includes('display:grid') && st.includes('grid-template-columns');
+                        });
+                        if (grids.length) choicesEl = grids[grids.length - 1];
+                    }
+                    let choicesHTML = '';
+                    if (choicesEl) {
+                        choicesHTML = choicesEl.outerHTML;
+                        choicesEl.remove();
+                    }
+                    return { statementHTML: holder.innerHTML, choicesHTML };
+                };
+
                 const buildTheoryAnalogScratchpad = (analogId, diagramHTML) => {
                     const diagramCard = diagramHTML ? `
                         <div id="draft-diagram-card-${analogId}" style="position:absolute;left:12px;top:12px;width:min(46%,380px);max-width:calc(100% - 24px);z-index:1;pointer-events:none;background:transparent;">
@@ -3375,13 +3397,30 @@ body.auth-locked > :not(#passwordGate){
 
                 let theoryHtml = "";
                 if (item.theory) {
+                    // Берём именно чертёж прототипа для верхней задачи разбора.
+                    if (!theorySvgCode) {
+                        theorySvgCode = item.theory.svg_code || item.theory.theoryImageHTML || item.theory.imageHTML || item.svg || item.svg_code || standaloneSvg || mainSvg || "";
+                        if (theorySvgCode) {
+                            let tmpTheory = document.createElement('div');
+                            tmpTheory.innerHTML = theorySvgCode;
+                            window.autoFixSVGArrows(tmpTheory);
+                            theorySvgCode = tmpTheory.innerHTML;
+                        }
+                    }
+
+                    const topParts = splitTask7TheoryHTML(item.theory.theory_task || '');
+                    const topDiagram = theorySvgCode ? `<div class="theory-task7-diagram" style="width:min(52%,340px);max-width:340px;margin:12px auto 10px;background:transparent;">${theorySvgCode}</div>` : '';
+                    const topChoices = topParts.choicesHTML ? `<div class="theory-task7-choices" style="width:100%;margin-top:8px;">${topParts.choicesHTML}</div>` : '';
+
                     const solutionBlockId = `theory-solution-${taskCounter}`;
                     const showSolutionId = `theory-show-solution-${taskCounter}`;
                     theoryHtml = `
                         <h3>Разбор аналогичного задания</h3>
                         <div id="${solutionBlockId}" style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
                             <p style='margin-top:0;'><b>Задача:</b></p>
-                            <div style='min-height:60px;'>${theorySvgCode ? '<div style="float:left; margin-right:20px; margin-bottom:10px; max-width:240px; background:#f9f9f9; border-radius:8px; padding:4px;">' + theorySvgCode + '</div>' : ''}${protectMathRelations(item.theory.theory_task)}</div><div style='clear:both;'></div>
+                            <div style="width:100%;line-height:1.5;">${topParts.statementHTML}</div>
+                            ${topDiagram}
+                            ${topChoices}
                             <p style='margin-top:20px;'><b>Решение:</b></p>
                             <div>${protectMathRelations(item.theory.theory_sol)}</div>
                             <div style="display:flex;justify-content:flex-end;margin-top:14px;padding-top:10px;border-top:1px solid #e5e5e5;">
@@ -3395,16 +3434,27 @@ body.auth-locked > :not(#passwordGate){
                     if (Array.isArray(item.theory.tasks) && item.theory.tasks.length > 0) {
                         theoryHtml += `<h4 style='color:#ff8c00;'>Аналогичные задачи этого номера:</h4><ul style='padding-left:20px;'>`;
                         item.theory.tasks.forEach((t, analogIndex) => {
+                            // У каждого аналога должен быть его собственный рисунок.
                             let tSvgCode = t.svg_code || t.theoryImageHTML || t.imageHTML || t.draftSvg || t.standaloneSvg || t.gameSvg || "";
                             if (!tSvgCode && theorySvgCode && /координатн|числовой\s+прям|отмечен[аоы]?\s+(?:число|числа|точк)/i.test(String(t.text || ''))) {
                                 tSvgCode = theorySvgCode;
                             }
-                            if (tSvgCode) { let tmp = document.createElement('div'); tmp.innerHTML = tSvgCode; window.autoFixSVGArrows(tmp); tSvgCode = tmp.innerHTML; }
-                            const tSvg = tSvgCode ? `<br><div style="margin:10px 0;max-width:240px;background:transparent;border-radius:8px;padding:0;display:block;">${tSvgCode}</div>` : '';
+                            if (tSvgCode) {
+                                let tmp = document.createElement('div');
+                                tmp.innerHTML = tSvgCode;
+                                window.autoFixSVGArrows(tmp);
+                                tSvgCode = tmp.innerHTML;
+                            }
+
+                            const analogParts = splitTask7TheoryHTML(t.text || '');
+                            const tSvg = tSvgCode ? `<div class="theory-analog-task7-diagram" style="width:min(52%,340px);max-width:340px;margin:10px auto;background:transparent;">${tSvgCode}</div>` : '';
+                            const tChoices = analogParts.choicesHTML ? `<div class="theory-analog-task7-choices" style="width:100%;margin-top:8px;">${analogParts.choicesHTML}</div>` : '';
                             const analogId = `analog-${taskCounter}-${analogIndex + 1}`;
                             const analogScratchpad = buildTheoryAnalogScratchpad(analogId, tSvgCode);
-                            theoryHtml += `<li style='margin-bottom:20px;'>
-                                ${protectMathRelations(t.text)}${tSvg}
+                            theoryHtml += `<li style='margin-bottom:22px;'>
+                                <div style="width:100%;line-height:1.5;">${analogParts.statementHTML}</div>
+                                ${tSvg}
+                                ${tChoices}
                                 <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
                                     <span style='color:#003399;cursor:pointer;border-bottom:1px dashed #003399;' onclick='this.innerText="Ответ: ${t.answer}";this.style.border="none";this.style.fontWeight="bold";'>Показать ответ</span>
                                     <button type="button" onclick="window.toggleCanvas('${analogId}')" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:18px;padding:6px 10px;cursor:pointer;" title="Открыть черновик для этого аналога">✏️</button>

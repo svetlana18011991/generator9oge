@@ -47,7 +47,7 @@
         <text x="476" y="67" font-size="18" font-family="serif" font-style="italic">x</text>
     </svg>`;
 
-    const optRow = (items) => `<div style="margin-top:8px;display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:5px 18px;">${items.map((v,i)=>`<div>${i+1}) ${v}</div>`).join('')}</div>`;
+    const optRow = (items) => `<div class="task7-choices" style="margin-top:8px;display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:5px 18px;">${items.map((v,i)=>`<div>${i+1}) ${v}</div>`).join('')}</div>`;
 
     const pointNumberText = (vals) => `На координатной прямой точками отмечены числа ${vals.join('; ')}.<br>Какому числу соответствует точка B?${optRow(vals)}`;
     const rootIntervalText = (n) => `Какому промежутку принадлежит число \\(\\sqrt{${n}}\\)?<br><i>В ответе укажите номер правильного варианта.</i>${optRow(['[4; 5]','[5; 6]','[6; 7]','[7; 8]'])}`;
