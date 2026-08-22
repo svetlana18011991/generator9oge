@@ -18,6 +18,8 @@
     <script src="task6_extra.js?v=20260816-2"></script>
     <script src="task7.js?v=20260821-theorydrawings2"></script>
     <script src="task7_extra.js?v=20260821-theorydrawings2"></script>
+    <script src="task8.js?v=20260822-task8-1"></script>
+    <script src="task8_extra.js?v=20260822-task8-1"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2052,8 +2054,8 @@ body.auth-locked > :not(#passwordGate){
                 // Задания 1–5 ОГЭ формируются единым связанным комплектом.
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
-                // Задания 8+ в ОГЭ пока не подключены. Подключим их по мере готовности.
-                if (taskNumber > 7) return false;
+                // Задания 9+ в ОГЭ пока не подключены. Подключим их по мере готовности.
+                if (taskNumber > 8) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -2801,7 +2803,7 @@ body.auth-locked > :not(#passwordGate){
         const hasPracticeDatabase = window.ogePracticeDatabase && Object.keys(window.ogePracticeDatabase).length > 0;
 
         if (!hasRegularDatabase && !hasPracticeDatabase) {
-            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js и task6.js, task7.js и другие файлы заданий.';
+            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js и другие файлы заданий.';
             document.getElementById('info-board').style.display = 'block';
             return;
         }
