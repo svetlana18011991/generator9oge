@@ -2770,16 +2770,19 @@ body.auth-locked > :not(#passwordGate){
     function getPrototypeDisplayLabel(p, idx, kind = 'main') {
         const candidates = p ? [p.short_desc, p.label, p.desc, p.title, p.name] : [];
         let label = String(candidates.find(value => String(value || '').trim()) || '').trim();
-        if (kind === 'extra') {
-            label = label
-                .replace(/^(?:Прототип|Тип)\s*№?\s*\d+\s*[.:;\-–—)]*\s*/i, '')
-                .replace(/^6\.Д\d+\.\s*/i, '')
-                .trim();
-        }
-        return label || `Тема ${idx + 1}`;
+
+        // В настройках оставляем смысловое описание, но убираем старую составную
+        // нумерацию прототипа: 7.1., 8.12., 8.Д1., «Прототип 7.1» и т. п.
+        label = label
+            .replace(/^(?:Прототип|Тип)\s*№?\s*/i, '')
+            .replace(/^\d+\s*\.\s*[ДD]?\s*\d+\s*[.:;\-–—)]*\s*/i, '')
+            .replace(/^\d+\s*[.:;\-–—)]\s*/i, '')
+            .trim();
+
+        return label || `Прототип`;
     }
 
-    // В настройках показываем только порядковые номера прототипов, как в задании 6.
+    // В настройках: простая нумерация 1, 2, 3... + описание прототипа.
     function buildPrototypeListHTML(tid, data, kind = 'main') {
         if (!data || !Array.isArray(data.prototypes)) return '';
         const kindArg = (kind === 'extra') ? `, 'extra'` : '';
@@ -2792,7 +2795,7 @@ body.auth-locked > :not(#passwordGate){
             listHTML += `
                 <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event${kindArg})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
                     <input type="checkbox" id="${getPrototypeCheckboxId(tid, idx, kind)}" checked onchange="syncProtoMaster('${tid}'${kindArg})">
-                    <span class="proto-label-text">${idx + 1} 👁️</span>
+                    <span class="proto-label-text">${idx + 1}. ${getPrototypeDisplayLabel(p, idx, kind)} &nbsp;👁️</span>
                 </label>`;
         });
         return listHTML;
