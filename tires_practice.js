@@ -18,7 +18,7 @@
         </div>
         <p>На заводе на автомобили этой модели устанавливают колёса с шинами <b>225/55 R16</b>.</p>`;
 
-    const allowedSizesTable = `<div class="common-table-wrap"><table class="common-table"><thead><tr><th rowspan="2">Ширина шины, мм</th><th colspan="3">Диаметр диска, дюймы</th></tr><tr><th>16</th><th>17</th><th>18</th></tr></thead><tbody><tr><td>225</td><td>225/55</td><td>225/50</td><td>—</td></tr><tr><td>235</td><td>235/55; 235/50</td><td>235/50; 235/45</td><td>235/45</td></tr><tr><td>245</td><td>—</td><td>245/45</td><td>245/40</td></tr></tbody></table></div>`;
+    const allowedSizesTable = `<div class="common-table-wrap"><table class="common-table"><thead><tr><th>Ширина шины, мм</th><th>16 дюймов</th><th>17 дюймов</th><th>18 дюймов</th></tr></thead><tbody><tr><td>225</td><td>225/55</td><td>225/50</td><td>—</td></tr><tr><td>235</td><td>235/55; 235/50</td><td>235/50; 235/45</td><td>235/45</td></tr><tr><td>245</td><td>—</td><td>245/45</td><td>245/40</td></tr></tbody></table></div>`;
 
     function solutionBlock(steps, answer) {
         const rows = steps.map((step, index) => `<div style="display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;margin:7px 0;"><div style="width:26px;height:26px;border-radius:50%;background:#ccfbf1;color:#0f766e;font-weight:800;display:flex;align-items:center;justify-content:center;">${index + 1}</div><div>${step}</div></div>`).join('');
