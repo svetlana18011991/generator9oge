@@ -23,6 +23,7 @@
     <script src="task9.js?v=20260823-task9-1"></script>
     <script src="task9_extra.js?v=20260823-task9-1"></script>
     <script src="task10.js?v=20260901-task10-1"></script>
+    <script src="task11.js?v=20260902-task11-1"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2057,8 +2058,8 @@ body.auth-locked > :not(#passwordGate){
                 // Задания 1–5 ОГЭ формируются единым связанным комплектом.
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
-                // Задания 11+ в ОГЭ пока не подключены. Подключим их по мере готовности.
-                if (taskNumber > 10) return false;
+                // Задания 12+ в ОГЭ пока не подключены. Подключим их по мере готовности.
+                if (taskNumber > 11) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -2810,7 +2811,7 @@ body.auth-locked > :not(#passwordGate){
         const hasPracticeDatabase = window.ogePracticeDatabase && Object.keys(window.ogePracticeDatabase).length > 0;
 
         if (!hasRegularDatabase && !hasPracticeDatabase) {
-            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js и другие файлы заданий.';
+            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js, task11.js и другие файлы заданий.';
             document.getElementById('info-board').style.display = 'block';
             return;
         }
@@ -3064,7 +3065,7 @@ body.auth-locked > :not(#passwordGate){
         let data = getPrototypeData(tid, kind);
         if (!data || !data.prototypes || !data.prototypes[index]) return;
         let p = data.prototypes[index];
-        const firstTaskText = p.tasks && p.tasks[0] ? p.tasks[0].text : (p.theory_task || '');
+        const firstTaskText = p.tasks && p.tasks[0] ? (p.tasks[0].tooltipText ?? p.tasks[0].theoryText ?? p.tasks[0].text) : (p.theory_task || '');
         tooltip.innerHTML = `${p.svg_code || ''}<div style="font-size: 0.9em;">${firstTaskText}</div>`;
         if (window.autoFixSVGArrows) window.autoFixSVGArrows(tooltip);
         tooltip.style.display = 'block';
@@ -3417,8 +3418,16 @@ body.auth-locked > :not(#passwordGate){
                         }
                     }
 
-                    const topParts = splitTask7TheoryHTML(item.theory.theory_task || '');
-                    const topDiagram = theorySvgCode ? `<div class="theory-task7-diagram" style="width:min(52%,340px);max-width:340px;margin:12px auto 10px;background:transparent;">${theorySvgCode}</div>` : '';
+                    const theoryTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
+                    const isTask11Theory = theoryTaskNumber === 11;
+                    // Для задания 11 порядок «формулы / графики» принципиален и уже задан в базе,
+                    // поэтому не переставляем элементы модального разбора автоматически.
+                    const topParts = isTask11Theory
+                        ? { statementHTML: protectMathRelations(item.theory.theory_task || ''), choicesHTML: '' }
+                        : splitTask7TheoryHTML(item.theory.theory_task || '');
+                    const theoryDiagramWidth = isTask11Theory ? 'min(92%,760px)' : 'min(52%,340px)';
+                    const theoryDiagramMaxWidth = isTask11Theory ? '760px' : '340px';
+                    const topDiagram = (!isTask11Theory && theorySvgCode) ? `<div class="theory-task7-diagram" style="width:${theoryDiagramWidth};max-width:${theoryDiagramMaxWidth};margin:12px auto 10px;background:transparent;">${theorySvgCode}</div>` : '';
                     const topChoices = topParts.choicesHTML ? `<div class="theory-task7-choices" style="width:100%;margin-top:8px;">${topParts.choicesHTML}</div>` : '';
 
                     const solutionBlockId = `theory-solution-${taskCounter}`;
@@ -3455,8 +3464,16 @@ body.auth-locked > :not(#passwordGate){
                                 tSvgCode = tmp.innerHTML;
                             }
 
-                            const analogParts = splitTask7TheoryHTML(t.text || '');
-                            const tSvg = tSvgCode ? `<div class="theory-analog-task7-diagram" style="width:min(52%,340px);max-width:340px;margin:10px auto;background:transparent;">${tSvgCode}</div>` : '';
+                            const analogSourceText = isTask11Theory
+                                ? (t.text || '')
+                                : (t.theoryText !== undefined ? t.theoryText : (t.text || ''));
+                            const analogParts = isTask11Theory
+                                ? { statementHTML: protectMathRelations(analogSourceText), choicesHTML: '' }
+                                : splitTask7TheoryHTML(analogSourceText);
+                            const analogDiagramWidth = isTask11Theory ? 'min(92%,760px)' : 'min(52%,340px)';
+                            const analogDiagramMaxWidth = isTask11Theory ? '760px' : '340px';
+                            // В задании 11 рисунок уже встроен в текст в нужном месте; отдельно его не дублируем.
+                            const tSvg = (!isTask11Theory && tSvgCode) ? `<div class="theory-analog-task7-diagram" style="width:${analogDiagramWidth};max-width:${analogDiagramMaxWidth};margin:10px auto;background:transparent;">${tSvgCode}</div>` : '';
                             const tChoices = analogParts.choicesHTML ? `<div class="theory-analog-task7-choices" style="width:100%;margin-top:8px;">${analogParts.choicesHTML}</div>` : '';
                             const analogId = `analog-${taskCounter}-${analogIndex + 1}`;
                             const analogScratchpad = buildTheoryAnalogScratchpad(analogId, tSvgCode);
