@@ -2695,7 +2695,7 @@ body.auth-locked > :not(#passwordGate){
                             const minUse = Math.min(...candidates.map((task, idx) => usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${indexes[idx]}`) || 0));
                             let candidatePairs = candidates.map((task, idx) => ({ task, originalIndex: indexes[idx] }))
                                 .filter(pair => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) === minUse);
-                            if (!orderedTasks) candidatePairs = shuffleArray(candidatePairs);
+                            candidatePairs = shuffleArray(candidatePairs);
                             const chosenPair = candidatePairs[0];
                             const chosen = chosenPair.task;
                             const analogTasks = allTasks
@@ -3247,7 +3247,7 @@ body.auth-locked > :not(#passwordGate){
 
                 window.selectedBlockTitles.push(blockData.title);
                 const activePools = selectedProtos.map(p => ({
-                    tasks: orderedTasks ? [...p.tasks] : shuffleArray([...p.tasks]),
+                    tasks: shuffleArray([...p.tasks]),
                     protoSvg: p.svg_code || '',
                     theory: p
                 }));
@@ -3271,7 +3271,7 @@ body.auth-locked > :not(#passwordGate){
                     let pools = activePools.map(pool => ({
                         protoSvg: pool.protoSvg || '',
                         theory: pool.theory,
-                        tasks: orderedTasks ? [...pool.tasks] : shuffleArray([...pool.tasks])
+                        tasks: shuffleArray([...pool.tasks])
                     })).filter(pool => pool.tasks.length > 0);
 
                     if (!orderedTasks) pools = shuffleArray(pools);
