@@ -3426,6 +3426,22 @@ body.auth-locked > :not(#passwordGate){
 
                 let theoryHtml = "";
                 if (item.theory) {
+                    const theoryTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
+                    const isTask11Theory = theoryTaskNumber === 11;
+
+                    // Сохраняем рисунок именно текущего задания, чтобы в разборе ученик видел свой чертёж.
+                    let currentTaskSvgCode = item.gameSvg !== undefined ? item.gameSvg : (standaloneSvg || mainSvg || item.svg || item.svg_code || "");
+                    if (currentTaskSvgCode) {
+                        const tmpCurrent = document.createElement('div');
+                        tmpCurrent.innerHTML = currentTaskSvgCode;
+                        window.autoFixSVGArrows(tmpCurrent);
+                        currentTaskSvgCode = tmpCurrent.innerHTML;
+                    }
+                    const currentTaskText = item.gameText !== undefined ? item.gameText : standaloneText;
+                    const currentParts = isTask11Theory
+                        ? splitTask11ExtraHTML(currentTaskText || '')
+                        : splitTask7TheoryHTML(currentTaskText || '');
+
                     // Берём именно чертёж прототипа для верхней задачи разбора.
                     if (!theorySvgCode) {
                         theorySvgCode = item.theory.svg_code || item.theory.theoryImageHTML || item.theory.imageHTML || item.svg || item.svg_code || standaloneSvg || mainSvg || "";
@@ -3437,22 +3453,29 @@ body.auth-locked > :not(#passwordGate){
                         }
                     }
 
-                    const theoryTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
-                    const isTask11Theory = theoryTaskNumber === 11;
                     const topParts = isTask11Theory
                         ? splitTask11ExtraHTML(item.theory.theory_task || '')
                         : splitTask7TheoryHTML(item.theory.theory_task || '');
                     const theoryDiagramWidth = isTask11Theory ? 'min(100%,860px)' : 'min(52%,340px)';
                     const theoryDiagramMaxWidth = isTask11Theory ? '860px' : '340px';
+                    const currentDiagram = currentTaskSvgCode ? `<div class="theory-current-task-diagram" style="width:${theoryDiagramWidth};max-width:${theoryDiagramMaxWidth};margin:14px auto 12px;background:transparent;">${currentTaskSvgCode}</div>` : '';
+                    const currentChoices = currentParts.choicesHTML ? `<div class="theory-current-task-choices" style="width:100%;margin-top:10px;">${currentParts.choicesHTML}</div>` : '';
                     const topDiagram = theorySvgCode ? `<div class="theory-task-diagram" style="width:${theoryDiagramWidth};max-width:${theoryDiagramMaxWidth};margin:14px auto 12px;background:transparent;">${theorySvgCode}</div>` : '';
                     const topChoices = topParts.choicesHTML ? `<div class="theory-task-choices" style="width:100%;margin-top:10px;">${topParts.choicesHTML}</div>` : '';
 
                     const solutionBlockId = `theory-solution-${taskCounter}`;
                     const showSolutionId = `theory-show-solution-${taskCounter}`;
                     theoryHtml = `
-                        <h3>Разбор аналогичного задания</h3>
+                        <h3>Разбор задания</h3>
+                        <div style='background:#f5f9ff;padding:15px;border:1px solid #bfdbfe;margin-bottom:14px;border-radius:8px;'>
+                            <p style='margin-top:0;color:#1d4ed8;'><b>Ваше задание:</b></p>
+                            <div style="width:100%;line-height:1.5;">${currentParts.statementHTML}</div>
+                            ${currentDiagram}
+                            ${currentChoices}
+                        </div>
+                        <div style='margin:0 0 10px;color:#7c2d12;font-weight:700;'>Ниже показан разбор аналогичного задания.</div>
                         <div id="${solutionBlockId}" style='background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;margin-bottom:15px;border-radius:6px;'>
-                            <p style='margin-top:0;'><b>Задача:</b></p>
+                            <p style='margin-top:0;'><b>Аналогичная задача:</b></p>
                             <div style="width:100%;line-height:1.5;">${topParts.statementHTML}</div>
                             ${topDiagram}
                             ${topChoices}
