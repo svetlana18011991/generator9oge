@@ -116,19 +116,34 @@
         return `<div style="max-width:860px;margin:10px auto 14px;"><svg viewBox="0 0 810 195" style="display:block;width:100%;height:auto;">${body}</svg></div>`;
     }
 
-    function statementText(items, word = "верны") {
-        return `На рисунке изображён график квадратичной функции \(y=f(x)\). Какие из следующих утверждений о данной функции ${word}? Запишите номера выбранных утверждений в порядке возрастания.<br><br>` +
-            items.map((x, i) => `${i + 1}) ${x}`).join("<br>");
+    function stackedTaskText(intro, after) {
+        return `<div class="task11-extra-intro" style="font-size:17px;line-height:1.45;">${intro}</div>` +
+            `<div class="task11-extra-after-diagram" style="margin-top:12px;">${after}</div>`;
     }
 
-    const signOptions = `Знаки коэффициентов:<br>1) \(a>0,\ c<0\)&nbsp;&nbsp;&nbsp; 2) \(a<0,\ c>0\)&nbsp;&nbsp;&nbsp; 3) \(a>0,\ c>0\)&nbsp;&nbsp;&nbsp; 4) \(a<0,\ c<0\)`;
+    function statementText(items, word = "верны") {
+        const intro = `На рисунке изображён график квадратичной функции $y=f(x)$. Какие из следующих утверждений о данной функции <b>${word}</b>?`;
+        const rows = `<div style="display:grid;gap:8px;font-size:17px;line-height:1.45;">` +
+            items.map((x, i) => `<div><b>${i + 1})</b>&nbsp; ${x}</div>`).join("") + `</div>`;
+        const footer = `<div style="margin-top:10px;font-size:16px;">Запишите номера выбранных утверждений <b>в порядке возрастания</b>.</div>`;
+        return stackedTaskText(intro, rows + footer);
+    }
+
+    const signOptions = `<div style="font-weight:700;margin-bottom:7px;">Знаки коэффициентов:</div>` +
+        `<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 14px;font-size:17px;line-height:1.35;">` +
+        `<div>1) $a>0,\ c<0$</div><div>2) $a<0,\ c>0$</div><div>3) $a>0,\ c>0$</div><div>4) $a<0,\ c<0$</div></div>`;
     function signTaskText() {
-        return `На рисунке изображены графики функций вида \(y=ax^2+c\). Установите соответствие между графиками и знаками коэффициентов \(a\) и \(c\).<br><br>${signOptions}<br><br>Запишите в ответ четыре цифры в порядке A, Б, В, Г.`;
+        const intro = `На рисунке изображены графики функций вида $y=ax^2+c$. Установите соответствие между графиками и знаками коэффициентов $a$ и $c$.`;
+        const after = `${signOptions}<div style="margin-top:10px;font-size:16px;">Запишите в ответ четыре цифры в порядке <b>А, Б, В, Г</b>.</div>`;
+        return stackedTaskText(intro, after);
     }
 
     function formulasText(formulas, kind = "quad") {
-        const rows = formulas.map((f, i) => `${i + 1}) \(${f.latex}\)`).join("<br>");
-        return `Установите соответствие между графиками A, Б, В и формулами, которые их задают.<br><br>${rows}<br><br>Запишите в ответ три цифры в порядке A, Б, В.`;
+        const rows = `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 22px;font-size:18px;line-height:1.4;">` +
+            formulas.map((f, i) => `<div><b>${i + 1})</b>&nbsp; \\(${f.latex}\\)</div>`).join("") + `</div>`;
+        const intro = `Установите соответствие между графиками <b>А, Б, В</b> и формулами, которые их задают.`;
+        const after = `${rows}<div style="margin-top:10px;font-size:16px;">Запишите в ответ три цифры в порядке <b>А, Б, В</b>.</div>`;
+        return stackedTaskText(intro, after);
     }
 
     const qSets = [
@@ -316,6 +331,12 @@
             }
         ]
     };
+
+    // Дополнительные задания 11 выводим вертикально: условие → крупный график → варианты/формулы.
+    task11Extra.prototypes.forEach(proto => {
+        proto.layout = "stacked11";
+        (proto.tasks || []).forEach(task => { task.layout = "stacked11"; });
+    });
 
     window.extraDatabase[11] = task11Extra;
     window.extraDatabase["task11"] = task11Extra;

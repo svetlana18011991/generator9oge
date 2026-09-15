@@ -29,7 +29,7 @@
     <script src="task11_images_1.js?v=20260914"></script>
     <script src="task11_images_2.js?v=20260914"></script>
     <script src="task11.js?v=20260914"></script>
-    <script src="task11_extra.js?v=20260914-1"></script>
+    <script src="task11_extra.js?v=20260914-2"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -3375,6 +3375,19 @@ body.auth-locked > :not(#passwordGate){
                     return { statementHTML: holder.innerHTML, choicesHTML };
                 };
 
+                // Дополнительные прототипы задания 11: условие -> крупный график -> варианты/формулы.
+                const splitTask11ExtraHTML = (value) => {
+                    const holder = document.createElement('div');
+                    holder.innerHTML = protectMathRelations(value || '');
+                    const afterEl = holder.querySelector('.task11-extra-after-diagram');
+                    let choicesHTML = '';
+                    if (afterEl) {
+                        choicesHTML = afterEl.innerHTML;
+                        afterEl.remove();
+                    }
+                    return { statementHTML: holder.innerHTML, choicesHTML };
+                };
+
                 const buildTheoryAnalogScratchpad = (analogId, diagramHTML) => {
                     const diagramCard = diagramHTML ? `
                         <div id="draft-diagram-card-${analogId}" style="position:absolute;left:12px;top:12px;width:min(46%,380px);max-width:calc(100% - 24px);z-index:1;pointer-events:none;background:transparent;">
@@ -3426,15 +3439,13 @@ body.auth-locked > :not(#passwordGate){
 
                     const theoryTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
                     const isTask11Theory = theoryTaskNumber === 11;
-                    // Для задания 11 порядок «формулы / графики» принципиален и уже задан в базе,
-                    // поэтому не переставляем элементы модального разбора автоматически.
                     const topParts = isTask11Theory
-                        ? { statementHTML: protectMathRelations(item.theory.theory_task || ''), choicesHTML: '' }
+                        ? splitTask11ExtraHTML(item.theory.theory_task || '')
                         : splitTask7TheoryHTML(item.theory.theory_task || '');
-                    const theoryDiagramWidth = isTask11Theory ? 'min(92%,760px)' : 'min(52%,340px)';
-                    const theoryDiagramMaxWidth = isTask11Theory ? '760px' : '340px';
-                    const topDiagram = (!isTask11Theory && theorySvgCode) ? `<div class="theory-task7-diagram" style="width:${theoryDiagramWidth};max-width:${theoryDiagramMaxWidth};margin:12px auto 10px;background:transparent;">${theorySvgCode}</div>` : '';
-                    const topChoices = topParts.choicesHTML ? `<div class="theory-task7-choices" style="width:100%;margin-top:8px;">${topParts.choicesHTML}</div>` : '';
+                    const theoryDiagramWidth = isTask11Theory ? 'min(100%,860px)' : 'min(52%,340px)';
+                    const theoryDiagramMaxWidth = isTask11Theory ? '860px' : '340px';
+                    const topDiagram = theorySvgCode ? `<div class="theory-task-diagram" style="width:${theoryDiagramWidth};max-width:${theoryDiagramMaxWidth};margin:14px auto 12px;background:transparent;">${theorySvgCode}</div>` : '';
+                    const topChoices = topParts.choicesHTML ? `<div class="theory-task-choices" style="width:100%;margin-top:10px;">${topParts.choicesHTML}</div>` : '';
 
                     const solutionBlockId = `theory-solution-${taskCounter}`;
                     const showSolutionId = `theory-show-solution-${taskCounter}`;
@@ -3474,13 +3485,12 @@ body.auth-locked > :not(#passwordGate){
                                 ? (t.text || '')
                                 : (t.theoryText !== undefined ? t.theoryText : (t.text || ''));
                             const analogParts = isTask11Theory
-                                ? { statementHTML: protectMathRelations(analogSourceText), choicesHTML: '' }
+                                ? splitTask11ExtraHTML(analogSourceText)
                                 : splitTask7TheoryHTML(analogSourceText);
-                            const analogDiagramWidth = isTask11Theory ? 'min(92%,760px)' : 'min(52%,340px)';
-                            const analogDiagramMaxWidth = isTask11Theory ? '760px' : '340px';
-                            // В задании 11 рисунок уже встроен в текст в нужном месте; отдельно его не дублируем.
-                            const tSvg = (!isTask11Theory && tSvgCode) ? `<div class="theory-analog-task7-diagram" style="width:${analogDiagramWidth};max-width:${analogDiagramMaxWidth};margin:10px auto;background:transparent;">${tSvgCode}</div>` : '';
-                            const tChoices = analogParts.choicesHTML ? `<div class="theory-analog-task7-choices" style="width:100%;margin-top:8px;">${analogParts.choicesHTML}</div>` : '';
+                            const analogDiagramWidth = isTask11Theory ? 'min(100%,860px)' : 'min(52%,340px)';
+                            const analogDiagramMaxWidth = isTask11Theory ? '860px' : '340px';
+                            const tSvg = tSvgCode ? `<div class="theory-analog-task-diagram" style="width:${analogDiagramWidth};max-width:${analogDiagramMaxWidth};margin:12px auto;background:transparent;">${tSvgCode}</div>` : '';
+                            const tChoices = analogParts.choicesHTML ? `<div class="theory-analog-task-choices" style="width:100%;margin-top:10px;">${analogParts.choicesHTML}</div>` : '';
                             const analogId = `analog-${taskCounter}-${analogIndex + 1}`;
                             const analogScratchpad = buildTheoryAnalogScratchpad(analogId, tSvgCode);
                             theoryHtml += `<li style='margin-bottom:22px;'>
@@ -3664,12 +3674,39 @@ body.auth-locked > :not(#passwordGate){
                         </div>
                     </div>`;
                 }
+                const isStacked11 = item.layout === 'stacked11';
+                let stacked11Parts = null;
+                if (isStacked11) {
+                    stacked11Parts = splitTask11ExtraHTML(renderText || '');
+                    interactiveTaskCore = `<div class="task11-extra-vertical-task" style="display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;width:100%;flex-grow:1;min-width:0;align-items:start;">
+                        <div style="font-weight:bold;font-size:1.1em;padding-top:2px;">${taskCounter}.</div>
+                        <div style="min-width:0;width:100%;">
+                            <div style="width:100%;font-size:17px;line-height:1.48;">${stacked11Parts.statementHTML}</div>
+                            ${mainSvg ? `<div class="task11-extra-interactive-diagram" style="width:100%;max-width:900px;margin:14px auto 12px;">${mainSvg}</div>` : ''}
+                            ${stacked11Parts.choicesHTML ? `<div class="task11-extra-interactive-options" style="width:100%;margin-top:6px;">${stacked11Parts.choicesHTML}</div>` : ''}
+                            <div style="margin-top:15px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px;border:2px solid #ccc;border-radius:6px;font-size:16px;font-weight:bold;width:150px;outline:none;transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold;font-size:15px;display:none;"></span></div>
+                        </div>
+                    </div>`;
+                }
                 if (!interactiveTaskCore) {
                     interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width:350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>`;
                 }
                 currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content:space-between;">${interactiveTaskCore}${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
                 
-                if (item.printLayout === 'image-grid') {
+                if (isStacked11) {
+                    const p11 = stacked11Parts || splitTask11ExtraHTML(renderText || '');
+                    currentPrintHTML += `<div class="task-print-block" style="page-break-inside:avoid;break-inside:avoid;margin-bottom:18px;padding-bottom:14px;">
+                        <div style="display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;align-items:start;">
+                            <div style="font-weight:700;font-size:15px;">${taskCounter}.</div>
+                            <div style="min-width:0;">
+                                <div style="font-size:14px;line-height:1.35;">${p11.statementHTML}</div>
+                                ${printSvg ? `<div style="width:100%;max-width:780px;margin:8px auto 7px;">${printSvg}</div>` : ''}
+                                ${p11.choicesHTML ? `<div style="font-size:13.5px;line-height:1.35;margin-top:4px;">${p11.choicesHTML}</div>` : ''}
+                                <div class="task-print-answer" style="margin-top:8px;">Ответ: ______________________________</div>
+                            </div>${stickerHTMLPrint}
+                        </div>
+                    </div>`;
+                } else if (item.printLayout === 'image-grid') {
                     const gridHeight = item.printGridHeight || 105;
                     const compactPrint = Boolean(item.printCompact);
                     if (item.printBreakBefore) {
