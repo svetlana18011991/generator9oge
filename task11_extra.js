@@ -42,36 +42,50 @@
         const ymin = cfg.ymin ?? -8;
         const ymax = cfg.ymax ?? 8;
         const padL = 25, padR = 12, padT = 14, padB = 18;
-        const gw = w - padL - padR;
-        const gh = h - padT - padB;
-        const X = x => padL + (x - xmin) / (xmax - xmin) * gw;
-        const Y = y => padT + gh - (y - ymin) / (ymax - ymin) * gh;
+
+        const usableW = w - padL - padR;
+        const usableH = h - padT - padB;
+        const xRange = xmax - xmin;
+        const yRange = ymax - ymin;
+        const unit = Math.min(usableW / xRange, usableH / yRange);
+
+        const gw = unit * xRange;
+        const gh = unit * yRange;
+        const left = padL + (usableW - gw) / 2;
+        const top = padT + (usableH - gh) / 2;
+
+        const X = x => left + (x - xmin) * unit;
+        const Y = y => top + gh - (y - ymin) * unit;
+
         let s = `<g>`;
         if (label) s += `<text x="5" y="22" font-size="18" font-weight="700" font-family="Arial">${label}</text>`;
+
         for (let x = Math.ceil(xmin); x <= Math.floor(xmax); x++) {
             const px = X(x);
-            s += `<line x1="${px}" y1="${padT}" x2="${px}" y2="${padT + gh}" stroke="${GRID}" stroke-width="0.8"/>`;
+            s += `<line x1="${px}" y1="${top}" x2="${px}" y2="${top + gh}" stroke="${GRID}" stroke-width="0.8"/>`;
         }
         for (let y = Math.ceil(ymin); y <= Math.floor(ymax); y++) {
             const py = Y(y);
-            s += `<line x1="${padL}" y1="${py}" x2="${padL + gw}" y2="${py}" stroke="${GRID}" stroke-width="0.8"/>`;
+            s += `<line x1="${left}" y1="${py}" x2="${left + gw}" y2="${py}" stroke="${GRID}" stroke-width="0.8"/>`;
         }
+
         if (xmin <= 0 && xmax >= 0) {
             const px = X(0);
-            s += `<line x1="${px}" y1="${padT}" x2="${px}" y2="${padT + gh}" stroke="${AXIS}" stroke-width="1.8"/>`;
-            s += `<path d="M${px - 4},${padT + 7} L${px},${padT} L${px + 4},${padT + 7}" fill="none" stroke="${AXIS}" stroke-width="1.6"/>`;
-            s += `<text x="${px + 5}" y="${padT + 13}" font-size="13" font-family="serif" font-style="italic">y</text>`;
+            s += `<line x1="${px}" y1="${top}" x2="${px}" y2="${top + gh}" stroke="${AXIS}" stroke-width="1.8"/>`;
+            s += `<path d="M${px - 4},${top + 7} L${px},${top} L${px + 4},${top + 7}" fill="none" stroke="${AXIS}" stroke-width="1.6"/>`;
+            s += `<text x="${px + 5}" y="${top + 13}" font-size="13" font-family="serif" font-style="italic">y</text>`;
         }
         if (ymin <= 0 && ymax >= 0) {
             const py = Y(0);
-            s += `<line x1="${padL}" y1="${py}" x2="${padL + gw}" y2="${py}" stroke="${AXIS}" stroke-width="1.8"/>`;
-            s += `<path d="M${padL + gw - 7},${py - 4} L${padL + gw},${py} L${padL + gw - 7},${py + 4}" fill="none" stroke="${AXIS}" stroke-width="1.6"/>`;
-            s += `<text x="${padL + gw - 11}" y="${py + 15}" font-size="13" font-family="serif" font-style="italic">x</text>`;
+            s += `<line x1="${left}" y1="${py}" x2="${left + gw}" y2="${py}" stroke="${AXIS}" stroke-width="1.8"/>`;
+            s += `<path d="M${left + gw - 7},${py - 4} L${left + gw},${py} L${left + gw - 7},${py + 4}" fill="none" stroke="${AXIS}" stroke-width="1.6"/>`;
+            s += `<text x="${left + gw - 11}" y="${py + 15}" font-size="13" font-family="serif" font-style="italic">x</text>`;
         }
         if (xmin <= 0 && xmax >= 0 && ymin <= 0 && ymax >= 0) {
             s += `<text x="${X(0) + 4}" y="${Y(0) + 14}" font-size="11" font-family="Arial">0</text>`;
         }
-        s += `<path d="${pathFor(fn, xmin, xmax, ymin, ymax, padL, padT, gw, gh)}" fill="none" stroke="${CURVE}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+        s += `<path d="${pathFor(fn, xmin, xmax, ymin, ymax, left, top, gw, gh)}" fill="none" stroke="${CURVE}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
         s += `</g>`;
         return { html: s, w, h };
     }
