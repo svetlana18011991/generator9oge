@@ -33,6 +33,9 @@
     <!-- Задание 12 + дополнительные прототипы -->
     <script src="task12.js?v=20260915"></script>
     <script src="task12_extra.js?v=20260915"></script>
+    <!-- Задание 13 + дополнительные прототипы -->
+    <script src="task13.js?v=20260915"></script>
+    <script src="task13_extra.js?v=20260915"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -1508,9 +1511,6 @@ body.auth-locked > :not(#passwordGate){
     </aside>
 
     <main class="main-content" id="generation-section">
-        <div class="generator-mode-nav">
-            <button type="button" class="generator-mode-btn" onclick="document.getElementById('task-total-panel')?.scrollIntoView({behavior:'smooth', block:'start'});">Генерация</button>
-        </div>
         <h2 style="margin: 0 0 8px 0; text-align: center;">Генератор вариантов</h2>
         <div style="text-align: center; color: #bbb; font-size: 1.05em; margin-bottom: 25px; border-bottom: 1px dashed #555; padding-bottom: 15px;">ОГЭ по математике</div>
         
@@ -1592,11 +1592,13 @@ body.auth-locked > :not(#passwordGate){
         <div id="task-total-panel" class="task-total-panel">
             <div class="task-total-text">📊 Набрано задач: <span id="task-total-count">0</span></div>
             <button type="button" class="task-total-reset" onclick="resetTaskCounts()">🔄 Сбросить набор</button>
+            <button type="button" class="task-total-reset" onclick="(function(){const group=document.getElementById('btn-group');const visible=group&&window.getComputedStyle(group).display!=='none';const target=visible?group:document.getElementById('generation-actions-anchor');if(target)target.scrollIntoView({behavior:'smooth',block:'center'});})();">➡️ К генерации</button>
             <div id="task-total-note" class="task-total-note">Набор заданий сброшен.</div>
         </div>
 
         <div id="dynamic-tasks"></div>
 
+        <div id="generation-actions-anchor" style="scroll-margin-top:90px;"></div>
         <button class="btn-generate" onclick="safeGenerateVariant(event)">Сгенерировать вариант</button>
         
         <div id="info-board"></div>
@@ -2820,7 +2822,7 @@ body.auth-locked > :not(#passwordGate){
         const hasPracticeDatabase = window.ogePracticeDatabase && Object.keys(window.ogePracticeDatabase).length > 0;
 
         if (!hasRegularDatabase && !hasPracticeDatabase) {
-            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js, task11.js, task12.js и другие файлы заданий.';
+            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js, task11.js, task12.js, task13.js и другие файлы заданий.';
             document.getElementById('info-board').style.display = 'block';
             return;
         }
@@ -3430,7 +3432,7 @@ body.auth-locked > :not(#passwordGate){
                 let theoryHtml = "";
                 if (item.theory) {
                     const theoryTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
-                    const isTask11Theory = theoryTaskNumber === 11;
+                    const isTask11Theory = theoryTaskNumber === 11 || theoryTaskNumber === 13;
 
                     // Сохраняем рисунок именно текущего задания, чтобы в разборе ученик видел свой чертёж.
                     let currentTaskSvgCode = item.gameSvg !== undefined ? item.gameSvg : (standaloneSvg || mainSvg || item.svg || item.svg_code || "");
