@@ -34,8 +34,8 @@
     <script src="task12.js?v=20260915"></script>
     <script src="task12_extra.js?v=20260915"></script>
     <!-- Задание 13 + дополнительные прототипы -->
-    <script src="task13.js?v=20260915"></script>
-    <script src="task13_extra.js?v=20260915"></script>
+    <script src="task13.js?v=20260916-2"></script>
+    <script src="task13_extra.js?v=20260916-2"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2069,8 +2069,8 @@ body.auth-locked > :not(#passwordGate){
                 // Задания 1–5 ОГЭ формируются единым связанным комплектом.
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
-                // Задания 13+ в ОГЭ пока не подключены. Подключим их по мере готовности.
-                if (taskNumber > 12) return false;
+                // Задания до 13 включительно подключены к генератору.
+                if (taskNumber > 13) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
