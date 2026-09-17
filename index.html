@@ -34,8 +34,8 @@
     <script src="task12.js?v=20260915"></script>
     <script src="task12_extra.js?v=20260915"></script>
     <!-- Задание 13 + дополнительные прототипы -->
-    <script src="task13.js?v=20260916-2"></script>
-    <script src="task13_extra.js?v=20260916-2"></script>
+    <script src="task13.js?v=20260917-answers2x2-1"></script>
+    <script src="task13_extra.js?v=20260917-answers2x2-1"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -1364,6 +1364,42 @@ body.auth-locked > :not(#passwordGate){
 }
 </style>
 <!-- THEORY_ANALOG_DRAFTS_V2_20260821 -->
+
+<style id="task13-main-choices-2x2-fix">
+    /* Задание 13: текстовые варианты ответа всегда 2 × 2.
+       !important нужен, чтобы перебить старую inline-разметку repeat(4,...). */
+    .task13-choice-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        column-gap: 42px !important;
+        row-gap: 12px !important;
+        width: 100% !important;
+        max-width: 820px !important;
+        margin: 12px auto 6px !important;
+        align-items: start !important;
+    }
+    .task13-choice-grid > div {
+        min-width: 0 !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 7px !important;
+    }
+    .task13-choice-grid > div > b {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+    .task13-choice-grid > div > span {
+        min-width: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    @media (max-width: 760px) {
+        .task13-choice-grid {
+            column-gap: 24px !important;
+        }
+    }
+</style>
+
 </head>
 <body class="auth-locked">
 

@@ -28,12 +28,15 @@
         const padL = 18, padR = 20, y = 31;
         const X = x => padL + (x - min) / (max - min) * (width - padL - padR);
         let s = `<svg viewBox="0 0 ${width} ${height}" style="display:block;width:100%;height:auto;overflow:visible">`;
+        // Для варианта «нет решений» числовую прямую не рисуем вообще.
+        if (spec.empty) {
+            s += `<text x="10" y="38" font-size="17" font-family="Arial" font-weight="600" fill="${AXIS}">нет решений</text>`;
+            s += `</svg>`;
+            return s;
+        }
         s += `<line x1="${padL}" y1="${y}" x2="${width-padR}" y2="${y}" stroke="${AXIS}" stroke-width="1.8"/>`;
         s += `<path d="M${width-padR-7},${y-4} L${width-padR},${y} L${width-padR-7},${y+4}" fill="none" stroke="${AXIS}" stroke-width="1.6"/>`;
         s += `<text x="${width-padR-5}" y="${y+17}" font-size="13" font-family="serif" font-style="italic">x</text>`;
-        if (spec.empty) {
-            s += `<text x="${width/2}" y="${y+2}" text-anchor="middle" font-size="14" font-family="Arial" fill="${MUTED}">нет решений</text>`;
-        }
         (spec.segments || []).forEach(seg => {
             const x1 = Number.isFinite(seg.from) ? X(seg.from) : padL;
             const x2 = Number.isFinite(seg.to) ? X(seg.to) : width-padR;
@@ -85,8 +88,12 @@
     function noLine() { return {segments:[], points:[], empty:true}; }
 
     function choicesHtml(items, cols=4) {
-        return `<div class="task11-extra-after-diagram" style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:8px 16px;margin-top:10px;line-height:1.45;">` +
-            items.map((x,i)=>`<div><b>${i+1})</b> ${x}</div>`).join('') + `</div>`;
+        // Для задания 13 текстовые варианты всегда размещаем 2×2:
+        // два варианта сверху и два снизу. Так длинные интервалы не ломаются
+        // и номер варианта не отрывается от самой формулы.
+        const actualCols = items.length === 4 ? 2 : Math.min(cols, items.length || 1);
+        return `<div class="task13-choice-grid" style="display:grid;grid-template-columns:repeat(${actualCols},minmax(0,1fr));column-gap:42px;row-gap:10px;margin:12px auto 4px;max-width:820px;line-height:1.45;">` +
+            items.map((x,i)=>`<div style="display:flex;align-items:flex-start;gap:7px;min-width:0;"><b style="flex:0 0 auto;white-space:nowrap;">${i+1})</b><span style="display:inline-block;min-width:0;white-space:nowrap;">${x}</span></div>`).join('') + `</div>`;
     }
 
     function stacked(statement, choices='') {
