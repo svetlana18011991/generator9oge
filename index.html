@@ -36,6 +36,8 @@
     <!-- Задание 13 + дополнительные прототипы -->
     <script src="task13.js?v=20260917-answers2x2-1"></script>
     <script src="task13_extra.js?v=20260917-answers2x2-1"></script>
+    <script src="task14.js?v=20260917-1"></script>
+    <script src="task14_extra.js?v=20260917-1"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2106,7 +2108,7 @@ body.auth-locked > :not(#passwordGate){
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
                 // Задания до 13 включительно подключены к генератору.
-                if (taskNumber > 13) return false;
+                if (taskNumber > 14) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -2858,7 +2860,7 @@ body.auth-locked > :not(#passwordGate){
         const hasPracticeDatabase = window.ogePracticeDatabase && Object.keys(window.ogePracticeDatabase).length > 0;
 
         if (!hasRegularDatabase && !hasPracticeDatabase) {
-            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js, task11.js, task12.js, task13.js и другие файлы заданий.';
+            document.getElementById('info-board').innerHTML = '<b>Критическая ошибка:</b> базы заданий не загрузились. Проверьте файлы oge_practice.js, task6.js, task7.js, task8.js, task9.js, task10.js, task11.js, task12.js, task13.js, task14.js и другие файлы заданий.';
             document.getElementById('info-board').style.display = 'block';
             return;
         }
