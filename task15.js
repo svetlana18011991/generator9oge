@@ -8,17 +8,28 @@
     }
     const L=(x1,y1,x2,y2,sw=2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C}" stroke-width="${sw}"/>`;
     const T=(x,y,s)=>`<text x="${x}" y="${y}" font-size="15" font-family="serif" fill="${C}">${s}</text>`;
+    const F=n=>Number(n.toFixed(1));
+    function tickOnSegment(x1,y1,x2,y2,t=0.5,len=12,sw=2,count=1,gap=5){
+        const dx=x2-x1, dy=y2-y1;
+        const norm=Math.hypot(dx,dy)||1;
+        const ux=dx/norm, uy=dy/norm;
+        const px=x1+dx*t, py=y1+dy*t;
+        const ox=-uy*(len/2), oy=ux*(len/2);
+        const drawAt=(shift)=>L(F(px+ux*shift-ox),F(py+uy*shift-oy),F(px+ux*shift+ox),F(py+uy*shift+oy),sw);
+        if(count===2) return drawAt(-gap/2)+drawAt(gap/2);
+        return drawAt(0);
+    }
     function triSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C'));}
     function extSvg(){return wrap(L(45,120,125,25)+L(125,25,190,120)+L(45,120,235,120)+T(31,140,'A')+T(121,20,'B')+T(185,140,'C'));}
     function rightSvg(){return wrap(L(45,120,200,120)+L(200,120,200,30)+L(45,120,200,30)+L(188,120,188,108)+L(188,108,200,108)+T(31,140,'A')+T(204,26,'B')+T(204,140,'C'));}
-    function isoSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+L(87,75,96,83,3)+L(164,83,173,75,3)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C'));}
+    function isoSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+tickOnSegment(50,120,130,25,0.46,13,2.5)+tickOnSegment(130,25,210,120,0.54,13,2.5)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C'));}
     function bisectorSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,181,81)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(185,78,'D'));}
-    function altitudeSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,125,120)+L(125,120,138,120)+L(138,120,138,107)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(120,140,'H'));}
+    function altitudeSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,125,120)+L(125,120,138,120)+L(138,120,138,107)+L(125,107,138,107)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(120,140,'H'));}
     function medianSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,132,120)+L(86,114,86,126)+L(176,114,176,126)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(127,140,'M'));}
     function equiSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+L(130,25,130,120)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C')+T(125,140,'M'));}
-    function midSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(85,72,171,72)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(72,72,'M')+T(176,72,'N'));}
-    function akSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,177,77)+L(105,94,112,103,3)+L(197,95,204,103,3)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(181,73,'K'));}
-    function bmEqSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,132,120)+L(86,114,86,126)+L(176,114,176,126)+L(127,70,139,70)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(127,140,'M'));}
+    function midSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(85,72,171,72)+tickOnSegment(45,120,85,72,0.5,11,2.2,1)+tickOnSegment(85,72,125,25,0.5,11,2.2,1)+tickOnSegment(125,25,171,72,0.5,11,2.2,2)+tickOnSegment(171,72,220,120,0.5,11,2.2,2)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(72,72,'M')+T(176,72,'N'));}
+    function akSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,177,77)+tickOnSegment(45,120,177,77,0.56,11,2.2,1)+tickOnSegment(177,77,220,120,0.55,11,2.2,1)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(181,73,'K'));}
+    function bmEqSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,132,120)+tickOnSegment(45,120,132,120,0.36,11,2.2,1)+tickOnSegment(132,120,220,120,0.64,11,2.2,1)+tickOnSegment(125,25,132,120,0.48,11,2.2,1)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(127,140,'M'));}
     const task = (text, answer, svg_code='') => ({text, answer:String(answer), ...(svg_code?{svg_code}:{})});
     const proto = (desc, theory_task, theory_sol, tasks, svg_code='') => ({desc, svg_code, theory_task, theory_sol, tasks});
 
@@ -391,6 +402,19 @@
             )
         ]
     };
+
+    function normalizeTask15Text(value){
+        return String(value).replace(/(\d+)√(\d+)/g, '$$$1\\sqrt{$2}$$');
+    }
+    function normalizeTask15Block(db){
+        db.prototypes.forEach(p=>{
+            p.desc = normalizeTask15Text(p.desc);
+            p.theory_task = normalizeTask15Text(p.theory_task);
+            p.theory_sol = normalizeTask15Text(p.theory_sol);
+            (p.tasks||[]).forEach(t=>{ t.text = normalizeTask15Text(t.text); });
+        });
+    }
+    normalizeTask15Block(task15Data);
     window.database[15] = task15Data;
     window.database["task15"] = task15Data;
 })();

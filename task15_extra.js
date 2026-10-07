@@ -5,8 +5,25 @@
     function wrap(body,w=280,h=165){return `<div style="width:100%;max-width:310px;margin:4px auto;"><svg viewBox="0 0 ${w} ${h}" style="display:block;width:100%;height:auto;overflow:visible" xmlns="http://www.w3.org/2000/svg">${body}</svg></div>`;}
     const L=(x1,y1,x2,y2,sw=2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C}" stroke-width="${sw}"/>`;
     const T=(x,y,s)=>`<text x="${x}" y="${y}" font-size="14" font-family="serif" fill="${C}">${s}</text>`;
+    const F=n=>Number(n.toFixed(1));
+    function tickOnSegment(x1,y1,x2,y2,t=0.5,len=12,sw=2,count=1,gap=5){
+        const dx=x2-x1, dy=y2-y1;
+        const norm=Math.hypot(dx,dy)||1;
+        const ux=dx/norm, uy=dy/norm;
+        const px=x1+dx*t, py=y1+dy*t;
+        const ox=-uy*(len/2), oy=ux*(len/2);
+        const drawAt=(shift)=>L(F(px+ux*shift-ox),F(py+uy*shift-oy),F(px+ux*shift+ox),F(py+uy*shift+oy),sw);
+        if(count===2) return drawAt(-gap/2)+drawAt(gap/2);
+        return drawAt(0);
+    }
+    function rightAngleSquare(x,y,ux,uy,vx,vy,size=11){
+        const x1=F(x+ux*size), y1=F(y+uy*size);
+        const x2=F(x+ux*size+vx*size), y2=F(y+uy*size+vy*size);
+        const x3=F(x+vx*size), y3=F(y+vy*size);
+        return L(F(x),F(y),x1,y1,2)+L(x1,y1,x2,y2,2)+L(x2,y2,x3,y3,2)+L(x3,y3,F(x),F(y),2);
+    }
     function rightSvg(){return wrap(L(45,130,215,130)+L(215,130,215,28)+L(45,130,215,28)+L(202,130,202,117)+L(202,117,215,117)+T(31,149,'A')+T(220,25,'B')+T(220,149,'C'));}
-    function rightAltSvg(){return wrap(L(45,130,215,130)+L(215,130,215,28)+L(45,130,215,28)+L(215,130,125,76)+L(119,82,128,87)+L(128,87,134,78)+T(31,149,'A')+T(220,25,'B')+T(220,149,'C')+T(112,75,'H'));}
+    function rightAltSvg(){const Hx=170, Hy=55; const ux=0.8575, uy=-0.5145, vx=0.5145, vy=0.8575; return wrap(L(45,130,215,130)+L(215,130,215,28)+L(45,130,215,28)+L(215,130,Hx,Hy)+rightAngleSquare(Hx,Hy,ux,uy,vx,vy,10)+T(31,149,'A')+T(220,25,'B')+T(220,149,'C')+T(156,52,'H'));}
     function circumSvg(){return wrap(`<circle cx="140" cy="88" r="62" fill="none" stroke="${C}" stroke-width="2"/>`+L(86,121,140,26)+L(140,26,194,121)+L(86,121,194,121)+T(72,141,'A')+T(136,21,'B')+T(198,141,'C'));}
     function midAreaSvg(){return wrap(L(45,130,135,25)+L(135,25,225,130)+L(45,130,225,130)+L(90,78,180,78)+T(31,150,'A')+T(131,20,'B')+T(229,150,'C')+T(77,78,'D')+T(184,78,'E'));}
     function medianHeightSvg(){return wrap(L(45,130,135,25)+L(135,25,225,130)+L(45,130,225,130)+L(135,25,135,130)+L(135,25,150,130)+T(31,150,'A')+T(131,20,'B')+T(229,150,'C')+T(145,150,'M')+T(126,150,'H'));}
@@ -46,14 +63,14 @@
             ),
             proto(
                 "15.Д3. Прямоугольный треугольник: высота к гипотенузе и синус",
-                "В прямоугольном треугольнике ABC катет AC=12, а высота CH, опущенная на гипотенузу, равна 6√3. Найдите sin ∠ABC.",
+                "В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;12, а высота CH, опущенная на гипотенузу, равна 6√3. Найдите sin&nbsp;∠ABC.",
                 "Для прямоугольного треугольника \\(CH=AC\\cdot\\cos B\\). Значит \\(\\cos B=\\frac{6\\sqrt3}{12}=\\frac{\\sqrt3}{2}\\), поэтому \\(\\sin B=\\frac12=0{,}5\\).<br><br><b>Ответ:</b> 0,5",
                 [
-                    task("В прямоугольном треугольнике ABC катет AC=10, а высота CH, опущенная на гипотенузу, равна 5√3. Найдите sin ∠ABC.", "0,5"),
-                    task("В прямоугольном треугольнике ABC катет AC=20, а высота CH, опущенная на гипотенузу, равна 5√7. Найдите sin ∠ABC.", "0,75"),
-                    task("В прямоугольном треугольнике ABC катет AC=15, а высота CH, опущенная на гипотенузу, равна 3√21. Найдите sin ∠ABC.", "0,4"),
-                    task("В прямоугольном треугольнике ABC катет AC=20, а высота CH, опущенная на гипотенузу, равна 2√51. Найдите sin ∠ABC.", "0,7"),
-                    task("В прямоугольном треугольнике ABC катет AC=25, а высота CH, опущенная на гипотенузу, равна 10√6. Найдите sin ∠ABC.", "0,2")
+                    task("В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;10, а высота CH, опущенная на гипотенузу, равна 5√3. Найдите sin&nbsp;∠ABC.", "0,5"),
+                    task("В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;20, а высота CH, опущенная на гипотенузу, равна 5√7. Найдите sin&nbsp;∠ABC.", "0,75"),
+                    task("В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;15, а высота CH, опущенная на гипотенузу, равна 3√21. Найдите sin&nbsp;∠ABC.", "0,4"),
+                    task("В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;20, а высота CH, опущенная на гипотенузу, равна 2√51. Найдите sin&nbsp;∠ABC.", "0,7"),
+                    task("В прямоугольном треугольнике ABC катет AC&nbsp;=&nbsp;25, а высота CH, опущенная на гипотенузу, равна 10√6. Найдите sin&nbsp;∠ABC.", "0,2")
                 ],
                 rightAltSvg()
             ),
@@ -137,6 +154,19 @@
             )
         ]
     };
+
+    function normalizeTask15ExtraText(value){
+        return String(value).replace(/(\d+)√(\d+)/g, '$$$1\\sqrt{$2}$$');
+    }
+    function normalizeTask15ExtraBlock(db){
+        db.prototypes.forEach(p=>{
+            p.desc = normalizeTask15ExtraText(p.desc);
+            p.theory_task = normalizeTask15ExtraText(p.theory_task);
+            p.theory_sol = normalizeTask15ExtraText(p.theory_sol);
+            (p.tasks||[]).forEach(t=>{ t.text = normalizeTask15ExtraText(t.text); });
+        });
+    }
+    normalizeTask15ExtraBlock(task15Extra);
     window.extraDatabase[15]=task15Extra;
     window.extraDatabase["task15"]=task15Extra;
 })();
