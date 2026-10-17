@@ -5,6 +5,8 @@
     // Каждому прототипу соответствует один разбор и пять тренировочных аналогов.
     const task15Extra = {
         title: "Задание 15. Дополнительные задачи",
+        // Порядок прототипов обязателен и при выключенном глобальном перемешивании.
+        preserveTopicOrder: true,
         prototypes: [
         // I. Углы и биссектрисы
         {
@@ -832,7 +834,7 @@
         // VI. Площади треугольников
         {
           "desc": "15.Д29. Площадь по двум частям основания и высоте (рисунок)",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"35,126 145,25 233,126 35,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"145\" y1=\"25\" x2=\"145\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"30\" y=\"146\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">15</text><text x=\"174\" y=\"146\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">6</text><text x=\"150\" y=\"87\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">8</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"35,126 145,25 233,126 35,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"145\" y1=\"25\" x2=\"145\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"87\" y=\"146\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">a</text><text x=\"186\" y=\"146\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">b</text><text x=\"153\" y=\"87\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">h</text></svg></div>",
           "theory_task": "Найдите площадь треугольника, изображённого на рисунке: высота равна 8, основание разбито на отрезки 15 и 6.",
           "theory_sol": "Основание равно 15 + 6 = 21. Площадь \\(S=\\frac12 ah=\\frac{(15+6)\\cdot8}{2}=84\\).<br><br><b>Ответ:</b> 84",
           "tasks": [
