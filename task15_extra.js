@@ -10,11 +10,11 @@
         style.textContent = `
             .t15x-nowrap{white-space:nowrap;}
             .t15x-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1;margin:0 .08em;font-size:.95em;}
-            .t15x-frac-top{display:block;padding:0 .18em .05em;border-bottom:1.4px solid currentColor;}
-            .t15x-frac-bottom{display:block;padding:.05em .18em 0;}
+            .t15x-frac-top{display:block;padding:0 .18em .06em;border-bottom:1.4px solid currentColor;}
+            .t15x-frac-bottom{display:block;padding:.06em .18em 0;}
             .t15x-sqrt{display:inline-flex;align-items:flex-start;vertical-align:middle;white-space:nowrap;}
-            .t15x-sqrt-sign{display:inline-block;font-size:1.05em;line-height:1;padding-right:1px;}
-            .t15x-sqrt-body{display:inline-block;border-top:1.4px solid currentColor;padding:0 .18em 0 .12em;margin-top:.08em;line-height:1.05;}
+            .t15x-sqrt-sign{display:inline-block;font-size:1.08em;line-height:1;margin-right:-2px;}
+            .t15x-sqrt-body{display:inline-block;border-top:1.4px solid currentColor;padding:0 .18em 0 .12em;margin-top:.12em;line-height:1.05;}
         `;
         document.head.appendChild(style);
     }
@@ -23,6 +23,9 @@
     }
     function sqrtHtml(value){
         return `<span class="t15x-nowrap"><span class="t15x-sqrt"><span class="t15x-sqrt-sign">√</span><span class="t15x-sqrt-body">${value}</span></span></span>`;
+    }
+    function normalizeCoef(coef){
+        return (!coef || coef === '1') ? '' : coef;
     }
     function formatInlineMath(math){
         let m = math;
@@ -33,27 +36,34 @@
              .replace(/\\cdot/g, '·')
              .replace(/\\angle/g, '∠');
         m = m.replace(/\{,\}/g, ',');
+        m = m.replace(/\s*=\s*/g, '&nbsp;=&nbsp;');
+        m = m.replace(/\s*·\s*/g, '&nbsp;·&nbsp;');
         let prev = '';
         while(prev !== m){
             prev = m;
             m = m.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_, a, b) => fracHtml(formatInlineMath(a), formatInlineMath(b)));
         }
-        m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}/g, (_, coef, rad) => `${coef || ''}${sqrtHtml(formatInlineMath(rad))}`);
-        m = m.replace(/\^\\circ/g, '°').replace(/\^\{\\circ\}/g, '°');
+        m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}\/(\d+)/g, (_, coef, rad, den) => fracHtml(`${normalizeCoef(coef)}${sqrtHtml(formatInlineMath(rad))}`, den));
+        m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}/g, (_, coef, rad) => `${normalizeCoef(coef)}${sqrtHtml(formatInlineMath(rad))}`);
+        m = m.replace(/\b(sin|cos|tg)\s+([A-ZА-Я])/g, '<span class="t15x-nowrap">$1 $2</span>');
+        m = m.replace(/\^(\\circ|\{\\circ\})/g, '°');
         m = m.replace(/\^2/g, '<sup>2</sup>').replace(/\^3/g, '<sup>3</sup>');
         return m;
     }
     function formatTask15Text(text){
         if(typeof text !== 'string') return text;
         let t = text;
+        t = t.replace(/\s*=\s*/g, '&nbsp;=&nbsp;');
+        t = t.replace(/\s+·\s+/g, '&nbsp;·&nbsp;');
+        t = t.replace(/\$(.*?)\$\/(\d+)/g, (_, m, den) => fracHtml(formatInlineMath(m), den));
+        t = t.replace(/\\\((.*?)\\\)\/(\d+)/g, (_, m, den) => fracHtml(formatInlineMath(m), den));
         t = t.replace(/\\\((.*?)\\\)/g, (_, m) => formatInlineMath(m));
         t = t.replace(/\$(.*?)\$/g, (_, m) => formatInlineMath(m));
-        t = t.replace(/(\d+)?√(\d+(?:[.,]\d+)?)/g, (_, coef, rad) => `${coef || ''}${sqrtHtml(rad)}`);
+        t = t.replace(/(\d+)?√(\d+(?:[.,]\d+)?)\/(\d+)/g, (_, coef, rad, den) => fracHtml(`${normalizeCoef(coef)}${sqrtHtml(rad)}`, den));
+        t = t.replace(/(\d+)?√(\d+(?:[.,]\d+)?)/g, (_, coef, rad) => `${normalizeCoef(coef)}${sqrtHtml(rad)}`);
         t = t.replace(/(?<![\d>])(\d+)\s*\/\s*(\d+)(?![\d<])/g, (_, a, b) => fracHtml(a, b));
         t = t.replace(/\b(sin|cos|tg)\s+([A-ZА-Я])/g, '<span class="t15x-nowrap">$1 $2</span>');
-        t = t.replace(/\s=\s/g, '&nbsp;=&nbsp;');
-        t = t.replace(/\s+·\s+/g, '&nbsp;·&nbsp;');
-        t = t.replace(/\b([A-Z]{1,3})\s+(?=(?:равен|равна|прямой|прямого))/g, '<span class="t15x-nowrap">$1</span> ');
+        t = t.replace(/\b([A-Z]{1,3}|∠[A-Z]{1,3})\s+(?=(?:равен|равна|прямой|прямого))/g, '<span class="t15x-nowrap">$1</span> ');
         return t;
     }
     function decorateTask15Extra(db){
@@ -132,7 +142,7 @@
         },
         {
           "desc": "15.Д3. Углы при параллельных прямых",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"25\" y1=\"48\" x2=\"240\" y2=\"48\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"25\" y1=\"127\" x2=\"240\" y2=\"127\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"98\" y1=\"158\" x2=\"145\" y2=\"20\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"185\" y1=\"158\" x2=\"145\" y2=\"48\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"149\" y=\"38\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">1</text><text x=\"174\" y=\"119\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">2</text><text x=\"137\" y=\"77\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">3</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"25\" y1=\"48\" x2=\"240\" y2=\"48\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"25\" y1=\"127\" x2=\"240\" y2=\"127\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"98\" y1=\"158\" x2=\"145\" y2=\"20\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"185\" y1=\"158\" x2=\"135\" y2=\"20\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"149\" y=\"38\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">1</text><text x=\"174\" y=\"119\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">2</text><text x=\"137\" y=\"77\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">3</text></svg></div>",
           "theory_task": "Прямые m и n параллельны. Найдите ∠3, если ∠1 = 77°, ∠2 = 88°. Ответ дайте в градусах.",
           "theory_sol": "По параллельности соответствующий угол равен 77°. В треугольнике сумма углов 180°, поэтому ∠3 = 180° − 77° − 88° = 15°.<br><br><b>Ответ:</b> 15",
           "tasks": [
@@ -749,7 +759,7 @@
         // V. Подобие и средние линии
         {
           "desc": "15.Д24. Параллельный отрезок: найти AM",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 135,25 226,126 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"82\" y1=\"82\" x2=\"178\" y2=\"82\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"19\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"71\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"183\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 135,25 226,126 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"82.5\" y1=\"82\" x2=\"186.4\" y2=\"82\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"19\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"71\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"191\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
           "theory_task": "Прямая, параллельная стороне AC треугольника ABC, пересекает стороны AB и BC в точках M и N соответственно, AB = 24, AC = 21, MN = 14. Найдите AM.",
           "theory_sol": "По подобию BM/BA = MN/AC. Поэтому \\(AM=AB-BM=AB\\cdot(1-\\frac{MN}{AC})=24\\cdot(1-\\frac{14}{21})=8\\).<br><br><b>Ответ:</b> 8",
           "tasks": [
@@ -807,7 +817,7 @@
         },
         {
           "desc": "15.Д26. Площадь подобных треугольников через параллельный отрезок",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 135,25 226,126 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"82\" y1=\"82\" x2=\"178\" y2=\"82\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"19\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"71\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"183\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 135,25 226,126 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"82.5\" y1=\"82\" x2=\"186.4\" y2=\"82\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"19\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"71\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"191\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
           "theory_task": "Прямая, параллельная стороне AC треугольника ABC, пересекает стороны AB и BC в точках M и N соответственно, AC = 18, MN = 8. Площадь треугольника ABC равна 81. Найдите площадь треугольника MBN.",
           "theory_sol": "Рассмотрим треугольники ABC и MBN: они подобны по двум углам (угол B общий, остальные соответственные при параллельных MN и AC). Площади относятся как квадраты сходственных сторон: \\(S_{MBN}=\\left(\\frac{MN}{AC}\\right)^2 S_{ABC}=\\left(\\frac{8}{18}\\right)^2\\cdot81=16\\).<br><br><b>Ответ:</b> 16",
           "tasks": [
@@ -1189,7 +1199,7 @@
         },
         {
           "desc": "15.Д39. Высота к гипотенузе по катетам",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 226,126 226,25 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"226\" y1=\"126\" x2=\"183.4\" y2=\"48.4\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"185.4,58.1 177.9,54.0 182.0,46.5\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"229\" y=\"21\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"170\" y=\"44\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 226,126 226,25 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"226\" y1=\"126\" x2=\"183.4\" y2=\"48.4\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"183.4,48.4 192.2,43.6 197.0,52.3 188.2,57.2\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"229\" y=\"21\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"170\" y=\"44\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "Катеты прямоугольного треугольника равны 15 и 20. Найдите высоту, проведённую к гипотенузе.",
           "theory_sol": "Гипотенуза равна \\(c=\\sqrt{15^2+20^2}=25\\). Приравнивая площади, \\(\\frac{ab}{2}=\\frac{ch}{2}\\), получаем \\(h=12\\).<br><br><b>Ответ:</b> 12",
           "tasks": [
@@ -1218,7 +1228,7 @@
         },
         {
           "desc": "15.Д40. Высота к гипотенузе по её отрезкам",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"45,130 215,130 215,28 45,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"215\" y1=\"130\" x2=\"170\" y2=\"55\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"166,63 174,68 178,60\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"220\" y=\"25\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"220\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"156\" y=\"52\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"45,130 215,130 215,28 45,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"215\" y1=\"130\" x2=\"170\" y2=\"55\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"170,55 178.6,49.9 183.7,58.4 175.1,63.6\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"220\" y=\"25\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"220\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"156\" y=\"52\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "На гипотенузу AB прямоугольного треугольника ABC опущена высота CH, AH = 4, BH = 16. Найдите CH.",
           "theory_sol": "По свойству высоты к гипотенузе \\(CH^2=AH\\cdot BH=4\\cdot16\\). Поэтому \\(CH=8\\).<br><br><b>Ответ:</b> 8",
           "tasks": [
@@ -1394,7 +1404,7 @@
         },
         {
           "desc": "15.Д46. Косинус при известной высоте в равнобедренном треугольнике",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"70,130 135,0 200,130 70,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"70\" y1=\"130\" x2=\"174\" y2=\"78\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"170.4,70.8 163.2,74.4 166.8,81.6\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"56\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"17\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"203\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"180\" y=\"76\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"70,130 135,8 200,130 70,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"70\" y1=\"130\" x2=\"171.3\" y2=\"76.1\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"171.3,76.1 176.0,84.9 167.1,89.6 162.4,80.8\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"56\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"15\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"203\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"178\" y=\"78\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "В треугольнике ABC AB = BC, а высота AH делит сторону BC на отрезки BH = 21 и CH = 14. Найдите cos B.",
           "theory_sol": "AB = BC = BH + CH = 35. В прямоугольном треугольнике ABH \\(\\cos B=\\frac{BH}{AB}=\\frac{21}{35}=0,6\\).<br><br><b>Ответ:</b> 0,6",
           "tasks": [
@@ -1423,7 +1433,7 @@
         },
         {
           "desc": "15.Д47. Косинус острого угла по высоте и стороне",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"65,135 135,12 229,129 65,135\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"65\" y1=\"135\" x2=\"167.6\" y2=\"52.6\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"164.1,61.6 159.0,55.2 165.4,50.1\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"51\" y=\"154\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"127\" y=\"10\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"233\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"174\" y=\"51\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"65,135 135,12 229,129 65,135\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"65\" y1=\"135\" x2=\"167.6\" y2=\"52.6\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"167.6,52.6 173.9,60.4 166.1,66.6 159.8,58.8\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"51\" y=\"154\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"127\" y=\"10\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"233\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"174\" y=\"51\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "В остроугольном треугольнике ABC высота AH равна √2275, а сторона AB равна 50. Найдите cos B.",
           "theory_sol": "Из прямоугольного треугольника ABH получаем \\(BH=\\sqrt{AB^2-AH^2}=15\\). Поэтому \\(\\cos B=\\frac{BH}{AB}=\\frac{15}{50}=0,3\\).<br><br><b>Ответ:</b> 0,3",
           "tasks": [
