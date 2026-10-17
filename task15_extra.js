@@ -2,6 +2,69 @@
 (function () {
     window.extraDatabase = window.extraDatabase || {};
     // Задание 15 ЭКСТРА. Порядок: темы и усложнение внутри каждой темы.
+    const EXTRA15_STYLE_ID = "task15-extra-format-style";
+    function injectExtra15Styles(){
+        if(document.getElementById(EXTRA15_STYLE_ID)) return;
+        const style = document.createElement("style");
+        style.id = EXTRA15_STYLE_ID;
+        style.textContent = `
+            .t15x-nowrap{white-space:nowrap;}
+            .t15x-frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1;margin:0 .08em;font-size:.95em;}
+            .t15x-frac-top{display:block;padding:0 .18em .05em;border-bottom:1.4px solid currentColor;}
+            .t15x-frac-bottom{display:block;padding:.05em .18em 0;}
+            .t15x-sqrt{display:inline-flex;align-items:flex-start;vertical-align:middle;white-space:nowrap;}
+            .t15x-sqrt-sign{display:inline-block;font-size:1.05em;line-height:1;padding-right:1px;}
+            .t15x-sqrt-body{display:inline-block;border-top:1.4px solid currentColor;padding:0 .18em 0 .12em;margin-top:.08em;line-height:1.05;}
+        `;
+        document.head.appendChild(style);
+    }
+    function fracHtml(a,b){
+        return `<span class="t15x-nowrap"><span class="t15x-frac"><span class="t15x-frac-top">${a}</span><span class="t15x-frac-bottom">${b}</span></span></span>`;
+    }
+    function sqrtHtml(value){
+        return `<span class="t15x-nowrap"><span class="t15x-sqrt"><span class="t15x-sqrt-sign">√</span><span class="t15x-sqrt-body">${value}</span></span></span>`;
+    }
+    function formatInlineMath(math){
+        let m = math;
+        m = m.replace(/\\operatorname\{tg\}/g, 'tg')
+             .replace(/\\sin/g, 'sin')
+             .replace(/\\cos/g, 'cos')
+             .replace(/\\tg/g, 'tg')
+             .replace(/\\cdot/g, '·')
+             .replace(/\\angle/g, '∠');
+        m = m.replace(/\{,\}/g, ',');
+        let prev = '';
+        while(prev !== m){
+            prev = m;
+            m = m.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_, a, b) => fracHtml(formatInlineMath(a), formatInlineMath(b)));
+        }
+        m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}/g, (_, coef, rad) => `${coef || ''}${sqrtHtml(formatInlineMath(rad))}`);
+        m = m.replace(/\^\\circ/g, '°').replace(/\^\{\\circ\}/g, '°');
+        m = m.replace(/\^2/g, '<sup>2</sup>').replace(/\^3/g, '<sup>3</sup>');
+        return m;
+    }
+    function formatTask15Text(text){
+        if(typeof text !== 'string') return text;
+        let t = text;
+        t = t.replace(/\\\((.*?)\\\)/g, (_, m) => formatInlineMath(m));
+        t = t.replace(/\$(.*?)\$/g, (_, m) => formatInlineMath(m));
+        t = t.replace(/(\d+)?√(\d+(?:[.,]\d+)?)/g, (_, coef, rad) => `${coef || ''}${sqrtHtml(rad)}`);
+        t = t.replace(/(?<![\d>])(\d+)\s*\/\s*(\d+)(?![\d<])/g, (_, a, b) => fracHtml(a, b));
+        t = t.replace(/\b(sin|cos|tg)\s+([A-ZА-Я])/g, '<span class="t15x-nowrap">$1 $2</span>');
+        t = t.replace(/\s=\s/g, '&nbsp;=&nbsp;');
+        t = t.replace(/\s+·\s+/g, '&nbsp;·&nbsp;');
+        t = t.replace(/\b([A-Z]{1,3})\s+(?=(?:равен|равна|прямой|прямого))/g, '<span class="t15x-nowrap">$1</span> ');
+        return t;
+    }
+    function decorateTask15Extra(db){
+        injectExtra15Styles();
+        for(const proto of db.prototypes || []){
+            proto.theory_task = formatTask15Text(proto.theory_task);
+            proto.theory_sol = formatTask15Text(proto.theory_sol);
+            for(const task of proto.tasks || []) task.text = formatTask15Text(task.text);
+        }
+        return db;
+    }
     // Каждому прототипу соответствует один разбор и пять тренировочных аналогов.
     const task15Extra = {
         title: "Задание 15. Дополнительные задачи",
@@ -1126,7 +1189,7 @@
         },
         {
           "desc": "15.Д39. Высота к гипотенузе по катетам",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 226,126 226,25 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"226\" y1=\"126\" x2=\"148\" y2=\"87\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"229\" y=\"21\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"140\" y=\"82\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"42,126 226,126 226,25 42,126\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"226\" y1=\"126\" x2=\"183.4\" y2=\"48.4\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"185.4,58.1 177.9,54.0 182.0,46.5\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"27\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"229\" y=\"21\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"229\" y=\"147\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"170\" y=\"44\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "Катеты прямоугольного треугольника равны 15 и 20. Найдите высоту, проведённую к гипотенузе.",
           "theory_sol": "Гипотенуза равна \\(c=\\sqrt{15^2+20^2}=25\\). Приравнивая площади, \\(\\frac{ab}{2}=\\frac{ch}{2}\\), получаем \\(h=12\\).<br><br><b>Ответ:</b> 12",
           "tasks": [
@@ -1331,7 +1394,7 @@
         },
         {
           "desc": "15.Д46. Косинус при известной высоте в равнобедренном треугольнике",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"70,130 135,0 200,130 70,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"70\" y1=\"130\" x2=\"174\" y2=\"78\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"169,88 179,93 184,83\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"56\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"17\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"203\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"178\" y=\"72\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"70,130 135,0 200,130 70,130\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"70\" y1=\"130\" x2=\"174\" y2=\"78\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"170.4,70.8 163.2,74.4 166.8,81.6\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"56\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"131\" y=\"17\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"203\" y=\"150\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"180\" y=\"76\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "В треугольнике ABC AB = BC, а высота AH делит сторону BC на отрезки BH = 21 и CH = 14. Найдите cos B.",
           "theory_sol": "AB = BC = BH + CH = 35. В прямоугольном треугольнике ABH \\(\\cos B=\\frac{BH}{AB}=\\frac{21}{35}=0,6\\).<br><br><b>Ответ:</b> 0,6",
           "tasks": [
@@ -1360,7 +1423,7 @@
         },
         {
           "desc": "15.Д47. Косинус острого угла по высоте и стороне",
-          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"65,135 135,12 229,129 65,135\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"65\" y1=\"135\" x2=\"168\" y2=\"53\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"51\" y=\"154\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"127\" y=\"10\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"233\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"172\" y=\"50\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
+          "svg_code": "<div style=\"width:100%;max-width:310px;margin:4px auto;\"><svg viewBox=\"0 0 270 165\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><polyline points=\"65,135 135,12 229,129 65,135\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"65\" y1=\"135\" x2=\"167.6\" y2=\"52.6\" stroke=\"#111827\" stroke-width=\"2\"/><polyline points=\"164.1,61.6 159.0,55.2 165.4,50.1\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"51\" y=\"154\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"127\" y=\"10\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"233\" y=\"149\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"174\" y=\"51\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">H</text></svg></div>",
           "theory_task": "В остроугольном треугольнике ABC высота AH равна √2275, а сторона AB равна 50. Найдите cos B.",
           "theory_sol": "Из прямоугольного треугольника ABH получаем \\(BH=\\sqrt{AB^2-AH^2}=15\\). Поэтому \\(\\cos B=\\frac{BH}{AB}=\\frac{15}{50}=0,3\\).<br><br><b>Ответ:</b> 0,3",
           "tasks": [
@@ -1739,6 +1802,7 @@
         }
         ]
     };
+    decorateTask15Extra(task15Extra);
     window.extraDatabase[15] = task15Extra;
     window.extraDatabase["task15"] = task15Extra;
 })();
