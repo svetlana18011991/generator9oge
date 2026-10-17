@@ -39,7 +39,7 @@
     <script src="task14.js?v=20260917-1"></script>
     <script src="task14_extra.js?v=20260917-1"></script>
     <script src="task15.js?v=20261017-1"></script>
-    <script src="task15_extra.js?v=20261017-2"></script>
+    <script src="task15_extra.js?v=20261017-5-ordered"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -245,6 +245,7 @@
             .extra-task-panel .row-header { align-items: flex-start; }
             .extra-task-title { white-space: normal; }
         }
+        .proto-topic-header { grid-column: 1 / -1; margin: 10px 0 2px; padding: 8px 10px; color: #8bdcf2; font-size: 0.9em; font-weight: 700; border-bottom: 1px solid rgba(139, 220, 242, 0.27); background: rgba(139, 220, 242, 0.07); border-radius: 5px; }
         .proto-item { display: flex; align-items: flex-start; gap: 8px; color: #bbb; cursor: pointer; }
         .proto-item input { margin-top: 3px; cursor: pointer; }
         .proto-select-all { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; color: #ff8c00; font-weight: bold; background: rgba(255,140,0,0.08); border: 1px solid rgba(255,140,0,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 4px; cursor: pointer; }
@@ -2847,7 +2848,13 @@ body.auth-locked > :not(#passwordGate){
                     <input type="checkbox" id="${getPrototypeMasterId(tid, kind)}" checked onchange="toggleAllProtos('${tid}', this.checked${kindArg})">
                     <span>Выбрать все / снять все</span>
                 </label>`;
+        let currentExtraTopic = '';
         data.prototypes.forEach((p, idx) => {
+            // Только для расширенных блоков, в которых заполнено поле topic.
+            if (kind === 'extra' && p.topic && p.topic !== currentExtraTopic) {
+                currentExtraTopic = p.topic;
+                listHTML += `<div class="proto-topic-header">${p.topic}</div>`;
+            }
             listHTML += `
                 <label class="proto-item" onmouseenter="showTooltip('${tid}', ${idx}, event${kindArg})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
                     <input type="checkbox" id="${getPrototypeCheckboxId(tid, idx, kind)}" checked onchange="syncProtoMaster('${tid}'${kindArg})">
@@ -2883,7 +2890,7 @@ body.auth-locked > :not(#passwordGate){
                 <div class="extra-task-panel">
                     <div class="row-header">
                         <label onclick="toggleSettings('${tid}', 'extra')">
-                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
+                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})${extraData.preserveTopicOrder === true ? " · по темам" : ""}</span>
                             <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
                         </label>
                         <div class="count-stepper" onclick="event.stopPropagation();">
@@ -3280,7 +3287,9 @@ body.auth-locked > :not(#passwordGate){
             const kind = block.kind || 'main';
             const isPracticeBlock = kind === 'practice';
             const sourceData = block.data;
-            const blockData = (kind === 'extra') ? { ...sourceData, title: 'Дополнительно' } : sourceData;
+            const blockData = (kind === 'extra')
+                ? { ...sourceData, title: sourceData.preserveTopicOrder === true ? 'Дополнительно — от простого к сложному' : 'Дополнительно' }
+                : sourceData;
             let finalTasks = [];
 
             if (isPracticeBlock) {
@@ -3297,6 +3306,9 @@ body.auth-locked > :not(#passwordGate){
                 if (selectedProtos.length === 0) continue;
 
                 window.selectedBlockTitles.push(blockData.title);
+                // Для задания 15 Экстра сохраняем тематический порядок даже при
+                // выключенной общей галочке «Упорядочить задания».
+                const preservePrototypeOrder = orderedTasks || (kind === 'extra' && sourceData.preserveTopicOrder === true);
                 const activePools = selectedProtos.map(p => ({
                     tasks: shuffleArray([...p.tasks]),
                     protoSvg: p.svg_code || '',
@@ -3325,13 +3337,13 @@ body.auth-locked > :not(#passwordGate){
                         tasks: shuffleArray([...pool.tasks])
                     })).filter(pool => pool.tasks.length > 0);
 
-                    if (!orderedTasks) pools = shuffleArray(pools);
+                    if (!preservePrototypeOrder) pools = shuffleArray(pools);
                     const maxTasksInProto = Math.max(...pools.map(pool => pool.tasks.length));
                     const roundTasks = [];
 
                     for (let layerIndex = 0; layerIndex < maxTasksInProto; layerIndex++) {
                         let layerPools = pools.filter(pool => pool.tasks[layerIndex]);
-                        if (!orderedTasks) layerPools = shuffleArray(layerPools);
+                        if (!preservePrototypeOrder) layerPools = shuffleArray(layerPools);
                         layerPools.forEach(pool => {
                             const task = pool.tasks[layerIndex];
                             roundTasks.push({
@@ -3347,7 +3359,7 @@ body.auth-locked > :not(#passwordGate){
                 const oneFullRound = buildPrototypeRound();
                 if (oneFullRound.length === 0) continue;
                 while (finalTasks.length < actualCount) {
-                    const cycleTasks = orderedTasks ? [...oneFullRound] : buildPrototypeRound();
+                    const cycleTasks = preservePrototypeOrder ? [...oneFullRound] : buildPrototypeRound();
                     const needNow = actualCount - finalTasks.length;
                     finalTasks.push(...cycleTasks.slice(0, needNow));
                 }
@@ -3361,7 +3373,19 @@ body.auth-locked > :not(#passwordGate){
             currentPrintHTML += blockTitle + `<div style="font-size: 16px;">`;
             currentAnswersHTML += `<h3>${blockData.title}</h3><div>`;
 
+            let lastExtraTopicInVariant = null;
             finalTasks.forEach(item => {
+                // Тематические рубрики видны не только в настройке, но и в самом варианте.
+                if (kind === 'extra' && sourceData.preserveTopicOrder === true) {
+                    const currentTopic = item.theory && item.theory.topic ? String(item.theory.topic) : '';
+                    if (currentTopic && currentTopic !== lastExtraTopicInVariant) {
+                        const topicHeading = `<h4 class="extra-topic-variant-header" style="color:#0f766e;background:#edfdf8;padding:8px 12px;border-left:3px solid #14b8a6;margin:16px 0 12px;font-size:16px;break-after:avoid;page-break-after:avoid;">${currentTopic}</h4>`;
+                        currentInteractiveHTML += topicHeading;
+                        currentPrintHTML += topicHeading;
+                        currentAnswersHTML += `<h4>${currentTopic}</h4>`;
+                    }
+                    lastExtraTopicInVariant = currentTopic;
+                }
                 if (item.beforeHTML) currentInteractiveHTML += item.beforeHTML;
                 if (item.beforePrintHTML || item.beforeHTML) currentPrintHTML += item.beforePrintHTML || item.beforeHTML;
                 if (item.beforeAnswersHTML) currentAnswersHTML += item.beforeAnswersHTML;
