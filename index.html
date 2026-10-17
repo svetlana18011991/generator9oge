@@ -2890,7 +2890,7 @@ body.auth-locked > :not(#passwordGate){
                 <div class="extra-task-panel">
                     <div class="row-header">
                         <label onclick="toggleSettings('${tid}', 'extra')">
-                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})${extraData.preserveTopicOrder === true ? " · по темам" : ""}</span>
+                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
                             <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
                         </label>
                         <div class="count-stepper" onclick="event.stopPropagation();">
@@ -3288,7 +3288,7 @@ body.auth-locked > :not(#passwordGate){
             const isPracticeBlock = kind === 'practice';
             const sourceData = block.data;
             const blockData = (kind === 'extra')
-                ? { ...sourceData, title: sourceData.preserveTopicOrder === true ? 'Дополнительно — от простого к сложному' : 'Дополнительно' }
+                ? { ...sourceData, title: 'Дополнительно' }
                 : sourceData;
             let finalTasks = [];
 
