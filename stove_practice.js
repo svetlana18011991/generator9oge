@@ -158,8 +158,7 @@
             {imageHTML:figure52HTML,theoryImageHTML:figure52HTML,showImageInTask:true})
     ];
 
-    // В банке ФИПИ для этой темы представлен один сюжет, поэтому в комплекте
-    // используются те же прототипы: генератор выбирает по одному варианту №1–5.
+    // Базовое условие и рисунок общие для всех трёх вариантов тетради.
     const scenario = {
         id: 'stove-plot-1',
         title: 'Сюжет 1. Печь',
@@ -173,6 +172,10 @@
             5: catalogPrototypes.filter(t => t.examNumber === 5)
         }
     };
+
+    // Одна сюжетная линия с единым общим условием из тетради.
+    // Все прототипы заданий № 1–5 выбираются независимо внутри этого сюжета.
+    // «Варианты 1–3» тренажёра — разные наборы вопросов, а не сюжеты.
 
     window.ogePracticeDatabase = window.ogePracticeDatabase || {};
     window.ogePracticeDatabase.stove = {

@@ -10,10 +10,19 @@
     <script src="tower_template.js?v=47"></script>
     <script src="battle_template.js?v=47"></script>
     <script src="motivation_template.js?v=motivation-v43"></script>
-    <!-- Связанные практические комплекты ОГЭ 1–5 -->
+    <!-- Связанные практические комплекты ОГЭ 1–5: восемь тем и три варианта для каждой. -->
     <script src="oge_practice.js?v=37"></script>
-    <script src="apartment_practice.js?v=38"></script>
+    <script src="tariff_practice.js?v=20261024-one-plot"></script>
+    <script src="apartment_practice.js?v=20261024-one-plot"></script>
     <script src="tires_practice.js?v=53"></script>
+    <script src="stove_practice.js?v=20261024-one-plot"></script>
+    <script src="sheets_practice.js?v=20261024-one-plot"></script>
+    <script src="plot_plan_base64.js?v=20261024"></script>
+    <script src="plot_practice.js?v=20261024"></script>
+    <script src="villages_practice.js?v=20261024-one-plot"></script>
+    <!-- Сюжеты шин 2–3 и решения всех прототипов. Порядок важен. -->
+    <script src="practice_scenario_overrides.js?v=20261024-one-plot"></script>
+    <script src="practice_solution_overrides.js?v=20261024"></script>
     <script src="task6.js"></script>
     <script src="task6_extra.js?v=20260816-2"></script>
     <script src="task7.js?v=20261024-workbook-shiryaeva"></script>
@@ -2181,9 +2190,9 @@ body.auth-locked > :not(#passwordGate){
                         </div>
                         <label class="practice-type-all">
                             <input type="checkbox" id="practice-scenario-all-${themeId}-${scenarioIndex}-${taskNumber}" checked onchange="toggleAllPracticeScenarioNumber('${themeId}', ${scenarioIndex}, ${taskNumber}, this.checked)">
-                            Все варианты задания ${taskNumber}
+                            Все прототипы задания ${taskNumber}
                         </label>
-                        <div class="practice-type-grid">${options || '<span style="color:#b91c1c;">Варианты пока не добавлены.</span>'}</div>
+                        <div class="practice-type-grid">${options || '<span style="color:#b91c1c;">Прототипы пока не добавлены.</span>'}</div>
                     </div>`;
             }
             return `
@@ -2191,13 +2200,13 @@ body.auth-locked > :not(#passwordGate){
                     <div class="practice-theme-head">
                         <label class="practice-theme-check">
                             <input type="checkbox" id="practice-scenario-${themeId}-${scenarioIndex}" data-practice-scenario-checkbox="1" data-practice-scenario-theme-id="${themeId}" data-practice-scenario-index-id="${scenarioIndex}" checked onchange="handlePracticeScenarioCheckboxChange('${themeId}');">
-                            <span>${scenario.title || `Сюжет ${scenarioIndex + 1}`}<span class="practice-hierarchy-badge">${totalVariants} вариантов</span></span>
+                            <span>${scenario.title || `Сюжет ${scenarioIndex + 1}`}<span class="practice-hierarchy-badge">Прототипов: ${totalVariants}</span></span>
                         </label>
                         <button type="button" class="btn-settings" onclick="togglePracticeScenarioDetails('${themeId}', ${scenarioIndex}); event.stopPropagation();">Задания</button>
                     </div>
                     <div class="practice-scenario-status" id="practice-scenario-summary-${themeId}-${scenarioIndex}">№1: все · №2: все · №3: все · №4: все · №5: все</div>
                     <div id="practice-scenario-details-${themeId}-${scenarioIndex}" class="practice-theme-details">
-                        <div class="practice-level-caption">Шаг 3. Оставьте допустимые варианты каждого номера</div>
+                        <div class="practice-level-caption">Шаг 3. Выберите прототипы для каждого задания</div>
                         ${groups}
                     </div>
                 </div>`;
@@ -2249,7 +2258,7 @@ body.auth-locked > :not(#passwordGate){
             <div class="practice-flow-guide">
                 <span class="practice-flow-step"><b>1</b> Темы</span><span class="practice-flow-arrow">→</span>
                 <span class="practice-flow-step"><b>2</b> Сюжеты</span><span class="practice-flow-arrow">→</span>
-                <span class="practice-flow-step"><b>3</b> Варианты заданий</span>
+                <span class="practice-flow-step"><b>3</b> Прототипы заданий</span>
             </div>
             <div class="practice-level-caption">Шаг 1. Оставьте нужные темы</div>
             <label class="proto-select-all" title="Выбрать или снять все темы сюжетов">
@@ -2291,7 +2300,7 @@ body.auth-locked > :not(#passwordGate){
                         <button type="button" class="count-btn" onclick="adjustTaskCount('practice-scenarios', 1, event)" title="Увеличить количество комплектов">+</button>
                     </div>
                 </div>
-                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> Все темы, сюжеты и варианты изначально выбраны. Настройки нужны только для сужения выбора.</div>
+                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> Все темы, сюжеты и прототипы изначально выбраны. Настройки нужны только для сужения выбора.</div>
                 <div id="protos-practice-scenarios" class="proto-list practice-settings-list">${settingsHTML}</div>
             </div>`;
     }
@@ -2419,7 +2428,7 @@ body.auth-locked > :not(#passwordGate){
     }
 
     function alertPracticeScenarioRequired(taskNumber) {
-        alert(`Нельзя снять все варианты задания ${taskNumber}. Для сюжетного комплекта должен остаться хотя бы один вариант у каждого задания 1–5.`);
+        alert(`Нельзя снять все прототипы задания ${taskNumber}. Для сюжетного комплекта должен остаться хотя бы один вариант у каждого задания 1–5.`);
     }
 
     function handlePracticeScenarioTaskToggle(checkbox, themeId, scenarioIndex, taskNumber) {
@@ -2673,7 +2682,7 @@ body.auth-locked > :not(#passwordGate){
                         }
                         if (complete) themeScenarios.push({ themeId, theme, scenario, scenarioIndex, selectedByNumber });
                         else {
-                            infoBoard.innerHTML += `<div><b>${theme.title} · ${scenario.title || `Сюжет ${scenarioIndex + 1}`}:</b> для пятёрки нужен хотя бы один выбранный вариант каждого задания №1–5.</div>`;
+                            infoBoard.innerHTML += `<div><b>${theme.title} · ${scenario.title || `Сюжет ${scenarioIndex + 1}`}:</b> для пятёрки нужен хотя бы один выбранный прототип каждого задания №1–5.</div>`;
                             infoBoard.style.display = 'block';
                         }
                     });
@@ -2927,11 +2936,18 @@ body.auth-locked > :not(#passwordGate){
             </div>`;
         }
 
-        syncPracticeThemeMaster();
-        syncPracticeCountWithThemes();
-        setPracticeMode('trainer');
+        // Актуальный интерфейс имеет два независимых режима настройки:
+        // каталог всех прототипов и связанные комплекты по сюжетам.
+        // Старые функции syncPracticeThemeMaster/setPracticeMode удалены,
+        // поэтому синхронизируем действующие контролы непосредственно.
+        handlePracticeTrainerThemeChange();
+        getOgeScenarioThemeIds().forEach(themeId => {
+            const theme = window.ogePracticeDatabase[themeId];
+            (theme.scenarios || []).forEach((_, i) => updatePracticeScenarioSummary(themeId, i));
+            updatePracticeThemeScenarioStatus(themeId);
+        });
         updateTaskTotal();
-        if (window.MathJax) {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
             MathJax.typesetPromise([container]).catch(err => console.log(err.message));
         }
     });
