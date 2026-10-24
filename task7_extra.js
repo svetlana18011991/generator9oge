@@ -16,9 +16,15 @@
         </svg>`;
     };
 
-    const rootPointsSvg = () => {
+    // Координаты точки, обозначающей корень, вычисляются точно из подкоренного числа.
+    // Другие точки служат соседними ориентирами; порядок M<N<P<Q не нарушается.
+    const rootPointsSvg = (n, correctLabel) => {
         const x = v => 85 + (v-6)*170;
-        const pts = [['M',6.20],['N',6.75],['P',7.20],['Q',7.75]];
+        const fixed = [['M',6.20],['N',6.75],['P',7.20],['Q',7.75]];
+        const pts = fixed.map(([lab,v]) => [lab, lab === correctLabel ? Math.sqrt(n) : v]);
+        if (!pts.every((p,i) => i === 0 || p[1] > pts[i-1][1])) {
+            throw new Error('Нарушен порядок точек для sqrt(' + n + ')');
+        }
         return `<svg viewBox="0 0 520 105" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:100%;height:auto;">
             <line x1="55" y1="55" x2="470" y2="55" stroke="#111" stroke-width="2"/>
             <path d="M 470 55 l -12 -6 l 4 6 l -4 6 z" fill="#111"/>
@@ -87,15 +93,15 @@
             },
             {
                 desc: 'Какой точке соответствует квадратный корень',
-                svg_code: rootPointsSvg(),
+                svg_code: rootPointsSvg(52,'P'),
                 theory_task: rootPointText(52),
-                theory_sol: 'Так как \\(7^2=49<52<64=8^2\\), число \\(\\sqrt{52}\\) находится между 7 и 8. Приближённо \\(\\sqrt{52}\\approx7{,}21\\), что соответствует точке \\(P\\).<br><br><b>Ответ:</b> 3',
+                theory_sol: 'Имеем \\(7^2=49<52<64=8^2\\), значит \\(7<\\sqrt{52}<8\\). Приближённо \\(\\sqrt{52}\\approx7{,}211\\). На рисунке точка \\(P\\) отмечена именно в положении \\(\\sqrt{52}\\) между 7 и 8.<br><br><b>Ответ:</b> 3',
                 tasks: [
-                    { text: rootPointText(40), svg_code: rootPointsSvg(), answer: '1' },
-                    { text: rootPointText(45), svg_code: rootPointsSvg(), answer: '2' },
-                    { text: rootPointText(50), svg_code: rootPointsSvg(), answer: '3' },
-                    { text: rootPointText(59), svg_code: rootPointsSvg(), answer: '4' },
-                    { text: rootPointText(47), svg_code: rootPointsSvg(), answer: '2' }
+                    { text: rootPointText(40), svg_code: rootPointsSvg(40,'M'), answer: '1' },
+                    { text: rootPointText(45), svg_code: rootPointsSvg(45,'N'), answer: '2' },
+                    { text: rootPointText(50), svg_code: rootPointsSvg(50,'P'), answer: '3' },
+                    { text: rootPointText(59), svg_code: rootPointsSvg(59,'Q'), answer: '4' },
+                    { text: rootPointText(47), svg_code: rootPointsSvg(47,'N'), answer: '2' }
                 ]
             },
             {
@@ -190,7 +196,7 @@
     newExtra.push({desc:'Соответствие точки положительной или отрицательной дроби',
       svg_code:lineSvgABCD([-3/8,5/12,-5/9,4/5]),
       theory_task:signedPointsText([[-3,8],[5,12],[-5,9],[4,5]],[5,12]),
-      theory_sol:'Сначала расположим положительные и отрицательные дроби по возрастанию. Искомая дробь вторая справа, значит это точка C.<br><br><b>Ответ:</b> 3',
+      theory_sol:'Сравним дроби: \\( -\\frac59<-\\frac38<\\frac5{12}<\\frac45 \\). Искомое число \\(\\frac5{12}\\) — третье слева, ему соответствует точка \\(C\\).<br><br><b>Ответ:</b> 3',
       tasks:signedPointCases.map(signedPoint)
     });
 
@@ -227,7 +233,7 @@
     newExtra.push({desc:'Определить точку по правильной обыкновенной дроби',
       svg_code:svgAxis([['A',1/8],['B',3/8],['C',5/8],['D',7/8]],0,1,[[0,'0'],[.5,'0,5'],[1,'1']]),
       theory_task:properPointText(3,8),
-      theory_sol:'Дробь 3/8 равна 0,375. На координатной прямой это точка B.<br><br><b>Ответ:</b> 2',
+      theory_sol:'Переведём дробь в десятичную: \\(\\frac38=0{,}375\\). На координатной прямой это точка \\(B\\).<br><br><b>Ответ:</b> 2',
       tasks:properCases
     });
 
@@ -239,7 +245,7 @@
     const absCase=(l,r,x,y)=>({text:absText(l,r),svg_code:svgAxis([[l,x],[r,y]],-5,5,[[0,'0']]),answer:String(x<y?(Math.abs(x)<Math.abs(y)?1:2):(Math.abs(x)>Math.abs(y)?3:4))});
     newExtra.push({desc:'Одновременное сравнение чисел и их модулей',
         svg_code:svgAxis([['x',-1.1],['y',3.4]],-5,5,[[0,'0']]),theory_task:absText('x','y'),
-        theory_sol:'Из рисунка x < y и |x| < |y|, то есть верен первый вариант.<br><br><b>Ответ:</b> 1',
+        theory_sol:'Из рисунка получаем \\(x<0<y\\) и \\(|x|<|y|\\). Значит, \\(x<y\\) и \\(|x|<|y|\\), то есть верен первый вариант.<br><br><b>Ответ:</b> 1',
         tasks:[absCase('x','y',-1.5,3.2),absCase('x','y',-4.3,1.4),absCase('x','y',2.4,-3.5),absCase('x','y',4.1,-1.8),absCase('x','y',-2.3,3.8)]
     });
 
@@ -249,7 +255,7 @@
       math(String.raw`\frac{${num}}{a}=\frac{${num}}{b}`),'невозможно определить'
     ])}`;
     newExtra.push({desc:'Сравнение дробей с одинаковым числителем',svg_code:'',
-      theory_task:invText(3,'<'),theory_sol:'Для положительных a < b обратные величины удовлетворяют 1/a > 1/b. Умножение на 3 сохраняет знак.<br><br><b>Ответ:</b> 1',
+      theory_task:invText(3,'<'),theory_sol:'Поскольку \\(0<a<b\\), произведение \\(ab\\) положительно. Из \\(b>a\\) следует \\(\\frac{b}{ab}>\\frac{a}{ab}\\), то есть \\(\\frac1a>\\frac1b\\). Умножив обе части неравенства на положительное число 3, получим \\(\\frac3a>\\frac3b\\).<br><br><b>Ответ:</b> 1',
       tasks:[[5,'<',1],[2,'>',2],[7,'<',1],[4,'>',2],[9,'<',1]].map(([n,rel,ans])=>({text:invText(n,rel),answer:String(ans)}))
     });
 
@@ -260,7 +266,7 @@
     ])}`;
     newExtra.push({desc:'Какие утверждения о неравенстве неверны',svg_code:'',
       theory_task:falseIneqText(18,21,7,9),
-      theory_sol:'При умножении неравенства на отрицательное число знак должен измениться. Поэтому неверно третье утверждение.<br><br><b>Ответ:</b> 3',
+      theory_sol:'Из \\(a<c\\) следует \\(a-18<c-18\\), \\(a+21<c+21\\) и \\(\\frac a9<\\frac c9\\). При умножении исходного неравенства на отрицательное число \\(-\\frac17\\) знак меняется: \\(-\\frac a7>-\\frac c7\\). Следовательно, неверно только утверждение 3.<br><br><b>Ответ:</b> 3',
       tasks:[[25,14,11,5],[43,18,13,7],[39,26,8,17],[51,22,9,19],[17,34,15,23]].map(z=>({text:falseIneqText(...z),answer:'3'}))
     });
 
@@ -272,7 +278,7 @@
     };
     newExtra.push({desc:'Наименьшая степень отмеченного числа',
       svg_code:svgAxis([['a',-0.5]],-2.2,2.4,[[-1,'−1'],[0,'0'],[1,'1']]),
-      theory_task:minPowerText([1,2,3]),theory_sol:'Если −1 < a < 0, то a отрицательно, a² положительно и a³ ближе к нулю, чем a. Меньше всех число a.<br><br><b>Ответ:</b> 1',
+      theory_task:minPowerText([1,2,3]),theory_sol:'По рисунку \\(-1<a<0\\). Поэтому \\(a^2>0\\), а \\(a<a^3<0\\) (поскольку \\(0<a^2<1\\)). Следовательно, \\(a<a^3<a^2\\), наименьшее число — \\(a\\).<br><br><b>Ответ:</b> 1',
       tasks:[powerMin(-.6,[1,2,3]),powerMin(.55,[2,3,4]),powerMin(1.6,[2,3,4]),powerMin(-1.4,[1,2,3]),powerMin(.7,[3,4,5])]
     });
 
@@ -287,7 +293,7 @@
     const orderCase=(a,b,ans)=>({text:orderText(),svg_code:svgAxis([['a',a],['b',b]],-2.2,2.6,[[0,'0'],[1,'1']]),answer:String(ans)});
     newExtra.push({desc:'Порядок возрастания обратных величин и единицы',
       svg_code:svgAxis([['a',-.7],['b',.6]],-2.2,2.6,[[0,'0'],[1,'1']]),
-      theory_task:orderText(),theory_sol:'При a < 0 < b < 1 величина 1/a отрицательна, а 1/b больше 1. Поэтому 1/a < 1 < 1/b.<br><br><b>Ответ:</b> 1',
+      theory_task:orderText(),theory_sol:'По рисунку \\(a<0<b<1\\). Следовательно, \\(\\frac1a<0\\), а \\(\\frac1b>1\\). Поэтому \\(\\frac1a<1<\\frac1b\\).<br><br><b>Ответ:</b> 1',
       tasks:[orderCase(-.5,.7,1),orderCase(.4,1.8,2),orderCase(-.8,1.6,3),orderCase(1.2,2.1,4),orderCase(1.8,1.3,3)]
     });
 
@@ -314,7 +320,7 @@
     };
     newExtra.push({desc:'Количество целых чисел между выражениями с корнями',svg_code:'',
       theory_task:countBetween([7,1],[82,1]),
-      theory_sol:'√7 ≈ 2,65, а √82 ≈ 9,06. Между ними расположены целые числа 3, 4, 5, 6, 7, 8, 9 — всего 7.<br><br><b>Ответ:</b> 7',
+      theory_sol:'Поскольку \\(2^2<7<3^2\\), имеем \\(2<\\sqrt7<3\\). Также \\(9^2<82<10^2\\), поэтому \\(9<\\sqrt{82}<10\\). Целые числа между границами: \\(3,4,5,6,7,8,9\\) — всего 7.<br><br><b>Ответ:</b> 7',
       tasks:[countCase([22,1],[121,1]),countCase([3,4],[7,3]),countCase([38,1],[138,1]),countCase([13,3],[6,5]),countCase([10,2],[2,10])]
     });
 
