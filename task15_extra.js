@@ -38,11 +38,18 @@
         m = m.replace(/\{,\}/g, ',');
         m = m.replace(/\s*=\s*/g, '&nbsp;=&nbsp;');
         m = m.replace(/\s*·\s*/g, '&nbsp;·&nbsp;');
+        // Краткие школьные записи \frac12 и \sqrt3 приводим к явному виду.
+        m = m.replace(/\\frac(\d)(\d)(?!\d)/g, (_, a, b) => `\\frac{${a}}{${b}}`);
+        // Сначала обрабатываем корень внутри числителя: обычная регулярка
+        // для \frac не поддерживает вложенные фигурные скобки.
+        m = m.replace(/\\frac\{([^{}]*?)\\sqrt(\d+)\}\{([^{}]+)\}/g,
+            (_, a, r, b) => fracHtml(formatInlineMath(a) + sqrtHtml(r), formatInlineMath(b)));
         let prev = '';
         while(prev !== m){
             prev = m;
             m = m.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, (_, a, b) => fracHtml(formatInlineMath(a), formatInlineMath(b)));
         }
+        m = m.replace(/\\sqrt(\d+)(?!\d)/g, (_, r) => sqrtHtml(r));
         m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}\/(\d+)/g, (_, coef, rad, den) => fracHtml(`${normalizeCoef(coef)}${sqrtHtml(formatInlineMath(rad))}`, den));
         m = m.replace(/(\d+)?\\sqrt\{([^{}]+)\}/g, (_, coef, rad) => `${normalizeCoef(coef)}${sqrtHtml(formatInlineMath(rad))}`);
         m = m.replace(/\b(sin|cos|tg)\s+([A-ZА-Я])/g, '<span class="t15x-nowrap">$1 $2</span>');
