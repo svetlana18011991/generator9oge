@@ -49,6 +49,8 @@
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
     <script src="task18_extra.js?v=20261025-1"></script>
+    <script src="task19.js?v=20261026-19-modes"></script>
+    <script src="task19_extra.js?v=20261026-19-modes"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2121,7 +2123,7 @@ body.auth-locked > :not(#passwordGate){
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
                 // Задания 6–17 подключены к генератору.
-                if (taskNumber > 18) return false;
+                if (taskNumber > 19) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -2890,6 +2892,13 @@ body.auth-locked > :not(#passwordGate){
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
             const listHTML = buildPrototypeListHTML(tid, data, 'main');
+            const special19UI = (String(tid).replace(/\D/g, '') === '19') ? `<div style="padding:10px;background:#effcf9;border-radius:8px;margin:8px 0;color:#134e4a;">
+              <b>Режим 1 — отдельные утверждения</b><br>
+              Для каждого задания сформируется одна подборка из выбранного количества утверждений по отмеченным темам.<br>
+              <label>Утверждений в одной подборке: <input type="number" id="count-19-statements" min="2" max="12" value="3" style="width:72px;padding:5px;border:1px solid #94a3b8;border-radius:5px;"></label>
+              <div style="margin-top:6px;font-size:13px;">Количество подборок задаётся счётчиком задания 19; во вкладке «Настроить» отметьте темы.</div>
+              </div>` : '';
+
             const extraData = getExtraTaskData(tid);
             let extraHTML = '';
 
@@ -2899,7 +2908,7 @@ body.auth-locked > :not(#passwordGate){
                 <div class="extra-task-panel">
                     <div class="row-header">
                         <label onclick="toggleSettings('${tid}', 'extra')">
-                            <span class="extra-task-title">＋ Дополнительно (${extraData.prototypes.length})</span>
+                            <span class="extra-task-title">${String(tid).replace(/\D/g, '') === '19' ? '＋ Режим 2 — готовые тройки из тетради' : `＋ Дополнительно (${extraData.prototypes.length})`}</span>
                             <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
                         </label>
                         <div class="count-stepper" onclick="event.stopPropagation();">
@@ -2925,7 +2934,7 @@ body.auth-locked > :not(#passwordGate){
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Увеличить количество">+</button>
                     </div>
                 </div>
-                <div id="protos-${tid}" class="proto-list">${listHTML}</div>
+                <div id="protos-${tid}" class="proto-list">${special19UI}${listHTML}</div>
                 ${extraHTML}
             </div>`;
         }
@@ -3315,6 +3324,12 @@ body.auth-locked > :not(#passwordGate){
                 if (selectedProtos.length === 0) continue;
 
                 window.selectedBlockTitles.push(blockData.title);
+                if (kind === 'main' && String(tid).replace(/\D/g, '') === '19' && typeof window.task19MakeStatementTasks === 'function') {
+                    const topicNames = selectedProtos.map(p=>p.topic);
+                    const ctl = document.getElementById('count-19-statements');
+                    const statementCount = ctl ? Math.max(2, Math.min(12, Number(ctl.value)||3)) : 3;
+                    finalTasks = window.task19MakeStatementTasks(requiredCount, statementCount, topicNames);
+                } else {
                 // Для задания 15 Экстра сохраняем тематический порядок даже при
                 // выключенной общей галочке «Упорядочить задания».
                 const preservePrototypeOrder = orderedTasks || (kind === 'extra' && sourceData.preserveTopicOrder === true);
@@ -3371,6 +3386,7 @@ body.auth-locked > :not(#passwordGate){
                     const cycleTasks = preservePrototypeOrder ? [...oneFullRound] : buildPrototypeRound();
                     const needNow = actualCount - finalTasks.length;
                     finalTasks.push(...cycleTasks.slice(0, needNow));
+                }
                 }
             }
 
