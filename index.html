@@ -48,7 +48,7 @@
     <script src="task17_extra.js?v=20261018-1"></script>
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
-    <script src="task18_extra.js?v=20261025-1"></script>
+    <script src="task18_extra.js?v=20261026-circle-grid-fix"></script>
     <script src="task19.js?v=20261026-19-single-boolean-v3"></script>
     <script src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
     <script src="assets_base64_1.js"></script>
@@ -3103,19 +3103,60 @@ body.auth-locked > :not(#passwordGate){
 
     // Task 19: selecting an explicit true/false response still populates the normal answer field
     // so PDF/game/checking/export code can reuse its established logic.
+    window.applyTask19BinaryStyles = function(taskNum, state, chosenValue, correctValue) {
+        const input = document.getElementById('ans-interactive-' + taskNum);
+        if (!input || !input.parentElement) return;
+        const buttons = input.parentElement.querySelectorAll('.task19-binary-btn');
+        buttons.forEach(btn => {
+            const value = String(btn.getAttribute('data-binary-value') || '');
+            const isChosen = String(chosenValue ?? '') === value;
+            btn.disabled = state === 'correct' || state === 'wrong' || state === 'empty';
+            btn.style.background = '#fff';
+            btn.style.borderColor = '#b7cbd1';
+            btn.style.color = '#111827';
+            btn.setAttribute('aria-pressed', 'false');
+            if (state === 'selected' && isChosen) {
+                btn.style.background = '#f6efe1';
+                btn.style.borderColor = '#c8a96a';
+                btn.style.color = '#7c5b17';
+                btn.setAttribute('aria-pressed', 'true');
+            } else if (state === 'correct' && isChosen) {
+                btn.style.background = '#e8f5e9';
+                btn.style.borderColor = '#4CAF50';
+                btn.style.color = '#1b5e20';
+                btn.setAttribute('aria-pressed', 'true');
+            } else if (state === 'wrong') {
+                if (isChosen) {
+                    btn.style.background = '#ffebee';
+                    btn.style.borderColor = '#f44336';
+                    btn.style.color = '#b71c1c';
+                    btn.setAttribute('aria-pressed', 'true');
+                } else if (String(correctValue ?? '') === value) {
+                    btn.style.background = '#f2faf3';
+                    btn.style.borderColor = '#9ccc65';
+                    btn.style.color = '#33691e';
+                }
+            } else if (state === 'empty') {
+                if (isChosen) {
+                    btn.style.background = '#f6efe1';
+                    btn.style.borderColor = '#c8a96a';
+                    btn.style.color = '#7c5b17';
+                    btn.setAttribute('aria-pressed', 'true');
+                }
+            }
+        });
+    };
+
+    // Task 19: selecting an explicit true/false response still populates the normal answer field
+    // so PDF/game/checking/export code can reuse its established logic.
     window.choose19Binary = function(btn, inputId, value) {
         const input=document.getElementById(inputId);
-        if(!input) return;
+        if(!input || input.dataset.checked === '1') return;
         input.value=value;
         input.dispatchEvent(new Event('input', { bubbles:true }));
         input.dispatchEvent(new Event('change', { bubbles:true }));
-        btn.parentElement.querySelectorAll('.task19-binary-btn').forEach(b=>{
-            const active=b===btn;
-            b.style.background=active?'#e3f2ef':'#fff';
-            b.style.borderColor=active?'#0f766e':'#b7cbd1';
-            b.style.color=active?'#0f766e':'#111827';
-            b.setAttribute('aria-pressed',active?'true':'false');
-        });
+        const taskNum = input.getAttribute('data-task-num') || ((String(input.id||'').match(/ans-interactive-(\d+)/)||[])[1] || '');
+        window.applyTask19BinaryStyles(taskNum, 'selected', value, null);
     };
 
     function adjustTaskCount(tid, delta, event) {
@@ -3903,8 +3944,8 @@ body.auth-locked > :not(#passwordGate){
                             <div style="line-height:1.5">${singleText}</div>
                             <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px;">
                                 <input type="text" class="ans-box" id="${choiceInputId}" data-task-num="${taskCounter}" data-ans="${acceptedAnswerString}" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" readonly aria-label="Выбранный ответ: верно или неверно">
-                                <button type="button" class="task19-binary-btn" onclick="window.choose19Binary(this,'${choiceInputId}','1')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Верно</button>
-                                <button type="button" class="task19-binary-btn" onclick="window.choose19Binary(this,'${choiceInputId}','0')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Неверно</button>
+                                <button type="button" class="task19-binary-btn" data-binary-value="1" data-task-num="${taskCounter}" onclick="window.choose19Binary(this,'${choiceInputId}','1')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Верно</button>
+                                <button type="button" class="task19-binary-btn" data-binary-value="0" data-task-num="${taskCounter}" onclick="window.choose19Binary(this,'${choiceInputId}','0')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Неверно</button>
                                 ${instantBtn}${drawBtn}${helpBtn}
                                 <span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold;font-size:15px;display:none;"></span>
                             </div>
@@ -4319,6 +4360,63 @@ body.auth-locked > :not(#passwordGate){
 
     <script>
         ${window.CANVAS_LOGIC_SCRIPT}
+        window.applyTask19BinaryStyles = function(taskNum, state, chosenValue, correctValue) {
+        const input = document.getElementById('ans-interactive-' + taskNum);
+        if (!input || !input.parentElement) return;
+        const buttons = input.parentElement.querySelectorAll('.task19-binary-btn');
+        buttons.forEach(btn => {
+            const value = String(btn.getAttribute('data-binary-value') || '');
+            const isChosen = String(chosenValue ?? '') === value;
+            btn.disabled = state === 'correct' || state === 'wrong' || state === 'empty';
+            btn.style.background = '#fff';
+            btn.style.borderColor = '#b7cbd1';
+            btn.style.color = '#111827';
+            btn.setAttribute('aria-pressed', 'false');
+            if (state === 'selected' && isChosen) {
+                btn.style.background = '#f6efe1';
+                btn.style.borderColor = '#c8a96a';
+                btn.style.color = '#7c5b17';
+                btn.setAttribute('aria-pressed', 'true');
+            } else if (state === 'correct' && isChosen) {
+                btn.style.background = '#e8f5e9';
+                btn.style.borderColor = '#4CAF50';
+                btn.style.color = '#1b5e20';
+                btn.setAttribute('aria-pressed', 'true');
+            } else if (state === 'wrong') {
+                if (isChosen) {
+                    btn.style.background = '#ffebee';
+                    btn.style.borderColor = '#f44336';
+                    btn.style.color = '#b71c1c';
+                    btn.setAttribute('aria-pressed', 'true');
+                } else if (String(correctValue ?? '') === value) {
+                    btn.style.background = '#f2faf3';
+                    btn.style.borderColor = '#9ccc65';
+                    btn.style.color = '#33691e';
+                }
+            } else if (state === 'empty') {
+                if (isChosen) {
+                    btn.style.background = '#f6efe1';
+                    btn.style.borderColor = '#c8a96a';
+                    btn.style.color = '#7c5b17';
+                    btn.setAttribute('aria-pressed', 'true');
+                }
+            }
+        });
+    };
+
+    // Task 19: selecting an explicit true/false response still populates the normal answer field
+    // so PDF/game/checking/export code can reuse its established logic.
+    window.choose19Binary = function(btn, inputId, value) {
+        const input=document.getElementById(inputId);
+        if(!input || input.dataset.checked === '1') return;
+        input.value=value;
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+        const taskNum = input.getAttribute('data-task-num') || ((String(input.id||'').match(/ans-interactive-(\\d+)/)||[])[1] || '');
+        window.applyTask19BinaryStyles(taskNum, 'selected', value, null);
+    };
+
+
         const SHOW_CORRECT_ON_ERROR = ${showCorrectOnError};
         let timerInterval; let timeLimit = ${timerValue} * 60; let timeSpent = 0; let isCountdown = timeLimit > 0;
         const workStartedAt = Date.now();
@@ -4409,11 +4507,14 @@ body.auth-locked > :not(#passwordGate){
             if (accepted.includes(u)) {
                 input.style.background = '#e8f5e9'; input.style.borderColor = '#4CAF50'; input.style.color = '#1b5e20';
                 setFeedback(taskNum, 'correct', answerLabel);
+                if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) window.applyTask19BinaryStyles(taskNum, 'correct', u, accepted[0] || '');
             } else {
                 input.style.background = '#ffebee'; input.style.borderColor = '#f44336'; input.style.color = '#b71c1c';
                 setFeedback(taskNum, 'wrong', answerLabel);
+                if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) window.applyTask19BinaryStyles(taskNum, 'wrong', u, accepted[0] || '');
             }
             input.readOnly = true;
+            if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) input.dataset.checked = '1';
             btn.style.display = 'none'; // Прячем галочку после проверки
             
             // Если разбор предусмотрен - сразу показываем его
@@ -4462,6 +4563,7 @@ body.auth-locked > :not(#passwordGate){
                     input.style.background = '#f5f5f5';
                     input.style.borderColor = '#9e9e9e';
                     setFeedback(taskNum, 'empty', answerLabel);
+                    if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) window.applyTask19BinaryStyles(taskNum, 'empty', '', accepted[0] || '');
                 } else if (accepted.includes(normalizedUserAnswer)) {
                     correctCount++;
                     status = 'correct';
@@ -4472,6 +4574,7 @@ body.auth-locked > :not(#passwordGate){
                     input.style.borderColor = '#4CAF50';
                     input.style.color = '#1b5e20';
                     setFeedback(taskNum, 'correct', answerLabel);
+                    if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) window.applyTask19BinaryStyles(taskNum, 'correct', normalizedUserAnswer, accepted[0] || '');
                 } else {
                     wrongCount++;
                     status = 'wrong';
@@ -4482,9 +4585,11 @@ body.auth-locked > :not(#passwordGate){
                     input.style.borderColor = '#f44336';
                     input.style.color = '#b71c1c';
                     setFeedback(taskNum, 'wrong', answerLabel);
+                    if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) window.applyTask19BinaryStyles(taskNum, 'wrong', normalizedUserAnswer, accepted[0] || '');
                 }
 
                 input.readOnly = true;
+                if (input.parentElement && input.parentElement.querySelector('.task19-binary-btn')) input.dataset.checked = '1';
 
                 const userAnswerForTable = rawUserAnswer === '' ? '—' : escapeHtml(rawUserAnswer);
                 const correctAnswerForTable = escapeHtml(answerLabel || '—');
