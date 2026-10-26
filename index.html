@@ -49,8 +49,8 @@
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
     <script src="task18_extra.js?v=20261025-1"></script>
-    <script src="task19.js?v=20261026-19-topics-v2"></script>
-    <script src="task19_extra.js?v=20261026-19-topics-v2"></script>
+    <script src="task19.js?v=20261026-19-exact-review"></script>
+    <script src="task19_extra.js?v=20261026-19-exact-review"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -3669,6 +3669,31 @@ body.auth-locked > :not(#passwordGate){
                         });
                         theoryHtml += `</ul>`;
                     }
+                }
+
+                // Task 19: разбираем ТОЛЬКО текущее утверждение или текущую готовую тройку.
+                // Не используем стандартное окно с аналогами для других заданий.
+                if (String(tid).replace(/\D/g, '') === '19' && item.theory) {
+                    const selectedStatement = item.gameText !== undefined ? item.gameText : standaloneText;
+                    const exactExplanation = item.theory.theory_sol || '';
+                    const solutionBlockId19 = `theory-solution-${taskCounter}`;
+                    const showSolutionId19 = `theory-show-solution-${taskCounter}`;
+                    theoryHtml = `
+                        <h3>Разбор задания</h3>
+                        <div style="background:#f5f9ff;padding:15px;border:1px solid #bfdbfe;margin-bottom:14px;border-radius:8px;">
+                            <p style="margin:0 0 10px;color:#1d4ed8;"><b>Ваше задание:</b></p>
+                            <div style="line-height:1.55;">${protectMathRelations(selectedStatement)}</div>
+                        </div>
+                        <div id="${solutionBlockId19}" style="background:#f9f9f9;padding:15px;border-left:4px solid #ff8c00;border-radius:6px;">
+                            <p style="margin:0 0 12px;"><b>Объяснение именно этого задания:</b></p>
+                            <div style="line-height:1.6;">${protectMathRelations(exactExplanation)}</div>
+                            <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+                                <button type="button" onclick="document.getElementById('${solutionBlockId19}').style.display='none';document.getElementById('${showSolutionId19}').style.display='flex';" style="background:none;border:none;color:#666;cursor:pointer;text-decoration:underline;">Скрыть объяснение</button>
+                            </div>
+                        </div>
+                        <div id="${showSolutionId19}" style="display:none;justify-content:flex-end;margin:10px 0;">
+                            <button type="button" onclick="document.getElementById('${solutionBlockId19}').style.display='block';this.parentElement.style.display='none';" style="background:#fff7ed;border:1px solid #fdba74;color:#c2410c;border-radius:7px;padding:8px 12px;cursor:pointer;">Показать объяснение</button>
+                        </div>`;
                 }
 
                 window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
