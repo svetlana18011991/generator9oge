@@ -5,31 +5,18 @@ const BANK = [{"id":1,"text":"Через заданную точку плоск�
 window.task19StatementBank=BANK;
 function escapeHTML(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function shuffled(arr){const r=arr.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
-window.task19MakeStatementTasks=function(count, statementCount, selectedTopics){
+window.task19MakeStatementTasks=function(count, ignored, selectedTopics){
  const candidates=BANK.filter(s=>selectedTopics.includes(s.topic));
  if(!candidates.length)return [];
- const tasks=[]; let deck=[]; const n=Math.max(2,Math.min(12,Number(statementCount)||3));
+ const tasks=[];let deck=[];
  for(let k=0;k<count;k++){
-  if(deck.length<n)deck=deck.concat(shuffled(candidates));
-  let selected=[],ids=new Set(),spins=0;
-  while(selected.length<n&&spins<5000){
-   if(!deck.length)deck=shuffled(candidates);
-   const v=deck.shift(); spins++;
-   if(!ids.has(v.id)){selected.push(v);ids.add(v.id);}
-  }
-  if(!selected.length)continue;
-  // При возможности смешиваем верные и неверные утверждения.
-  if(selected.every(v=>v.true)&&candidates.some(v=>!v.true)){
-   const replacement=candidates.find(v=>!v.true&&!ids.has(v.id));if(replacement)selected[selected.length-1]=replacement;
-  }
-  if(selected.every(v=>!v.true)&&candidates.some(v=>v.true)){
-   const replacement=candidates.find(v=>v.true&&!ids.has(v.id));if(replacement)selected[selected.length-1]=replacement;
-  }
-  selected=shuffled(selected);
-  const answer=selected.map((v,i)=>v.true?String(i+1):'').join('');
-  const text='Какие из следующих утверждений верны? Укажите их номера.'+'<div style="margin:8px 0">'+selected.map((v,i)=>'<div style="margin:6px 0">'+(i+1)+') '+escapeHTML(v.text)+'</div>').join('')+'</div>';
-  const sol=selected.map((v,i)=>'<p><b>'+(i+1)+') '+(v.true?'Верно.':'Неверно.')+'</b> '+escapeHTML(v.explanation)+'</p>').join('')+'<b>Ответ:</b> '+answer;
-  tasks.push({text,answer,displayText:text,standaloneText:text,theory:{theory_task:text,theory_sol:sol}});
+  if(!deck.length)deck=shuffled(candidates);
+  const v=deck.shift();
+  const safe=escapeHTML(v.text);
+  const text='<div class="task19-single-assertion"><b>Верно или неверно следующее утверждение?</b><div style="margin:10px 0">'+safe+'</div></div>';
+  const answer=v.true?'1':'0';
+  const sol='<p><b>'+(v.true?'Утверждение верно.':'Утверждение неверно.')+'</b> '+escapeHTML(v.explanation)+'</p><b>Ответ:</b> '+answer;
+  tasks.push({text,answer,displayText:text,standaloneText:text,theory:{theory_task:text,theory_sol:sol},statementId:v.id, task19Single:true});
  }
  return tasks;
 };

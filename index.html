@@ -49,8 +49,8 @@
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
     <script src="task18_extra.js?v=20261025-1"></script>
-    <script src="task19.js?v=20261026-19-exact-review"></script>
-    <script src="task19_extra.js?v=20261026-19-exact-review"></script>
+    <script src="task19.js?v=20261026-19-single-boolean-v3"></script>
+    <script src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -3101,6 +3101,23 @@ body.auth-locked > :not(#passwordGate){
         if (totalEl) totalEl.textContent = total;
     }
 
+    // Task 19: selecting an explicit true/false response still populates the normal answer field
+    // so PDF/game/checking/export code can reuse its established logic.
+    window.choose19Binary = function(btn, inputId, value) {
+        const input=document.getElementById(inputId);
+        if(!input) return;
+        input.value=value;
+        input.dispatchEvent(new Event('input', { bubbles:true }));
+        input.dispatchEvent(new Event('change', { bubbles:true }));
+        btn.parentElement.querySelectorAll('.task19-binary-btn').forEach(b=>{
+            const active=b===btn;
+            b.style.background=active?'#e3f2ef':'#fff';
+            b.style.borderColor=active?'#0f766e':'#b7cbd1';
+            b.style.color=active?'#0f766e':'#111827';
+            b.setAttribute('aria-pressed',active?'true':'false');
+        });
+    };
+
     function adjustTaskCount(tid, delta, event) {
         if (event) {
             event.preventDefault();
@@ -3875,6 +3892,23 @@ body.auth-locked > :not(#passwordGate){
                             <div style="margin-top:15px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px;border:2px solid #ccc;border-radius:6px;font-size:16px;font-weight:bold;width:150px;outline:none;transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold;font-size:15px;display:none;"></span></div>
                         </div>
                     </div>`;
+                }
+                // Task 19 main: one statement, two explicit binary response buttons.
+                if (interactiveTaskNumber === 19 && kind === 'main' && item.task19Single) {
+                    const choiceInputId = `ans-interactive-${taskCounter}`;
+                    const singleText = renderText;
+                    interactiveTaskCore = `<div style="display:flex;gap:15px;flex-grow:1;min-width:0;align-items:flex-start;">
+                        <div style="font-weight:700;font-size:1.1em;padding-top:2px;">${taskCounter}.</div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="line-height:1.5">${singleText}</div>
+                            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px;">
+                                <input type="text" class="ans-box" id="${choiceInputId}" data-task-num="${taskCounter}" data-ans="${acceptedAnswerString}" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" readonly aria-label="Выбранный ответ: верно или неверно">
+                                <button type="button" class="task19-binary-btn" onclick="window.choose19Binary(this,'${choiceInputId}','1')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Верно</button>
+                                <button type="button" class="task19-binary-btn" onclick="window.choose19Binary(this,'${choiceInputId}','0')" style="padding:9px 19px;border:2px solid #b7cbd1;background:#fff;border-radius:7px;cursor:pointer;font-weight:700;">Неверно</button>
+                                ${instantBtn}${drawBtn}${helpBtn}
+                                <span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold;font-size:15px;display:none;"></span>
+                            </div>
+                        </div></div>`;
                 }
                 if (!interactiveTaskCore) {
                     interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width:350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>`;
