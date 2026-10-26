@@ -3506,14 +3506,19 @@ body.auth-locked > :not(#passwordGate){
                 const h = `<h3 style="background:#fff7e9;border-left:4px solid #f59e0b;color:#9a560f;padding:12px 16px;margin:30px 0 14px">Часть 2. Задание 20 — Выражения, уравнения и неравенства</h3>`;
                 currentInteractiveHTML += h;
                 currentPrintHTML += h;
-                currentAnswersHTML += `<h3>Часть 2. Задание 20</h3><p>Задания с развёрнутым ответом: проверка учителем.</p>`;
+                currentAnswersHTML += `<h3>Часть 2. Задание 20</h3><p>Ответы к заданиям с развёрнутым ответом. Оценивание решения выполняет учитель.</p>`;
                 finalTasks.forEach(item => {
                     taskCounter++;
-                    const taskHtml = `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px" class="part2-workspace"></div></div></div></div>`;
-                    currentInteractiveHTML += taskHtml;
-                    currentPrintHTML += taskHtml;
-                    // Сохраняем исходный текст для экспортных режимов; ответ проверяет педагог.
-                    window.currentGeneratedTasks.push({text:item.text, draftText:item.text, presentationText:item.text, answer:'', part:2, taskNumber:20, sourcePage:item.sourcePage, taskId:item.id});
+                    const part2Answer = String(item.answer || '').trim();
+                    const baseTask20 = `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px" class="part2-workspace"></div></div></div></div>`;
+                    // Только интерактивный режим: показываем правильный ответ по запросу ученика.
+                    // Не проверяем развёрнутое решение и не показываем разбор.
+                    const reveal20 = part2Answer ? `<div class="task20-answer-toggle" style="margin-top:12px"><button type="button" aria-expanded="false" onclick="const panel=this.nextElementSibling;const showing=panel.hidden;panel.hidden=!showing;this.setAttribute('aria-expanded',String(showing));this.textContent=showing?'Скрыть ответ':'Показать ответ';if(showing && window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([panel]);" style="background:#fff7e9;border:1px solid #e8b869;border-radius:7px;padding:9px 14px;color:#99530d;font-weight:700;cursor:pointer">Показать ответ</button><div hidden style="margin-top:10px;padding:10px 14px;border-left:3px solid #f59e0b;background:#fffaf0;color:#2f3338"><b>Ответ:</b> ${part2Answer}</div></div>` : '';
+                    currentInteractiveHTML += baseTask20.replace('</div></div></div></div>', `${reveal20}</div></div></div></div>`);
+                    currentPrintHTML += baseTask20;
+                    // В документе ответов правильный ответ показывается сразу.
+                    currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || 'Ответ отсутствует'}</div>`;
+                    window.currentGeneratedTasks.push({text:item.text, draftText:item.text, presentationText:item.text, answer:part2Answer, part:2, taskNumber:20, sourcePage:item.sourcePage, taskId:item.id});
                 });
                 continue;
             }
