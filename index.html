@@ -49,8 +49,8 @@
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
     <script src="task18_extra.js?v=20261025-1"></script>
-    <script src="task19.js?v=20261026-19-modes"></script>
-    <script src="task19_extra.js?v=20261026-19-modes"></script>
+    <script src="task19.js?v=20261026-19-topics-v2"></script>
+    <script src="task19_extra.js?v=20261026-19-topics-v2"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2875,6 +2875,49 @@ body.auth-locked > :not(#passwordGate){
         return listHTML;
     }
 
+    // Задание 19: выбор ТОЛЬКО тем, без прототипов и значков предпросмотра.
+    // Сохраняем id proto-19-N для совместимости с существующей генерацией.
+    function build19MainTopicListHTML(tid, data) {
+        if (!data || !Array.isArray(data.prototypes)) return '';
+        const allId=getPrototypeMasterId(tid, 'main');
+        const allRow=`<label class="proto-select-all" title="Выбрать или снять все темы задания 19">
+            <input type="checkbox" id="${allId}" checked onchange="toggleAllProtos('${tid}', this.checked); updateTaskTotal()">
+            <span>Выбрать все темы / снять выбор</span>
+        </label>`;
+        const rows=data.prototypes.map((p,i)=>{
+            const topic=String(p.topic || p.desc || '').replace(/^19[.\s]*\d+[.\s]*/, '').trim();
+            const n=(window.task19StatementBank || []).filter(st=>st.topic===p.topic).length;
+            return `<label class="proto-item">
+                <input type="checkbox" id="${getPrototypeCheckboxId(tid,i,'main')}" checked onchange="syncProtoMaster('${tid}'); updateTaskTotal()">
+                <span class="proto-label-text">${topic} <span style="opacity:.65">(${n})</span></span>
+            </label>`;
+        }).join('');
+        return `<div style="padding:8px 10px;font-size:13px;color:#0f766e">Выберите темы, из которых брать отдельные утверждения.</div>${allRow}${rows}`;
+    }
+
+    function build19TopicListHTML(tid, data) {
+        const names=[...new Set(window.task19StatementBank.map(s=>s.topic))];
+        return `<label class="proto-select-all"><input type="checkbox" id="proto-all-extra-${tid}" checked onchange="toggleAll19TripleTopics('${tid}', this.checked)"><span>Все темы / снять выбор</span></label>`+
+            names.map((name,i)=>`<label class="proto-item"><input type="checkbox" id="topic19-extra-${i}" checked onchange="sync19TripleTopicMaster('${tid}')"><span class="proto-label-text">${i+1}. ${name}</span></label>`).join('');
+    }
+    function toggleAll19TripleTopics(tid, checked) {
+        document.querySelectorAll('input[id^="topic19-extra-"]').forEach(cb=>cb.checked=checked);
+        const master=document.getElementById(`proto-all-extra-${tid}`);
+        if(master){master.checked=checked;master.indeterminate=false;}
+        updateTaskTotal();
+    }
+    function sync19TripleTopicMaster(tid) {
+        const boxes=[...document.querySelectorAll('input[id^="topic19-extra-"]')];
+        const n=boxes.filter(cb=>cb.checked).length;
+        const master=document.getElementById(`proto-all-extra-${tid}`);
+        if(master){master.checked=n===boxes.length;master.indeterminate=n>0&&n<boxes.length;}
+        updateTaskTotal();
+    }
+    function get19SelectedTripleTopics() {
+        const names=[...new Set((window.task19StatementBank||[]).map(s=>s.topic))];
+        return names.filter((t,i)=>document.getElementById(`topic19-extra-${i}`)?.checked);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('dynamic-tasks');
         const hasRegularDatabase = window.database && Object.keys(window.database).length > 0;
@@ -2891,33 +2934,29 @@ body.auth-locked > :not(#passwordGate){
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
-            const listHTML = buildPrototypeListHTML(tid, data, 'main');
-            const special19UI = (String(tid).replace(/\D/g, '') === '19') ? `<div style="padding:10px;background:#effcf9;border-radius:8px;margin:8px 0;color:#134e4a;">
-              <b>Режим 1 — отдельные утверждения</b><br>
-              Для каждого задания сформируется одна подборка из выбранного количества утверждений по отмеченным темам.<br>
-              <label>Утверждений в одной подборке: <input type="number" id="count-19-statements" min="2" max="12" value="3" style="width:72px;padding:5px;border:1px solid #94a3b8;border-radius:5px;"></label>
-              <div style="margin-top:6px;font-size:13px;">Количество подборок задаётся счётчиком задания 19; во вкладке «Настроить» отметьте темы.</div>
-              </div>` : '';
+            const listHTML = (String(tid).replace(/\D/g, '') === '19') ? build19MainTopicListHTML(tid, data) : buildPrototypeListHTML(tid, data, 'main');
+            const special19UI = '';
 
             const extraData = getExtraTaskData(tid);
             let extraHTML = '';
 
             if (extraData && Array.isArray(extraData.prototypes) && extraData.prototypes.length > 0) {
-                const extraListHTML = buildPrototypeListHTML(tid, extraData, 'extra');
+                const is19Triples = String(tid).replace(/\D/g, '') === '19';
+                const extraListHTML = is19Triples ? '' : buildPrototypeListHTML(tid, extraData, 'extra');
                 extraHTML = `
                 <div class="extra-task-panel">
                     <div class="row-header">
-                        <label onclick="toggleSettings('${tid}', 'extra')">
-                            <span class="extra-task-title">${String(tid).replace(/\D/g, '') === '19' ? '＋ Режим 2 — готовые тройки из тетради' : `＋ Дополнительно (${extraData.prototypes.length})`}</span>
-                            <button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>
+                        <label ${is19Triples ? '' : `onclick="toggleSettings('${tid}', 'extra')"`}>
+                            <span class="extra-task-title">${is19Triples ? '＋ Утверждения тройками (120)' : `＋ Дополнительно (${extraData.prototypes.length})`}</span>
+                            ${is19Triples ? '' : `<button type="button" class="btn-settings" onclick="toggleSettings('${tid}', 'extra'); event.stopPropagation();">⚙️ Настроить</button>`}
                         </label>
                         <div class="count-stepper" onclick="event.stopPropagation();">
                             <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', -1, event)" title="Уменьшить количество">−</button>
-                            <input type="number" id="count-extra-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
+                            <input type="number" id="count-extra-${tid}" min="0" value="0" aria-label="${String(tid).replace(/\D/g,'') === '19' ? 'Количество готовых троек' : 'Количество дополнительных заданий'}" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
                             <button type="button" class="count-btn" onclick="adjustTaskCount('extra-${tid}', 1, event)" title="Увеличить количество">+</button>
                         </div>
                     </div>
-                    <div id="protos-extra-${tid}" class="proto-list">${extraListHTML}</div>
+                    ${is19Triples ? '' : `<div id="protos-extra-${tid}" class="proto-list">${extraListHTML}</div>`}
                 </div>`;
             }
 
@@ -2925,12 +2964,12 @@ body.auth-locked > :not(#passwordGate){
             <div class="task-row">
                 <div class="row-header">
                     <label onclick="toggleSettings('${tid}')">
-                        <span>${data.title} (${data.prototypes.length})</span>
+                        <span>${String(tid).replace(/\D/g, '') === '19' ? 'Анализ геометрических утверждений (127)' : `${data.title} (${data.prototypes.length})`}</span>
                         <button type="button" class="btn-settings" onclick="toggleSettings('${tid}'); event.stopPropagation();">⚙️ Настроить</button>
                     </label>
                     <div class="count-stepper" onclick="event.stopPropagation();">
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', -1, event)" title="Уменьшить количество">−</button>
-                        <input type="number" id="count-${tid}" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
+                        <input type="number" id="count-${tid}" min="0" value="0" aria-label="${String(tid).replace(/\D/g,'') === '19' ? 'Количество отдельных утверждений' : 'Количество заданий'}" oninput="updateTaskTotal()" onchange="updateTaskTotal()">
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Увеличить количество">+</button>
                     </div>
                 </div>
@@ -3050,7 +3089,13 @@ body.auth-locked > :not(#passwordGate){
                 return;
             }
 
-            total += value;
+            if (input.id === 'count-extra-task19' || input.id === 'count-extra-19') {
+                total += value * 3;
+            } else if (input.id === 'count-task19' || input.id === 'count-19') {
+                if ((window.database.task19?.prototypes || window.database[19]?.prototypes || []).some((_,idx)=>document.getElementById(getPrototypeCheckboxId('task19', idx, 'main'))?.checked || document.getElementById(getPrototypeCheckboxId('19', idx, 'main'))?.checked)) total += value;
+            } else {
+                total += value;
+            }
         });
         const totalEl = document.getElementById('task-total-count');
         if (totalEl) totalEl.textContent = total;
@@ -3306,7 +3351,7 @@ body.auth-locked > :not(#passwordGate){
             const isPracticeBlock = kind === 'practice';
             const sourceData = block.data;
             const blockData = (kind === 'extra')
-                ? { ...sourceData, title: 'Дополнительно' }
+                ? { ...sourceData, title: String(tid).replace(/\D/g, '') === '19' ? 'Утверждения тройками' : 'Дополнительно' }
                 : sourceData;
             let finalTasks = [];
 
@@ -3317,18 +3362,18 @@ body.auth-locked > :not(#passwordGate){
                 const requiredCount = block.requiredCount || 0;
                 if (requiredCount <= 0 || !sourceData || !Array.isArray(sourceData.prototypes)) continue;
 
-                const selectedProtos = sourceData.prototypes.filter((p, idx) => {
-                    const checkbox = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
-                    return checkbox && checkbox.checked;
-                });
+                const selectedProtos = (kind === 'extra' && String(tid).replace(/\D/g, '') === '19')
+                    ? sourceData.prototypes
+                    : sourceData.prototypes.filter((p, idx) => {
+                        const checkbox = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
+                        return checkbox && checkbox.checked;
+                    });
                 if (selectedProtos.length === 0) continue;
 
                 window.selectedBlockTitles.push(blockData.title);
                 if (kind === 'main' && String(tid).replace(/\D/g, '') === '19' && typeof window.task19MakeStatementTasks === 'function') {
                     const topicNames = selectedProtos.map(p=>p.topic);
-                    const ctl = document.getElementById('count-19-statements');
-                    const statementCount = ctl ? Math.max(2, Math.min(12, Number(ctl.value)||3)) : 3;
-                    finalTasks = window.task19MakeStatementTasks(requiredCount, statementCount, topicNames);
+                    finalTasks = window.task19MakeStatementTasks(requiredCount, 1, topicNames);
                 } else {
                 // Для задания 15 Экстра сохраняем тематический порядок даже при
                 // выключенной общей галочке «Упорядочить задания».
@@ -3401,7 +3446,7 @@ body.auth-locked > :not(#passwordGate){
             let lastExtraTopicInVariant = null;
             finalTasks.forEach(item => {
                 // Тематические рубрики видны не только в настройке, но и в самом варианте.
-                if (kind === 'extra' && sourceData.preserveTopicOrder === true) {
+                if (kind === 'extra' && sourceData.preserveTopicOrder === true && String(tid).replace(/\D/g, '') !== '19') {
                     const currentTopic = item.theory && item.theory.topic ? String(item.theory.topic) : '';
                     if (currentTopic && currentTopic !== lastExtraTopicInVariant) {
                         const topicHeading = `<h4 class="extra-topic-variant-header" style="color:#0f766e;background:#edfdf8;padding:8px 12px;border-left:3px solid #14b8a6;margin:16px 0 12px;font-size:16px;break-after:avoid;page-break-after:avoid;">${currentTopic}</h4>`;
