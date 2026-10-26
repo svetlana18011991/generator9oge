@@ -51,6 +51,7 @@
     <script src="task18_extra.js?v=20261026-circle-grid-fix"></script>
     <script src="task19.js?v=20261026-19-single-boolean-v3"></script>
     <script src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
+    <script src="task20.js?v=20261026-20-part2-bank"></script>
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2123,7 +2124,7 @@ body.auth-locked > :not(#passwordGate){
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
                 // Задания 6–17 подключены к генератору.
-                if (taskNumber > 19) return false;
+                if (taskNumber > 20) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -2934,6 +2935,9 @@ body.auth-locked > :not(#passwordGate){
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
+            if (String(tid).replace(/\D/g,'') === '20') {
+                container.innerHTML += `<div class="part2-heading" style="margin:26px 0 10px;padding:13px 16px;border-left:4px solid #f59e0b;background:#14343f;border-radius:8px;color:#ffd28e;font-weight:800;font-size:19px;">Часть 2 · Задания с развёрнутым ответом</div><div style="color:#a8cbd0;font-size:13px;margin-bottom:10px">Выберите количество и прототипы. Решения записываются самостоятельно; разборов и автоматической проверки здесь нет.</div>`;
+            }
             const listHTML = (String(tid).replace(/\D/g, '') === '19') ? build19MainTopicListHTML(tid, data) : buildPrototypeListHTML(tid, data, 'main');
             const special19UI = '';
 
@@ -3433,9 +3437,9 @@ body.auth-locked > :not(#passwordGate){
                     const topicNames = selectedProtos.map(p=>p.topic);
                     finalTasks = window.task19MakeStatementTasks(requiredCount, 1, topicNames);
                 } else {
-                // Для задания 15 Экстра сохраняем тематический порядок даже при
-                // выключенной общей галочке «Упорядочить задания».
-                const preservePrototypeOrder = orderedTasks || (kind === 'extra' && sourceData.preserveTopicOrder === true);
+                // Порядок должен зависеть только от общей галочки «Упорядочить задания».
+                // Если галочка выключена, выбранные задания можно перемешивать.
+                const preservePrototypeOrder = orderedTasks;
                 const activePools = selectedProtos.map(p => ({
                     tasks: shuffleArray([...p.tasks]),
                     protoSvg: p.svg_code || '',
@@ -3496,6 +3500,24 @@ body.auth-locked > :not(#passwordGate){
             if (finalTasks.length === 0) continue;
             hasContent = true;
 
+            // ЧАСТЬ 2: как в генераторе ЕГЭ — без автоматической проверки и без разборов.
+            // Условие сохраняет исходную типографику PDF, ученик записывает развёрнутое решение.
+            if (String(tid).replace(/\D/g, '') === '20') {
+                const h = `<h3 style="background:#fff7e9;border-left:4px solid #f59e0b;color:#9a560f;padding:12px 16px;margin:30px 0 14px">Часть 2. Задание 20 — Выражения, уравнения и неравенства</h3>`;
+                currentInteractiveHTML += h;
+                currentPrintHTML += h;
+                currentAnswersHTML += `<h3>Часть 2. Задание 20</h3><p>Задания с развёрнутым ответом: проверка учителем.</p>`;
+                finalTasks.forEach(item => {
+                    taskCounter++;
+                    const taskHtml = `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px" class="part2-workspace"></div></div></div></div>`;
+                    currentInteractiveHTML += taskHtml;
+                    currentPrintHTML += taskHtml;
+                    // Сохраняем исходный текст для экспортных режимов; ответ проверяет педагог.
+                    window.currentGeneratedTasks.push({text:item.text, draftText:item.text, presentationText:item.text, answer:'', part:2, taskNumber:20, sourcePage:item.sourcePage, taskId:item.id});
+                });
+                continue;
+            }
+
             let blockTitle = `<h3 style="background: #ecfdf5; padding: 10px 15px; border-left: 4px solid #14B8A6; margin-top: 30px; border-radius: 0 6px 6px 0; color: #0F766E;">${blockData.title}</h3>`;
             currentInteractiveHTML += blockTitle + `<div style="font-size: 16px;">`;
             currentPrintHTML += blockTitle + `<div style="font-size: 16px;">`;
@@ -3504,7 +3526,7 @@ body.auth-locked > :not(#passwordGate){
             let lastExtraTopicInVariant = null;
             finalTasks.forEach(item => {
                 // Тематические рубрики видны не только в настройке, но и в самом варианте.
-                if (kind === 'extra' && sourceData.preserveTopicOrder === true && String(tid).replace(/\D/g, '') !== '19') {
+                if (orderedTasks && kind === 'extra' && sourceData.preserveTopicOrder === true && String(tid).replace(/\D/g, '') !== '19') {
                     const currentTopic = item.theory && item.theory.topic ? String(item.theory.topic) : '';
                     if (currentTopic && currentTopic !== lastExtraTopicInVariant) {
                         const topicHeading = `<h4 class="extra-topic-variant-header" style="color:#0f766e;background:#edfdf8;padding:8px 12px;border-left:3px solid #14b8a6;margin:16px 0 12px;font-size:16px;break-after:avoid;page-break-after:avoid;">${currentTopic}</h4>`;
