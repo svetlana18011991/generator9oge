@@ -5488,6 +5488,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:9mm;align-items:start;height:173mm;flex:0 0 173mm;overflow:hidden;}
 .oge-exam-column{width:100%;height:173mm;overflow:hidden;position:relative;min-width:0;}
 .oge-exam-column-content{display:flow-root;width:100%;overflow:visible;}
+.oge-exam-column-content *{max-width:100%;}
 .oge-exam-wide-page .oge-exam-columns{grid-template-columns:minmax(0,1fr);}
 .oge-exam-wide-page .oge-exam-column+ .oge-exam-column{display:none;}
 .oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Georgia,"Times New Roman",serif;color:#777;display:flex;align-items:end;justify-content:space-between;gap:5mm;border-top:.25pt solid #ddd;padding-top:.8mm;} .oge-exam-footer .brand{font-style:italic;font-size:8.1pt;color:#757575}.oge-exam-footer a{color:#626d80;text-decoration:none;border-bottom:.25pt solid #a3a3a3;}
@@ -5503,9 +5504,9 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
-.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(8.5pt,.85em);line-height:1.22;}
-.oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:.5mm 1.2mm;vertical-align:top;}
-.oge-exam-task table{font-size:max(8.5pt,.85em);}
+.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:fixed;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(7.4pt,.78em);line-height:1.16;}
+.oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:.45mm .8mm;vertical-align:top;overflow-wrap:anywhere;word-break:break-word;hyphens:auto;}
+.oge-exam-task table{font-size:max(7.4pt,.78em);}
 .oge-match11-print{margin:2.2mm 0!important;max-width:54mm!important;table-layout:fixed!important;text-align:center;border:1px solid #888;}
 .oge-match11-print th,.oge-match11-print td{width:33.33%;padding:1.1mm 4mm!important;text-align:center;border:1px solid #777;}
 .oge-match11-print td{height:8mm;}
@@ -5520,7 +5521,8 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:50mm;margin:2mm auto;}
 .oge-exam-intro *{max-width:100%;}
-.oge-exam-statement .common-table{font-size:max(8.5pt,.85em);margin:2mm 0;}
+.oge-exam-statement .common-table{font-size:max(7.4pt,.78em);margin:1.6mm 0;}
+.oge-exam-statement .common-table th,.oge-exam-statement .common-table td{padding:.4mm .7mm;}
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
@@ -5663,38 +5665,146 @@ ${window.SCRIPT_END}
         downloadBlobSafely(blob,'ОГЭ_Варианты_для_печати_A4_альбомная.html');
     }
 
+    function ogeKeyTaskEntries(snapshot) {
+        // Используем задания из сохранённого варианта, а не старый длинный HTML.
+        // Так не теряются ответы при переключении вариантов и замене задач.
+        const occurrences = new Map();
+        const result = [];
+        (Array.isArray(snapshot) ? snapshot : []).forEach(block => {
+            (block.tasks || []).forEach(task => {
+                const rawNumber = block.kind === 'practice'
+                    ? (task.examNumber || task.__ogeScenarioMeta?.taskNumber || task.__ogeTrainerMeta?.proto?.examNumber)
+                    : String(block.tid || '').replace(/\D/g, '');
+                const num = Number(rawNumber);
+                if (!Number.isInteger(num) || num < 1 || num > 25) return;
+                const position = (occurrences.get(num) || 0) + 1;
+                occurrences.set(num, position);
+                const secondPart = num >= 20;
+                const alternatives = (!secondPart && Array.isArray(task.accepts) && task.accepts.length)
+                    ? task.accepts.map(value => String(value ?? '').trim()).filter(Boolean)
+                    : [];
+                const answer = alternatives.length
+                    ? [...new Set(alternatives)].join(' или ')
+                    : String(task.answer ?? '').trim();
+                result.push({num, key:num + '#' + position,
+                    answer:answer || (secondPart ? 'Проверка учителем' : '—')});
+            });
+        });
+        return result;
+    }
+
+    function ogeKeyEscape(value) {
+        return String(value ?? '').replace(/[&<>"']/g, symbol => ({
+            '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+        })[symbol]);
+    }
+
     function downloadAnswers() {
-        // The printable export already uses ogeVariantBatch; keys must do the
-        // same instead of exporting only currentAnswersHTML (active variant).
-        const batch = Array.isArray(window.ogeVariantBatch) ? window.ogeVariantBatch : [];
-        const sections = batch.length > 1
-            ? batch.map((entry, i) => ({index:i + 1, html:entry.answersHTML || ''}))
-            : [{index:1, html:currentAnswersHTML || batch[0]?.answersHTML || ''}];
-        if (!sections.some(entry => entry.html)) {
+        const stored = Array.isArray(window.ogeVariantBatch) && window.ogeVariantBatch.length
+            ? window.ogeVariantBatch
+            : [{snapshot:window.ogeVariantSnapshot}];
+        const variants = stored.map((entry, index) => ({
+            index:index + 1,
+            tasks:ogeKeyTaskEntries(entry.snapshot || (stored.length === 1 ? window.ogeVariantSnapshot : []))
+        }));
+        if (!variants.some(v => v.tasks.length)) {
             alert('Сначала сгенерируйте варианты, чтобы получить ключи.');
             return;
         }
-        const content = sections.map(({index,html}) => `
-            <section class="key-variant">
-                <h2>Вариант №${index}</h2>
-                ${html || '<p>Ответы для данного варианта отсутствуют.</p>'}
-            </section>`).join('\n');
+        const isFullVariant = tasks => tasks.length === 25 &&
+            new Set(tasks.map(t => t.num)).size === 25 &&
+            Array.from({length:25}, (_,i) => i + 1).every(n => tasks.some(t => t.num === n));
+        const full = variants.every(v => isFullVariant(v.tasks));
+        const keys = [];
+        const used = new Set();
+        variants.forEach(v => v.tasks.forEach(task => {
+            if (!used.has(task.key)) {used.add(task.key); keys.push(task);}
+        }));
+        keys.sort((a,b) => a.num - b.num || Number(a.key.split('#')[1]) - Number(b.key.split('#')[1]));
+        const taskKeys = keys.map(t => t.key);
+        const answerMaps = variants.map(v => new Map(v.tasks.map(t => [t.key, t.answer])));
+        // При большом количестве вариантов не сжимаем все ответы до нечитаемой ширины.
+        const groupCount = Math.ceil(variants.length / 4);
+        const perTable = Math.ceil(variants.length / groupCount);
+        const chunks = [];
+        for (let i = 0; i < variants.length; i += perTable) chunks.push(variants.slice(i, i + perTable));
+        const title = full ? 'Ключи к полным вариантам ОГЭ' : 'Ключи к подборкам заданий ОГЭ';
+        const tableSections = chunks.map((chunk, groupIndex) => {
+            const from = chunk[0].index, to = chunk[chunk.length - 1].index;
+            const chunkName = full ? 'Вариант' : 'Подборка';
+            const caption = variants.length > perTable
+                ? `<h2>${chunkName === 'Вариант' ? 'Варианты' : 'Подборки'} №${from}–${to}</h2>`
+                : '';
+            const header = full
+                ? '<th class="key-task-col" scope="col">№ задания</th>'
+                : '<th class="key-order-col" scope="col">№</th><th class="key-task-col" scope="col">Задание ОГЭ</th>';
+            const columns = chunk.map(v => `<th scope="col">${chunkName} №${v.index}</th>`).join('');
+            const bodyRows = taskKeys.map((key, rowIndex) => {
+                const ref = keys[rowIndex];
+                const label = full
+                    ? `<th scope="row">${ref.num}</th>`
+                    : `<th scope="row">${rowIndex + 1}</th><td class="key-exam-num">${ref.num}</td>`;
+                const cells = chunk.map(v => {
+                    const value = answerMaps[v.index - 1].get(key);
+                    return `<td class="key-answer">${value === undefined ? '<span class="key-empty">—</span>' : ogeKeyEscape(value)}</td>`;
+                }).join('');
+                return `<tr>${label}${cells}</tr>`;
+            }).join('');
+            return `<section class="key-section" data-group="${groupIndex + 1}">${caption}
+                <table class="key-table"><thead><tr>${header}${columns}</tr></thead>
+                    <tbody>${bodyRows}</tbody></table></section>`;
+        }).join('\n');
+        const note = keys.some(t => t.num >= 20)
+            ? '<p class="key-note">Для заданий 20–25 указан итоговый ответ (если он есть в базе). Развёрнутое решение проверяет учитель.</p>'
+            : '';
+        // ВАЖНО: сериализуем объект, а не вписываем \\( и \\) непосредственно в
+        // HTML-шаблон. Иначе второй проход разбора JavaScript удаляет слеши,
+        // и MathJax начинает считать любые скобки границами формул.
+        const mathjaxConfig = {
+            tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+            options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']}
+        };
         const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
-            <title>Ответы к ${sections.length} вариантам ОГЭ</title>
-            <base href="https://svetlana18011991.github.io/generator11prof/">
-            <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]}};${window.SCRIPT_END}
-            <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>${title}</title>
+            <script>window.MathJax=${JSON.stringify(mathjaxConfig)};${window.SCRIPT_END}
+            <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">${window.SCRIPT_END}
             <style>
-                body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px 36px;color:#182432}
-                h1{text-align:center;margin-bottom:28px}h2{color:#0f766e;border-bottom:2px solid #0f766e;padding-bottom:8px}
-                h3{margin-top:22px}.key-variant{margin-bottom:35px}
-                @media print{@page{size:A4 portrait;margin:16mm}
-                    body{max-width:none;margin:0;padding:0}
-                    .key-variant:not(:first-of-type){break-before:page;page-break-before:always}
-                    h2,h3,h4{break-after:avoid;page-break-after:avoid}}
-            </style></head><body><h1>Ключи к вариантам ОГЭ по математике</h1>${content}</body></html>`;
+                *{box-sizing:border-box}
+                body{font-family:Arial,Helvetica,sans-serif;max-width:1180px;margin:0 auto;padding:22px 25px;color:#1b2938;background:#fff}
+                h1{font-size:22px;text-align:center;margin:0 0 8px}h2{font-size:17px;margin:16px 0 9px;color:#136b6a}
+                .key-subtitle{text-align:center;color:#586878;margin:0 0 17px;font-size:13px}
+                .key-section{margin:0 0 23px;overflow-x:auto}
+                .key-table{width:100%;table-layout:fixed;border-collapse:collapse;border:1px solid #adbfc4;font-size:12.5px;line-height:1.32;background:white}
+                .key-table th,.key-table td{border:1px solid #bfcbd0;padding:5px 7px;vertical-align:middle;overflow-wrap:anywhere;word-break:normal}
+                .key-table thead th{background:#e9f3f3;color:#173c46;font-size:12px;line-height:1.3}
+                .key-table tbody tr:nth-child(even){background:#f8fbfc}
+                .key-table tbody th{font-weight:700;text-align:center;width:44px;background:#f2f5f7}
+                .key-table .key-exam-num{text-align:center;font-weight:600}
+                .key-order-col{width:44px}.key-task-col{width:90px}
+                .key-answer{text-align:left;min-width:0}
+                .key-empty{color:#a0a8ad}.key-note{font-size:12px;color:#596576;margin:10px 0 0}
+                mjx-container{max-width:100%;}mjx-container[display="true"]{margin:4px 0!important}
+                @media print{
+                    @page{size:A4 landscape;margin:11mm}
+                    body{max-width:none;margin:0;padding:0;color:#111}
+                    h1{font-size:17px}.key-subtitle{margin-bottom:12px}
+                    h2{font-size:14px}.key-section{overflow:visible;break-before:auto}
+                    .key-section:not(:first-of-type){break-before:page;page-break-before:always}
+                    .key-table{font-size:10.5px}.key-table thead th{font-size:10.5px}
+                    .key-table th,.key-table td{padding:3px 5px}
+                    .key-table thead{display:table-header-group}
+                    .key-table tr{break-inside:avoid;page-break-inside:avoid}
+                    .key-note{font-size:10px}
+                    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+                }
+            </style></head><body>
+                <h1>${title}</h1>
+                <p class="key-subtitle">${variants.length} ${full ? 'полных вариантов (задания 1–25)' : 'подборок'} · ${taskKeys.length} заданий в таблице</p>
+                ${tableSections}${note}
+            </body></html>`;
         downloadBlobSafely(new Blob([html], {type:'text/html;charset=utf-8'}),
-            sections.length > 1 ? `Ответы_ко_всем_${sections.length}_вариантам.html` : 'Ответы.html');
+            `${full ? 'Ключи_варианты' : 'Ключи_подборки'}_${variants.length}.html`);
     }
 
     function getOgeGameEligibleTasks() {
