@@ -3461,9 +3461,18 @@ body.auth-locked > *:not(#passwordGate) {
         return count;
     }
     function ogeHasManualSelection() {
-        if(Number(document.getElementById('count-practice-scenarios')?.value||0)>0) return true;
-        if(getOgeTrainerThemeIds().some(t=>document.getElementById('practice-trainer-theme-'+t)?.checked)) return true;
-        return [...document.querySelectorAll('input[id^="count-task"],input[id^="count-extra-task"]')].some(el=>Number(el.value||0)>0);
+        // Проверяем те же поля количества, которые считывает generateVariant().
+        // Ключи заданий в базе могут быть и числовыми (17), и строковыми (task17).
+        // Проверка только count-task* пропускала, например, count-17 и count-extra-17.
+        const scenarioCount = Number(document.getElementById('count-practice-scenarios')?.value || 0);
+        if (scenarioCount > 0 && getOgeScenarioThemeIds().some(t =>
+            document.getElementById('practice-scenario-theme-' + t)?.checked)) return true;
+        if (getOgeTrainerThemeIds().some(t =>
+            document.getElementById('practice-trainer-theme-' + t)?.checked)) return true;
+        return getUniqueTaskIds().some(tid =>
+            Number(document.getElementById(`count-${tid}`)?.value || 0) > 0 ||
+            Number(document.getElementById(`count-extra-${tid}`)?.value || 0) > 0
+        );
     }
     function safeGenerateVariant(event, requestedMode='manual') {
         if(event){event.preventDefault();event.stopPropagation();}
