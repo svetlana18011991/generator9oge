@@ -2835,12 +2835,21 @@ body.auth-locked > *:not(#passwordGate) {
                         for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
                             const allTasks = scenario.tasks && Array.isArray(scenario.tasks[taskNumber]) ? scenario.tasks[taskNumber] : [];
                             const indexes = state.selectedByNumber[taskNumber];
-                            const candidates = indexes.map(i => allTasks[i]).filter(Boolean);
-                            const minUse = Math.min(...candidates.map((task, idx) => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${indexes[idx]}`) || 0) + (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(task))||0)));
-                            let candidatePairs = candidates.map((task, idx) => ({ task, originalIndex: indexes[idx] }))
-                                .filter(pair => ((usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) + (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(pair.task))||0)) === minUse);
-                            candidatePairs = shuffleArray(candidatePairs);
+                            const candidatePairsAll = indexes
+                                .map(i => ({task:allTasks[i], originalIndex:i}))
+                                .filter(pair => Boolean(pair.task));
+                            const scenarioTypePrefix = 'scenario-type:' + state.themeId + ':' + state.scenarioIndex + ':' + taskNumber + ':';
+                            const typeKey = pair => scenarioTypePrefix + String(pair.task.typeId || ('type-' + pair.originalIndex));
+                            const typeUse = pair => (usageCounts.get(typeKey(pair)) || 0) +
+                                (usage.get(typeKey(pair)) || 0);
+                            const minTypeUse = Math.min(...candidatePairsAll.map(typeUse));
+                            const freshTypes = candidatePairsAll.filter(pair => typeUse(pair) === minTypeUse);
+                            const taskUse = pair => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) +
+                                (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(pair.task))||0);
+                            const minTaskUse = Math.min(...freshTypes.map(taskUse));
+                            const candidatePairs = shuffleArray(freshTypes.filter(pair => taskUse(pair) === minTaskUse));
                             const chosenPair = candidatePairs[0];
+                            usage.set(typeKey(chosenPair), (usage.get(typeKey(chosenPair)) || 0) + 1);
                             const chosen = chosenPair.task;
                             const analogTasks = allTasks
                                 .map((other, otherIndex) => ({ other, otherIndex }))
@@ -2858,6 +2867,7 @@ body.auth-locked > *:not(#passwordGate) {
                                 examNumber: taskNumber,
                                 __ogeScenarioMeta: {
                                     chosen, candidates: indexes.map(i => allTasks[i]).filter(Boolean),
+                                    selectedTypeId: String(chosen.typeId || ('type-' + chosenPair.originalIndex)),
                                     themeTitle: theme.title, scenario, setNumber, taskNumber, diagramHTML,
                                     groupId: `${state.themeId}:${state.scenarioIndex}:${setNumber}`
                                 },
@@ -3375,7 +3385,8 @@ body.auth-locked > *:not(#passwordGate) {
                 const usedTasks=new Set(block.tasks.filter((t,i)=>i!==itemIndex).map(ogeTaskReplacementKey));
                 const candidates=src.tasks.filter(t=>!usedTasks.has(ogeTaskReplacementKey(t)));
                 const next=(candidates.length?candidates:src.tasks)[Math.floor(Math.random()*(candidates.length?candidates:src.tasks).length)];
-                replacement={...next,svg:next.svg_code||src.svg_code||'',theory:src};
+                replacement={...next,svg:next.svg_code||src.svg_code||'',theory:src,
+                    __ogeSelectedPrototypeKey:'prototype-cycle:'+block.kind+':'+String(block.tid)+':'+block.data.prototypes.indexOf(src)};
             } else {
                 if (!p||!Array.isArray(p.tasks)||p.tasks.length<2) return;
                 const alternatives=p.tasks.filter(t=>ogeTaskReplacementKey(t)!==ogeTaskReplacementKey(old));
@@ -3409,13 +3420,23 @@ body.auth-locked > *:not(#passwordGate) {
         return String(block?.tid||'')+':'+ogeTaskReplacementKey(task);
     }
     function ogeRecordUsage(snapshot, usage) {
+        const lastTypesByBlock = new Map();
         (snapshot||[]).forEach(b=>(b.tasks||[]).forEach(t=>{
             const k=ogeTaskGlobalKey(t,b);usage.set(k,(usage.get(k)||0)+1);
-            if(t?.theory && b.kind!=='practice'){
-                const protoKey='proto:'+b.tid+':'+String(t.theory.code||t.theory.desc||'');
-                usage.set(protoKey,(usage.get(protoKey)||0)+1);
+            if (t.__ogeSelectedPrototypeKey && b.kind !== 'practice') {
+                const typeKey = t.__ogeSelectedPrototypeKey;
+                usage.set(typeKey, (usage.get(typeKey) || 0) + 1);
+                const blockKey = 'previous-prototypes:' + b.kind + ':' + String(b.tid);
+                if (!lastTypesByBlock.has(blockKey)) lastTypesByBlock.set(blockKey, new Set());
+                lastTypesByBlock.get(blockKey).add(typeKey);
             }
             const m=t?.__ogeScenarioMeta;
+            if (m && m.chosen) {
+                const [theme, scenario] = String(m.groupId || '').split(':');
+                const type = String(m.selectedTypeId || m.chosen.typeId || ('type-' + (m.candidates || []).indexOf(m.chosen)));
+                const typeKey = 'scenario-type:' + theme + ':' + scenario + ':' + m.taskNumber + ':' + type;
+                usage.set(typeKey, (usage.get(typeKey) || 0) + 1);
+            }
             if(m && Number(m.taskNumber)===1){
                 const theme=String(m.groupId||'').split(':')[0];
                 const scenario=String(m.groupId||'').split(':')[1];
@@ -3424,6 +3445,7 @@ body.auth-locked > *:not(#passwordGate) {
                 usage.set(sk,(usage.get(sk)||0)+1);
             }
         }));
+        lastTypesByBlock.forEach((types, key) => usage.set(key, [...types]));
     }
     function ogeBuildBatchEntry() {
         return {snapshot:window.ogeVariantSnapshot,printHTML:currentPrintHTML,
@@ -3666,6 +3688,81 @@ body.auth-locked > *:not(#passwordGate) {
         return array;
     }
 
+
+    // A random, balanced prototype cycle is maintained separately for each task
+    // number and each bank (main / extra). A prototype repeats only after its
+    // peers have been drawn equally often, unless the user has selected fewer
+    // types than requested tasks.
+    function ogeChooseBalancedPrototypes({selectedProtos, sourceData, kind, tid,
+                                          requiredCount, usageCounts, orderedTasks,
+                                          createTask}) {
+        const activePools = selectedProtos.map((proto) => {
+            const index = sourceData.prototypes.indexOf(proto);
+            return {
+                proto, index,
+                typeKey: 'prototype-cycle:' + kind + ':' + String(tid) + ':' + index,
+                tasks: (proto.tasks || []).filter(Boolean)
+            };
+        }).filter(pool => pool.tasks.length > 0);
+        if (!activePools.length) return [];
+
+        const lastKeys = usageCounts.get('previous-prototypes:' + kind + ':' + String(tid)) || [];
+        const lastTypeSet = new Set(lastKeys);
+        const localTypeUse = new Map();
+        const localTaskUse = new Map();
+        const chosen = [];
+        for (let slot = 0; slot < requiredCount; slot++) {
+            // Lower global+current-batch counts always win; random ties avoid
+            // predictable 1,2,3,... ordering while exhausting types first.
+            const minUse = Math.min(...activePools.map(pool =>
+                (usageCounts.get(pool.typeKey) || 0) + (localTypeUse.get(pool.typeKey) || 0)));
+            let choices = activePools.filter(pool =>
+                (usageCounts.get(pool.typeKey) || 0) + (localTypeUse.get(pool.typeKey) || 0) === minUse);
+            const notPrevious = choices.filter(pool => !lastTypeSet.has(pool.typeKey));
+            if (notPrevious.length) choices = notPrevious;
+            const pool = choices[Math.floor(Math.random() * choices.length)];
+
+            let task;
+            if (createTask) {
+                // The statements bank creates items dynamically instead of
+                // storing them in the placeholder prototype.tasks array.
+                let bestUse = Infinity;
+                for (let attempt = 0; attempt < 18; attempt++) {
+                    const candidate = createTask(pool.proto);
+                    if (!candidate) break;
+                    const key = String(tid) + ':' + ogeTaskReplacementKey(candidate);
+                    const n = (usageCounts.get(key) || 0) + (localTaskUse.get(key) || 0);
+                    if (n < bestUse) { task = candidate; bestUse = n; }
+                    if (n === 0) break;
+                }
+            } else {
+                const minTaskUse = Math.min(...pool.tasks.map(t => {
+                    const key = String(tid) + ':' + ogeTaskReplacementKey(t);
+                    return (usageCounts.get(key) || 0) + (localTaskUse.get(key) || 0);
+                }));
+                const taskChoices = pool.tasks.filter(t => {
+                    const key = String(tid) + ':' + ogeTaskReplacementKey(t);
+                    return (usageCounts.get(key) || 0) + (localTaskUse.get(key) || 0) === minTaskUse;
+                });
+                task = taskChoices[Math.floor(Math.random() * taskChoices.length)];
+            }
+            if (!task) continue;
+            const key = String(tid) + ':' + ogeTaskReplacementKey(task);
+            localTaskUse.set(key, (localTaskUse.get(key) || 0) + 1);
+            localTypeUse.set(pool.typeKey, (localTypeUse.get(pool.typeKey) || 0) + 1);
+            chosen.push({
+                ...task,
+                svg: task.svg_code || pool.proto.svg_code || '',
+                theory: createTask ? (task.theory || pool.proto) : pool.proto,
+                __ogeSelectedPrototypeKey: pool.typeKey,
+                __ogeSelectedPrototypeIndex: pool.index
+            });
+        }
+        if (orderedTasks) chosen.sort((a,b) =>
+            a.__ogeSelectedPrototypeIndex - b.__ogeSelectedPrototypeIndex);
+        return chosen;
+    }
+
     function generateVariant(options = {}) {
         const frozenSnapshot = options && Array.isArray(options.snapshot) ? options.snapshot : null;
         const usageCounts = options && options.usageCounts instanceof Map ? options.usageCounts : new Map();
@@ -3796,74 +3893,26 @@ body.auth-locked > *:not(#passwordGate) {
                 if (selectedProtos.length === 0) continue;
 
                 window.selectedBlockTitles.push(blockData.title);
-                if (kind === 'main' && String(tid).replace(/\D/g, '') === '19' && typeof window.task19MakeStatementTasks === 'function') {
-                    const topicNames = selectedProtos.map(p=>p.topic);
-                    finalTasks = window.task19MakeStatementTasks(requiredCount, 1, topicNames);
-                } else {
-                // Порядок должен зависеть только от общей галочки «Упорядочить задания».
-                // Если галочка выключена, выбранные задания можно перемешивать.
-                const preservePrototypeOrder = orderedTasks;
-                const activePools = selectedProtos.map(p => ({
-                    tasks: shuffleArray([...p.tasks]).sort((a,b)=>
-                        (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(a))||0)-
-                        (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(b))||0)),
-                    protoSvg: p.svg_code || '',                     theory: p
-                }));
-
-                const availableCount = activePools.reduce((sum, pool) => sum + pool.tasks.length, 0);
-                const requestedCount = requiredCount;
-                const actualCount = requiredCount;
-
-                if (availableCount === 0) {
+                const isStatements = kind === 'main' &&
+                    String(tid).replace(/\D/g, '') === '19' &&
+                    typeof window.task19MakeStatementTasks === 'function';
+                const availableCount = selectedProtos.reduce((sum,p) => sum +
+                    (Array.isArray(p.tasks) ? p.tasks.length : 0), 0);
+                if (!availableCount) {
                     infoBoard.innerHTML += `<div><b>${blockData.title}:</b> в выбранных прототипах нет доступных задач.</div>`;
                     infoBoard.style.display = 'block';
                     continue;
                 }
-
-                if (requestedCount > availableCount) {
-                    infoBoard.innerHTML += `<div><b>${blockData.title}:</b> запрошено ${requestedCount}, уникальных задач в выбранных прототипах ${availableCount}. После первого круга задачи будут повторяться по новому кругу.</div>`;
+                if (!isStatements && requiredCount > availableCount) {
+                    infoBoard.innerHTML += `<div><b>${blockData.title}:</b> запрошено ${requiredCount}, уникальных задач в выбранных прототипах ${availableCount}. После первого круга задачи будут повторяться по новому кругу.</div>`;
                     infoBoard.style.display = 'block';
                 }
-
-                function buildPrototypeRound() {
-                    let pools = activePools.map(pool => ({
-                        protoSvg: pool.protoSvg || '',
-                        theory: pool.theory,
-                        tasks: shuffleArray([...pool.tasks]).sort((a,b)=>
-                            (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(a))||0)-
-                            (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(b))||0))
-                    })).filter(pool => pool.tasks.length > 0);
-
-                    if (!preservePrototypeOrder) pools = shuffleArray(pools);
-                    if(block.autoFull) pools.sort((a,b)=>
-                        (usageCounts.get('proto:'+tid+':'+String(a.theory?.code||a.theory?.desc||''))||0)-
-                        (usageCounts.get('proto:'+tid+':'+String(b.theory?.code||b.theory?.desc||''))||0));
-                    const maxTasksInProto = Math.max(...pools.map(pool => pool.tasks.length));
-                    const roundTasks = [];
-
-                    for (let layerIndex = 0; layerIndex < maxTasksInProto; layerIndex++) {
-                        let layerPools = pools.filter(pool => pool.tasks[layerIndex]);
-                        if (!preservePrototypeOrder) layerPools = shuffleArray(layerPools);
-                        layerPools.forEach(pool => {
-                            const task = pool.tasks[layerIndex];
-                            roundTasks.push({
-                                ...task,
-                                svg: task.svg_code || pool.protoSvg || '',
-                                theory: pool.theory
-                            });
-                        });
-                    }
-                    return roundTasks;
-                }
-
-                const oneFullRound = buildPrototypeRound();
-                if (oneFullRound.length === 0) continue;
-                while (finalTasks.length < actualCount) {
-                    const cycleTasks = preservePrototypeOrder ? [...oneFullRound] : buildPrototypeRound();
-                    const needNow = actualCount - finalTasks.length;
-                    finalTasks.push(...cycleTasks.slice(0, needNow));
-                }
-                }
+                finalTasks = ogeChooseBalancedPrototypes({
+                    selectedProtos, sourceData, kind, tid, requiredCount,
+                    usageCounts, orderedTasks,
+                    createTask: isStatements ? (proto =>
+                        window.task19MakeStatementTasks(1, 1, [proto.topic])[0]) : null
+                });
             }
 
             if (finalTasks.length === 0) continue;
@@ -5615,10 +5664,37 @@ ${window.SCRIPT_END}
     }
 
     function downloadAnswers() {
-        if (!currentAnswersHTML) return;
-        let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ответы</title><base href="https://svetlana18011991.github.io/generator11prof/"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\\\(','\\\\)']]}};${window.SCRIPT_END}<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}</head><body style="padding:40px;font-family:sans-serif;"><h2>Ключи</h2>${currentAnswersHTML}</body></html>`;
-        let blob = new Blob([html], {type:"text/html;charset=utf-8"});
-        downloadBlobSafely(blob, "Ответы.html");
+        // The printable export already uses ogeVariantBatch; keys must do the
+        // same instead of exporting only currentAnswersHTML (active variant).
+        const batch = Array.isArray(window.ogeVariantBatch) ? window.ogeVariantBatch : [];
+        const sections = batch.length > 1
+            ? batch.map((entry, i) => ({index:i + 1, html:entry.answersHTML || ''}))
+            : [{index:1, html:currentAnswersHTML || batch[0]?.answersHTML || ''}];
+        if (!sections.some(entry => entry.html)) {
+            alert('Сначала сгенерируйте варианты, чтобы получить ключи.');
+            return;
+        }
+        const content = sections.map(({index,html}) => `
+            <section class="key-variant">
+                <h2>Вариант №${index}</h2>
+                ${html || '<p>Ответы для данного варианта отсутствуют.</p>'}
+            </section>`).join('\n');
+        const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+            <title>Ответы к ${sections.length} вариантам ОГЭ</title>
+            <base href="https://svetlana18011991.github.io/generator11prof/">
+            <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]}};${window.SCRIPT_END}
+            <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
+            <style>
+                body{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:24px 36px;color:#182432}
+                h1{text-align:center;margin-bottom:28px}h2{color:#0f766e;border-bottom:2px solid #0f766e;padding-bottom:8px}
+                h3{margin-top:22px}.key-variant{margin-bottom:35px}
+                @media print{@page{size:A4 portrait;margin:16mm}
+                    body{max-width:none;margin:0;padding:0}
+                    .key-variant:not(:first-of-type){break-before:page;page-break-before:always}
+                    h2,h3,h4{break-after:avoid;page-break-after:avoid}}
+            </style></head><body><h1>Ключи к вариантам ОГЭ по математике</h1>${content}</body></html>`;
+        downloadBlobSafely(new Blob([html], {type:'text/html;charset=utf-8'}),
+            sections.length > 1 ? `Ответы_ко_всем_${sections.length}_вариантам.html` : 'Ответы.html');
     }
 
     function getOgeGameEligibleTasks() {
