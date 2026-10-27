@@ -5175,342 +5175,224 @@ body.auth-locked > *:not(#passwordGate) {
         if(batch.length) return batch;
         return [{snapshot:window.ogeVariantSnapshot,printGroups:window.ogePrintableGroups||{}}];
     }
-    function buildOgeBatchPrintHTML(sigPrint) {
-        const batch=ogeBatchPrintData();
-        const pieces=[['1-5','Задания 1–5'],['6-14','Задания 6–14'],['15-25','Задания 15–25']];
-        const escape=(s)=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return batch.map((entry,vi)=>pieces.map(([key,title],pi)=>{
-            const fragments=entry.printGroups?.[key]||[];
-            const content=fragments.length?fragments.join(''):'<p style="color:#777">Задания этого диапазона не выбраны.</p>';
-            return `<article class="oge-print-sheet" data-oge-sheet="${vi+1}-${pi+1}">
-                <div class="oge-sheet-inner">
-                    <header class="oge-sheet-heading"><strong>Вариант №${vi+1}</strong><span>${escape(title)} · лист ${pi+1} из 3</span></header>
-                    ${pi===0&&sigPrint?`<div class="oge-sheet-author">${sigPrint}</div>`:''}
-                    <div class="oge-sheet-tasks">${content}</div>
-                </div>
-            </article>`;
-        }).join('')).join('');
+    // Печать по образцу экзаменационного варианта: 3 страницы, A4-книжная,
+    // две колонки, задания 1–5 / 6–14 / 15–25 без интерактивных элементов.
+    function ogePrintStripUserInterface(node) {
+        if (!node) return node;
+        node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .sticker-print, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
+        node.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+        node.querySelectorAll('*').forEach(el=>{
+            el.removeAttribute('onclick');el.removeAttribute('onmousedown');el.removeAttribute('onmouseup');
+            el.removeAttribute('onmouseenter');el.removeAttribute('onmouseleave');
+            // Не трогаем inline-разметку чертежей: некоторые планы и таблицы
+            // строятся из DIV с grid, position:absolute и размерами.
+            if(el.matches('.oge-practice-common,.oge-practice-sticky,.oge-practice-sticky-scope,.task-print-flex,.task-print-block,.task20-part2-item,.task-print-text,.task-print-img'))
+                el.removeAttribute('style');
+            if (el.hasAttribute('contenteditable')) el.removeAttribute('contenteditable');
+        });
+        return node;
+    }
+    function ogePrintCommonFromFragment(fragment) {
+        const host=document.createElement('div'); host.innerHTML=String(fragment||'');
+        const common=host.querySelector('.oge-practice-common');
+        if(!common) return '';
+        const clean=ogePrintStripUserInterface(common.cloneNode(true));
+        clean.querySelectorAll('h3,h4').forEach(h=>{
+            if(/Практический комплект|Задания 1.{0,3}5/i.test(h.textContent||'')) h.remove();
+        });
+        return clean.innerHTML.trim();
+    }
+    function ogePrintRenderTask(fragment, num, suppressDiagram) {
+        const host=document.createElement('div'); host.innerHTML=String(fragment||'');
+        const task=host.querySelector('.task-print-block, .task20-part2-item');
+        if (!task) return '';
+        const cloned=ogePrintStripUserInterface(task.cloneNode(true));
+        cloned.querySelectorAll('.task-print-answer').forEach(el=>el.remove());
+        let content='', artwork='';
+        const formal=cloned.querySelector('.task-print-text');
+        if (formal) {
+            const statement=formal.cloneNode(true);
+            statement.querySelectorAll('.task-print-answer').forEach(el=>el.remove());
+            content=statement.innerHTML;
+            const diagram=cloned.querySelector('.task-print-img');
+            if(diagram) artwork=diagram.innerHTML;
+        } else if (cloned.classList.contains('task20-part2-item')) {
+            // Внутри второй части: обёртка -> flex -> <b>20.</b> + <div>условие</div>.
+            // Убираем номер-дубль и пустую область для рукописного решения.
+            const flex=cloned.firstElementChild;
+            const statement=(flex && flex.lastElementChild && flex.lastElementChild.tagName==='DIV')
+                ?flex.lastElementChild.cloneNode(true):cloned.cloneNode(true);
+            statement.querySelectorAll('div').forEach(el=>{
+                const st=(el.getAttribute('style')||'').toLowerCase();
+                if(st.includes('height:66px')||st.includes('border-bottom:1px dotted'))el.remove();
+            });
+            content=statement.innerHTML;
+        } else {
+            // Задачи с картинкой и отдельным полем для решения.
+            const first=cloned.firstElementChild;
+            if(first) {
+                let textHolder=first.cloneNode(true);
+                content=textHolder.innerHTML;
+            } else content=cloned.innerHTML;
+            const visuals=[...cloned.querySelectorAll('img,svg')];
+            if(visuals.length) artwork=visuals.map(x=>x.outerHTML).join('');
+            content=content.replace(/^\s*<b>\s*\d+\.?\s*<\/b>\s*/i,'');
+            content=content.replace(/^\s*\d+\.\s*/, '');
+        }
+        // Готовая задача второй части иногда имеет собственную обёртку с номером.
+        content=content.replace(/^\s*<b[^>]*>\s*\d+\.?\s*<\/b>\s*/i,'');
+        const containsVisual=/<(?:svg|img|picture)\b/i.test(content);
+        if(suppressDiagram) artwork='';
+        if(containsVisual) artwork='';
+        const body=content.trim();
+        if(!body && !artwork)return '';
+        const graph=artwork?'<div class="oge-exam-diagram">'+artwork+'</div>':'';
+        const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
+        return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
+           +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
+           +body+'</div>'+graph+'</section>';
+    }
+    function ogePrintArrayToEntries(group, startNum, trueNumbers) {
+        const raw=Array.isArray(group)?group:[];
+        const items=[];
+        let common='';
+        raw.forEach((fragment,i)=>{
+            const num=Array.isArray(trueNumbers) && trueNumbers[i] >= 1 ? Number(trueNumbers[i]) : startNum+i;
+            if(i===0){common=ogePrintCommonFromFragment(fragment);}
+            const rendered=ogePrintRenderTask(fragment,num,Boolean(common) && num>=2 && num<=5);
+            if(rendered){items.push({num,html:rendered});}
+        });
+        return {items,common};
+    }
+    function buildOgeBatchPrintHTML() {
+        const batch=Array.isArray(window.ogeVariantBatch)&&window.ogeVariantBatch.length
+            ?window.ogeVariantBatch:[{printGroups:window.ogePrintableGroups||{}}];
+        const makeColumn=(tasks,extra='')=>'<div class="oge-exam-column"><div class="oge-exam-column-content">'+extra+tasks.map(x=>x.html).join('')+'</div></div>';
+        const pages=[];
+        batch.forEach((entry,i)=>{
+            const groups=entry.printGroups||{};
+            // Сохраняем РЕАЛЬНЫЕ номера заданий и в неполном ручном варианте.
+            // Нельзя считать «первый в диапазоне» заданием 6, если выбран только №9.
+            const numbers={'1-5':[],'6-14':[],'15-25':[]};
+            (entry.snapshot||window.ogeVariantSnapshot||[]).forEach(block=>{
+                (block.tasks||[]).forEach(task=>{
+                    const code=Number(block.kind==='practice'?
+                        (task.examNumber||task.__ogeScenarioMeta?.taskNumber||task.__ogeTrainerMeta?.proto?.examNumber):
+                        String(block.tid||'').replace(/\D/g,''));
+                    if(code>=1&&code<=25){
+                        const key=code<=5?'1-5':code<=14?'6-14':'15-25';
+                        numbers[key].push(code);
+                    }
+                });
+            });
+            const p1=ogePrintArrayToEntries(groups['1-5'],1,numbers['1-5']);
+            const p2=ogePrintArrayToEntries(groups['6-14'],6,numbers['6-14']);
+            const p3=ogePrintArrayToEntries(groups['15-25'],15,numbers['15-25']);
+            // Общая схема сюжетов 1–5 печатается ОДИН раз, над общим текстом,
+            // как в экзаменационном образце, а не возле каждого номера.
+            let sharedDiagram='';
+            if(p1.common && p1.items.length) {
+                const temp=document.createElement('div');temp.innerHTML=p1.items[0].html;
+                const diagram=temp.querySelector('.oge-exam-diagram');
+                if(diagram){sharedDiagram=diagram.outerHTML;diagram.remove();p1.items[0].html=temp.innerHTML;}
+            }
+            const intro='<div class="oge-exam-part1">Часть 1</div>'+(p1.common?'<div class="oge-exam-intro"><div class="oge-exam-intro-label">Прочитайте внимательно текст и выполните задания 1–5.</div>'+sharedDiagram+p1.common+'</div>':'');
+            const book=[
+                {index:1,left:p1.items.filter(t=>t.num<=1),right:p1.items.filter(t=>t.num>=2),extraLeft:intro,extraRight:''},
+                {index:2,left:p2.items.filter(t=>t.num<=10),right:p2.items.filter(t=>t.num>=11),extraLeft:'',extraRight:''},
+                {index:3,left:p3.items.filter(t=>t.num<=19),right:p3.items.filter(t=>t.num>=20),extraLeft:'',extraRight:'<div class="oge-exam-part2">Часть 2</div>'}
+            ];
+            book.forEach(pg=>{
+                const heading='<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>Вариант '+(i+1)+'</strong></header>';
+                pages.push('<article class="oge-exam-page" data-exam-page="'+(i+1)+'-'+pg.index+'">'
+                    +heading+'<div class="oge-exam-columns">'
+                    +makeColumn(pg.left,pg.extraLeft)+makeColumn(pg.right,pg.extraRight)
+                    +'</div><footer class="oge-exam-footer">Вариант '+(i+1)+' · страница '+pg.index+' из 3</footer></article>');
+            });
+        });
+        return pages.join('');
     }
     function downloadPrintPDF() {
-        if (!currentPrintHTML) { alert("Сначала сгенерируйте вариант!"); return; }
-
-        let teacherName = document.getElementById('teacher-name').value.trim();
-        let sigPrint = "";
-        if (document.getElementById('toggle-signature').checked && teacherName !== '') {
-            let verb = (document.getElementById('teacher-gender').value === 'male') ? 'подготовил' : 'подготовила';
-            sigPrint = `<div class="print-author">Вариант ${verb}: ${teacherName}</div>`;
-        }
-
-        let printHtml = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Печать варианта</title>
-    <base href="https://svetlana18011991.github.io/generator11prof/">
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
-    <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\\\(','\\\\)']]}};${window.SCRIPT_END}
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
-    <style>
-        :root { --blue:#003399; --orange:#ff8c00; --line:#d8e5f3; --soft:#f4f8ff; }
-        * { box-sizing: border-box; }
-        @media print {
-            @page { margin: 12mm 12mm 16mm 12mm; size: A4; }
-            body {
-                background:#fff !important;
-                margin:0 !important;
-                padding:0 !important;
-                color:#111 !important;
-                font-family: "Times New Roman", serif;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            #print-footer-fixed {
-                display:block !important;
-                position:fixed;
-                bottom:5mm;
-                left:0;
-                right:0;
-                text-align:center;
-                font-family:'Caveat', cursive;
-                font-size:15px;
-                color:rgba(0,0,0,0.42);
-                z-index:9999;
-                height:7mm;
-                line-height:7mm;
-                pointer-events:none;
-            }
-            .print-page {
-                width:100%;
-                padding:0;
-                margin:0;
-            }
-            .print-header {
-                page-break-after: avoid;
-                break-after: avoid;
-                margin:0 0 5mm 0;
-                padding:0 0 3.5mm 0;
-                border-bottom:2px solid var(--orange);
-                position:relative;
-            }
-            .print-header::before {
-                content:"";
-                display:block;
-                height:3mm;
-                border-radius:999px;
-                background:linear-gradient(90deg, var(--blue), var(--orange));
-                margin-bottom:4mm;
-            }
-            .print-title {
-                text-align:center;
-                text-transform:uppercase;
-                font-size:18px;
-                letter-spacing:.08em;
-                color:#111;
-                margin:0;
-                font-weight:800;
-            }
-            .print-subtitle {
-                text-align:center;
-                margin:1mm 0 0;
-                color:#555;
-                font-size:12px;
-            }
-            .print-author {
-                text-align:center;
-                font-family:'Caveat', cursive;
-                font-size:23px;
-                color:var(--blue);
-                margin:2mm 0 0;
-            }
-
-            h3 {
-                page-break-after: avoid;
-                break-after: avoid;
-                font-size:15px !important;
-                line-height:1.2 !important;
-                margin:6mm 0 3mm !important;
-                padding:2.5mm 4mm !important;
-                border-left:4px solid var(--orange) !important;
-                border-radius:0 6px 6px 0 !important;
-                background:#eef6ff !important;
-                color:var(--blue) !important;
-            }
-            .tropinki-print-pack-2-4 {
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-            }
-            .tropinki-print-pack-2-4 .task-print-block {
-                margin-bottom:2.2mm !important;
-                padding-top:2mm !important;
-                padding-bottom:1.8mm !important;
-            }
-            .tropinki-print-pack-2-4 .task-print-answer {
-                margin-top:1.8mm !important;
-            }
-            .task-print-block {
-                display:block;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-                margin:0 0 4.5mm 0 !important;
-                padding:3.2mm 3.6mm 3mm 3.4mm !important;
-                position:relative;
-                clear:both;
-                border:1px solid var(--line) !important;
-                border-left:3px solid var(--orange) !important;
-                border-radius:7px !important;
-                background:linear-gradient(90deg,#fff,#fbfdff) !important;
-                box-shadow:0 1px 0 rgba(0,0,0,.05) !important;
-            }
-            .task-print-flex {
-                display:flex !important;
-                align-items:flex-start !important;
-                gap:4mm !important;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-            }
-            .task-print-num {
-                flex:0 0 8mm !important;
-                width:8mm !important;
-                height:8mm !important;
-                display:inline-flex !important;
-                align-items:center !important;
-                justify-content:center !important;
-                border-radius:50% !important;
-                background:var(--blue) !important;
-                color:#fff !important;
-                font-size:12px !important;
-                font-weight:800 !important;
-                line-height:1 !important;
-                margin-top:.5mm !important;
-            }
-            .task-print-text {
-                flex:1 1 auto !important;
-                min-width:0 !important;
-                font-size:14px !important;
-                line-height:1.26 !important;
-            }
-            .task-print-text p { margin:0 0 2.2mm !important; }
-            .task-print-text mjx-container { margin:0 .5mm !important; }
-            .task-print-answer {
-                margin-top:4mm !important;
-                font-size:14px !important;
-                letter-spacing:.2px !important;
-                color:#333 !important;
-            }
-
-            .task-print-img {
-                flex:0 0 62mm !important;
-                width:62mm !important;
-                max-width:62mm !important;
-                min-width:52mm !important;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-                display:flex !important;
-                align-items:flex-start !important;
-                justify-content:center !important;
-                overflow:visible !important;
-            }
-            .task-print-img img,
-            .task-print-img svg {
-                display:block !important;
-                width:100% !important;
-                max-width:62mm !important;
-                height:auto !important;
-                max-height:58mm !important;
-                object-fit:contain !important;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-            }
-            .task-print-text img,
-            .task-print-text svg {
-                display:block !important;
-                max-width:min(100%, 68mm) !important;
-                max-height:58mm !important;
-                width:auto !important;
-                height:auto !important;
-                object-fit:contain !important;
-                margin:2mm auto !important;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-            }
-
-            .sticker-print {
-                flex:0 0 27mm !important;
-                width:27mm !important;
-                max-width:27mm !important;
-                position:static !important;
-                transform:none !important;
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-                overflow:visible !important;
-                margin-left:2mm !important;
-            }
-            .sticker-print img {
-                max-width:23mm !important;
-                max-height:23mm !important;
-                height:auto !important;
-                object-fit:contain !important;
-            }
-            .sticker-print div {
-                page-break-inside:avoid !important;
-                break-inside:avoid !important;
-                max-width:27mm !important;
-                font-size:10px !important;
-                line-height:1.05 !important;
-            }
-
-            img { max-width:100% !important; page-break-inside:avoid; }
-            svg { overflow:visible; }
-            .print-page{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;box-shadow:none!important;}
-            .oge-print-sheet{display:block!important;position:relative;width:100%;height:266mm;overflow:hidden!important;
-                break-after:page!important;page-break-after:always!important;margin:0!important;padding:0!important;}
-            .oge-print-sheet:last-child{break-after:auto!important;page-break-after:auto!important;}
-            .oge-sheet-inner{width:100%;max-width:100%;transform-origin:top left;}
-            .oge-sheet-heading{font-family:Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;
-                color:#0e3d52;border-bottom:2px solid #14b8a6;padding:0 0 3mm;margin:0 0 3mm;font-size:14px;}
-            .oge-sheet-heading strong{font-size:17px;}
-            .oge-sheet-tasks h4.oge-print-block-caption{font-size:12px!important;margin:2mm 0 1mm!important;padding:0!important;
-                background:none!important;border:0!important;color:#0e5663!important;}
-            .oge-sheet-tasks h3{font-size:12px!important;margin:2mm 0 1mm!important;padding:1mm 2mm!important;}
-            .oge-sheet-tasks .task-print-block,.oge-sheet-tasks .task20-part2-item{margin:0 0 2mm!important;padding:2mm!important;
-                border-radius:5px!important;font-size:12px!important;}
-            .oge-sheet-tasks .task-print-text,.oge-sheet-tasks .task-print-answer{font-size:12px!important;}
-            .oge-sheet-tasks .task-print-img{max-width:43mm!important;width:43mm!important;min-width:35mm!important;flex-basis:43mm!important;}
-            .oge-sheet-tasks .task-print-img img,.oge-sheet-tasks .task-print-img svg{max-width:43mm!important;max-height:38mm!important;}
-            .oge-sheet-tasks .sticker-print{display:none!important;}
-            .oge-sheet-tasks .oge-practice-common{padding:2mm!important;margin:1mm 0 2mm!important;}
-            .oge-sheet-tasks .oge-practice-common p{margin:2mm 0!important;}
-        }
-
-        @media screen {
-            .oge-print-sheet{background:#fff;border:1px solid #d7e5e8;box-shadow:0 5px 18px rgba(0,0,0,.13);margin:0 auto 24px;
-                padding:14px;min-height:250px;max-width:850px;overflow:hidden;}
-            .oge-sheet-heading{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid #14b8a6;
-                padding-bottom:12px;margin-bottom:12px;color:#0e3d52;font-family:Arial,sans-serif;}
-            .oge-sheet-author .print-author{font-size:18px;}
-            body {
-                background:#eef3f8;
-                font-family:"Times New Roman", serif;
-                padding:30px;
-                color:#111;
-            }
-            .print-page {
-                max-width:820px;
-                margin:0 auto;
-                background:#fff;
-                padding:34px 46px 56px;
-                box-shadow:0 8px 28px rgba(0,0,0,.12);
-            }
-            #print-footer-fixed {
-                display:block !important;
-                position:fixed;
-                bottom:10mm;
-                left:0;
-                right:0;
-                text-align:center;
-                font-family:'Caveat', cursive;
-                font-size:20px;
-                color:rgba(0,0,0,0.5);
-                pointer-events:none;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="print-footer-fixed">Шкатулка математических интерактивов</div>
-    <main class="print-page">
-        ${buildOgeBatchPrintHTML(sigPrint)}
-    </main>
-    <script>
-        ${window.CANVAS_LOGIC_SCRIPT}
-        (async function(){
-            try {
-                if(window.MathJax&&MathJax.typesetPromise) await MathJax.typesetPromise();
-                await Promise.all(Array.from(document.images).map(img=>img.complete?Promise.resolve():
-                    new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;setTimeout(resolve,2200);})))
-                if(document.fonts&&document.fonts.ready) await document.fonts.ready;
-            }catch(e){console.warn(e)}
-            const mmPx=96/25.4, available=263*mmPx;
-            document.querySelectorAll('.oge-print-sheet').forEach(sheet=>{
-                const inner=sheet.querySelector('.oge-sheet-inner');
-                if(!inner)return;
-                inner.style.zoom='1';
-                const height=inner.scrollHeight;
-                if(height>available){
-                    inner.style.zoom=String(Math.max(0.04,Math.min(1,available/height*0.985)));
-                    // Слишком длинные комплекты автоматически уменьшаются без обрезания.
-                    const actual=inner.getBoundingClientRect().height;
-                    if(actual>available) inner.style.zoom=String(Math.max(0.025,Number(inner.style.zoom)*available/actual*0.97));
-                }
-            });
-            setTimeout(()=>window.print(),350);
-        })();
-    ${window.SCRIPT_END}
-</body>
-</html>`;
-
-        let b = new Blob([printHtml], { type: "text/html;charset=utf-8" });
-        downloadBlobSafely(b, "Вариант_Печать.html");
+        const hasBatch=Array.isArray(window.ogeVariantBatch)&&window.ogeVariantBatch.length;
+        if(!hasBatch && !window.ogePrintableGroups){alert('Сначала сгенерируйте вариант!');return;}
+        const pages=buildOgeBatchPrintHTML();
+        const printHtml = `<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><title>ОГЭ · варианты для печати</title>
+<base href="https://svetlana18011991.github.io/generator9oge/">
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]}};${window.SCRIPT_END}
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
+<style>
+@page{size:A4 portrait;margin:10mm 11mm 10mm 11mm;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Arial,Helvetica,sans-serif;}
+.oge-exam-page{width:188mm;height:275mm;max-height:275mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
+.oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
+.oge-exam-header{height:9mm;flex:0 0 9mm;display:flex;justify-content:space-between;align-items:center;font-size:9.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
+.oge-exam-header strong{font-size:9.5pt;}
+.oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:8.4mm;align-items:start;height:254mm;flex:0 0 254mm;overflow:hidden;}
+.oge-exam-column{width:100%;height:254mm;overflow:hidden;position:relative;min-width:0;}
+.oge-exam-column-content{width:100%;transform-origin:top left;overflow:visible;}
+.oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Arial,Helvetica,sans-serif;color:#555;display:flex;align-items:end;justify-content:flex-end;}
+.oge-exam-part1{font:bold 10pt Arial,Helvetica,sans-serif;text-align:center;padding:0 0 2mm;}
+.oge-exam-part2{font:bold 11pt Arial,Helvetica,sans-serif;text-align:center;padding:2mm 0 3mm;}
+.oge-exam-intro{margin:0 0 2.6mm 0;font:9pt/1.24 Arial,Helvetica,sans-serif;color:#111;}
+.oge-exam-intro-label{text-align:left;font-weight:600;margin:0 0 2mm;}
+.oge-exam-intro .oge-practice-common{margin:0;padding:0;border:none;box-shadow:none;background:transparent;}
+.oge-exam-intro h3,.oge-exam-intro h4{font-size:9pt;margin:0 0 1mm;}
+.oge-exam-intro div,.oge-exam-intro p{line-height:1.24;margin:0 0 1.5mm;}
+.oge-exam-task{font:9pt/1.25 Arial,Helvetica,sans-serif;color:#111;margin:0 0 3mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
+.oge-exam-task-name{font-weight:700;white-space:nowrap;}
+.oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
+.oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
+.oge-exam-statement p{margin:0 0 1.1mm;}
+.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:8pt;}
+.oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:1mm 1.2mm;vertical-align:top;}
+.oge-exam-task table{font-size:7.7pt;}
+.oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
+.oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
+.oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
+.oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
+.oge-exam-geometry .oge-exam-diagram{margin:0;}
+.oge-exam-geometry .oge-exam-diagram img,.oge-exam-geometry .oge-exam-diagram svg{max-height:33mm;}
+.oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
+.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:74mm;margin:2mm auto;}
+.oge-exam-intro *{max-width:100%;}
+.oge-exam-statement .common-table{font-size:7.5pt;margin:2mm 0;}
+.oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
+.oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
+.oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
+.oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings,.oge-exam-column-content .sticker-print{display:none!important;}
+@media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:188mm;}}
+@media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;filter:grayscale(1);}}
+</style></head><body>${pages}
+<script>
+(function(){
+async function fitAndPrint(){
+ try{
+  if(window.MathJax&&MathJax.typesetPromise) await MathJax.typesetPromise();
+  await Promise.all(Array.from(document.images).map(function(im){return im.complete?Promise.resolve():new Promise(function(ok){im.onload=ok;im.onerror=ok;setTimeout(ok,1900)})}));
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+ }catch(err){console.warn('Подготовка печати',err)}
+ document.querySelectorAll('.oge-exam-column').forEach(function(column){
+   var content=column.querySelector('.oge-exam-column-content');if(!content)return;
+   content.style.zoom='1';
+   var h=content.scrollHeight;
+   var available=column.clientHeight-3;
+   if(h>available&&available>0){
+     var z=Math.min(1,available/h*.982);
+     content.style.zoom=String(z);
+     var visual=content.getBoundingClientRect().height;
+     if(visual>available)content.style.zoom=String(z*available/visual*.98);
+   }
+ });
+ setTimeout(function(){window.print()},420);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fitAndPrint);else fitAndPrint();
+})();
+${window.SCRIPT_END}
+</body></html>`;
+        const blob=new Blob([printHtml],{type:'text/html;charset=utf-8'});
+        downloadBlobSafely(blob,'ОГЭ_Варианты_для_печати_A4.html');
     }
 
     function downloadAnswers() {
