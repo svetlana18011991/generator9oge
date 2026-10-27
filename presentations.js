@@ -1350,6 +1350,9 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
 </body>
 </html>`;
 
+    if (window.injectReferenceHelpIntoHtml) {
+        fullHTML = window.injectReferenceHelpIntoHtml(fullHTML, 'presentation');
+    }
     let blob = new Blob([fullHTML], { type: "text/html;charset=utf-8" });
     let a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
     document.getElementById('pres-modal').style.display = 'none';
