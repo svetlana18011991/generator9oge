@@ -60,6 +60,12 @@
     <script src="task19.js?v=20261026-19-single-boolean-v3"></script>
     <script src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
     <script src="task20.js?v=20261027-25-prototipov"></script>
+    <script src="task21.js?v=20261027-fipi-part2"></script>
+    <script src="task22.js?v=20261027-fipi-part2"></script>
+    <script src="task23.js?v=20261027-fipi-part2"></script>
+    <script src="task24.js?v=20261027-fipi-part2"></script>
+    <script src="task25.js?v=20261027-fipi-part2"></script>
+
     <script src="assets_base64_1.js"></script>
     <script src="assets_base64_2.js"></script>
     <script src="assets_base64_3.js"></script>
@@ -2143,8 +2149,8 @@ body.auth-locked > *:not(#passwordGate) {
                 // Задания 1–5 ОГЭ формируются единым связанным комплектом.
                 const taskNumber = parseInt(String(tid).replace(/\D/g, '')) || 0;
                 if (taskNumber >= 1 && taskNumber <= 5) return false;
-                // Задания 6–17 подключены к генератору.
-                if (taskNumber > 20) return false;
+                // Задания 6–25, включая вторую часть 20–25, подключены к генератору.
+                if (taskNumber > 25) return false;
 
                 const title = data.title.trim();
                 if (seenTitles.has(title)) {
@@ -3567,11 +3573,13 @@ body.auth-locked > *:not(#passwordGate) {
 
             // ЧАСТЬ 2: как в генераторе ЕГЭ — без автоматической проверки и без разборов.
             // Условие сохраняет исходную типографику PDF, ученик записывает развёрнутое решение.
-            if (String(tid).replace(/\D/g, '') === '20') {
-                const h = `<h3 style="background:#fff7e9;border-left:4px solid #f59e0b;color:#9a560f;padding:12px 16px;margin:30px 0 14px">Часть 2. Задание 20 — Выражения, уравнения и неравенства</h3>`;
+            if (kind === 'main' && /^2[0-5]$/.test(String(tid).replace(/\D/g, ''))) {
+                const part2TaskNum = Number(String(tid).replace(/\D/g, ''));
+                const isProofTask = part2TaskNum === 24;
+                const h = `<h3 style="background:#fff7e9;border-left:4px solid #f59e0b;color:#9a560f;padding:12px 16px;margin:30px 0 14px">Часть 2. ${blockData.title}</h3>`;
                 currentInteractiveHTML += h;
                 currentPrintHTML += h;
-                currentAnswersHTML += `<h3>Часть 2. Задание 20</h3><p>Ответы к заданиям с развёрнутым ответом. Оценивание решения выполняет учитель.</p>`;
+                currentAnswersHTML += `<h3>Часть 2. Задание ${part2TaskNum}</h3><p>Ответы к заданиям с развёрнутым ответом. Оценивание решения выполняет учитель.</p>`;
                 // Как в ЕГЭ: аналоги — только из того же прототипа, за исключением всех задач этого
                 // прототипа, уже включённых в вариант (не показываем исходную задачу снова).
                 const selectedIdsByProto = {};
@@ -3587,27 +3595,30 @@ body.auth-locked > *:not(#passwordGate) {
                     const protoKey = String(proto.code || proto.desc || '');
                     const usedIds = selectedIdsByProto[protoKey] || new Set();
                     const analogList = (Array.isArray(proto.tasks) ? proto.tasks : []).filter(a => !usedIds.has(String(a.id ?? a.text ?? '')));
-                    let analogsHtml = `<h3 style="margin-top:0;color:#003399">Аналоги · ${proto.desc || 'Задание 20'}</h3>`;
+                    let analogsHtml = `<h3 style="margin-top:0;color:#003399">Аналоги · ${proto.desc || 'Задание ' + part2TaskNum}</h3>`;
                     if (!analogList.length) {
                         analogsHtml += `<div style="padding:14px;background:#f5f5f5;border-radius:8px">Все похожие задания этого типа уже вошли в текущий вариант.</div>`;
                     } else {
                         analogsHtml += `<ol style="padding-left:24px">`;
                         analogList.forEach((a, ai) => {
-                            const aid = `oge20-analog-${taskCounter}-${ai+1}`;
+                            const aid = `oge${part2TaskNum}-analog-${taskCounter}-${ai+1}`;
                             const answer = String(a.answer || 'Ответ отсутствует');
                             const draft = buildOgePart2ScratchpadHTML(aid, true);
-                            analogsHtml += `<li style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px dashed #cbd5e1"><div style="line-height:1.55;font-size:17px">${a.text}</div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px"><button type="button" onclick="window.toggleCanvas('${aid}')" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:19px;padding:7px 11px;cursor:pointer" title="Открыть черновик">✏️</button><button type="button" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.textContent=b.hidden?'ПОКАЗАТЬ ОТВЕТ':'СКРЫТЬ ОТВЕТ';if(!b.hidden && window.MathJax && MathJax.typesetPromise)MathJax.typesetPromise([b]);" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;border-radius:6px;padding:9px 13px;font-weight:bold;cursor:pointer">ПОКАЗАТЬ ОТВЕТ</button><div hidden style="flex-basis:100%;background:#eef6ff;color:#273448;border-left:4px solid #003399;padding:10px;border-radius:5px"><b>Ответ:</b> ${answer}</div></div>${draft}</li>`;
+                            const analogyAnswerButton = String(a.answer || '').trim()
+                                ? `<button type="button" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.textContent=b.hidden?'ПОКАЗАТЬ ОТВЕТ':'СКРЫТЬ ОТВЕТ';if(!b.hidden && window.MathJax && MathJax.typesetPromise)MathJax.typesetPromise([b]);" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;border-radius:6px;padding:9px 13px;font-weight:bold;cursor:pointer">ПОКАЗАТЬ ОТВЕТ</button><div hidden style="flex-basis:100%;background:#eef6ff;color:#273448;border-left:4px solid #003399;padding:10px;border-radius:5px"><b>Ответ:</b> ${answer}</div>`
+                                : '<span style="font-size:14px;color:#6b7280">Задача на доказательство — оценивание учителем</span>';
+                            analogsHtml += `<li style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px dashed #cbd5e1"><div style="line-height:1.55;font-size:17px">${a.text}</div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px"><button type="button" onclick="window.toggleCanvas('${aid}')" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:19px;padding:7px 11px;cursor:pointer" title="Открыть черновик">✏️</button>${analogyAnswerButton}</div>${draft}</li>`;
                         });
                         analogsHtml += `</ol>`;
                     }
                     const answerButton = part2Answer
                         ? `<button class="btn-settings second-answer-btn" id="second-answer-btn-${taskCounter}" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;font-weight:bold;padding:9px 13px" onclick="window.showSecondPartAnswer('${taskCounter}')">ПОКАЗАТЬ ОТВЕТ</button>`
                         : '';
-                    const actionArea = `<div style="margin-top:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:20px;padding:7px 11px;cursor:pointer">✏️</button>${answerButton}<button class="btn-settings" type="button" style="background:#e3f2fd;color:#003399;border:1px solid #003399;font-weight:bold;padding:9px 13px" onclick="window.openTheoryModalLocal('oge20-analogs-${taskCounter}')">АНАЛОГИ</button><div id="oge20-analogs-${taskCounter}" style="display:none">${encodeURIComponent(analogsHtml)}</div><div id="second-answer-data-${taskCounter}" style="display:none">${encodeURIComponent(part2Answer)}</div><div id="second-final-answer-${taskCounter}" style="display:none;flex-basis:100%;background:#eef6ff;border-left:4px solid #003399;border-radius:6px;padding:12px 14px;color:#273448"></div></div>`;
-                    currentInteractiveHTML += `<div class="generated-task-block second-part-task task20-part2-item" data-part="2" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div>${actionArea}</div></div>${buildOgePart2ScratchpadHTML(String(taskCounter),true)}</div>`;
+                    const actionArea = `<div style="margin-top:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:20px;padding:7px 11px;cursor:pointer">✏️</button>${answerButton}<button class="btn-settings" type="button" style="background:#e3f2fd;color:#003399;border:1px solid #003399;font-weight:bold;padding:9px 13px" onclick="window.openTheoryModalLocal('oge${part2TaskNum}-analogs-${taskCounter}')">АНАЛОГИ</button><div id="oge${part2TaskNum}-analogs-${taskCounter}" style="display:none">${encodeURIComponent(analogsHtml)}</div><div id="second-answer-data-${taskCounter}" style="display:none">${encodeURIComponent(part2Answer)}</div><div id="second-final-answer-${taskCounter}" style="display:none;flex-basis:100%;background:#eef6ff;border-left:4px solid #003399;border-radius:6px;padding:12px 14px;color:#273448"></div></div>`;
+                    currentInteractiveHTML += `<div class="generated-task-block second-part-task oge-part2-item" data-part="2" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div>${actionArea}</div></div>${buildOgePart2ScratchpadHTML(String(taskCounter),true)}</div>`;
                     currentPrintHTML += `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px"></div></div></div></div>`;
-                    currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || 'Ответ отсутствует'}</div>`;
-                    window.currentGeneratedTasks.push({text:item.text,draftText:item.text,presentationText:item.text,answer:part2Answer,part:2,isSecondPart:true,taskNumber:20,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
+                    currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || (isProofTask ? 'Задача на доказательство. Проверка развёрнутого решения учителем.' : 'Ответ отсутствует')}</div>`;
+                    window.currentGeneratedTasks.push({text:item.text,draftText:item.text,presentationText:item.text,answer:part2Answer,part:2,isSecondPart:true,taskNumber:part2TaskNum,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
                 });
                 continue;
             }
