@@ -1601,6 +1601,17 @@ body.auth-locked > *:not(#passwordGate) {
         <h2 style="margin: 0 0 8px 0; text-align: center;">Генератор вариантов</h2>
         <div style="text-align: center; color: #bbb; font-size: 1.05em; margin-bottom: 25px; border-bottom: 1px dashed #555; padding-bottom: 15px;">ОГЭ по математике</div>
         
+        <div id="oge-fast-variant-panel" class="oge-fast-variant-panel">
+            <div class="oge-fast-panel-title">🎲 Быстрый полный вариант ОГЭ</div>
+            <div class="oge-fast-panel-note">По одному заданию каждого номера <b>1–25</b>, без предварительного выбора. Задания 1–5 — единый сюжет. При создании нескольких вариантов генератор старается не повторять темы, прототипы и задачи.</div>
+            <div class="oge-generation-row">
+                <label for="oge-variant-count" class="oge-variant-count-label">Количество вариантов</label>
+                <input id="oge-variant-count" type="number" min="1" max="40" step="1" value="1" inputmode="numeric" onblur="ogeNormalizeVariantCount()" title="От 1 до 40 вариантов" aria-label="Количество вариантов">
+                <button type="button" class="btn-generate oge-fast-btn" onclick="safeGenerateVariant(event,'full')">🎲 Сгенерировать полные варианты</button>
+            </div>
+            <div class="oge-fast-manual-tip">Нужны только отдельные задания? Отметь их ниже и нажми «Сгенерировать выбранные задания» под настройками. Количество вариантов задаётся здесь.</div>
+        </div>
+
         <div class="task-row">
             <div class="row-header" style="flex-wrap: wrap; gap: 15px;">
                 <label style="cursor: pointer; min-width: 200px;">Оформление варианта</label>
@@ -1679,7 +1690,7 @@ body.auth-locked > *:not(#passwordGate) {
         <div id="task-total-panel" class="task-total-panel">
             <div class="task-total-text">📊 Набрано задач: <span id="task-total-count">0</span></div>
             <button type="button" class="task-total-reset" onclick="resetTaskCounts()">🔄 Сбросить набор</button>
-            <button type="button" class="task-total-reset" onclick="(function(){const group=document.getElementById('btn-group');const visible=group&&window.getComputedStyle(group).display!=='none';const target=visible?group:document.getElementById('generation-actions-anchor');if(target)target.scrollIntoView({behavior:'smooth',block:'center'});})();">➡️ К генерации</button>
+            <button type="button" class="task-total-reset" onclick="(function(){const group=document.getElementById('btn-group');const visible=group&&window.getComputedStyle(group).display!=='none';const target=visible?group:document.getElementById('oge-fast-variant-panel');if(target)target.scrollIntoView({behavior:'smooth',block:'center'});})();">➡️ К генерации</button>
             <div id="task-total-note" class="task-total-note">Набор заданий сброшен.</div>
         </div>
 
@@ -1692,7 +1703,18 @@ body.auth-locked > *:not(#passwordGate) {
 .oge-replace-bar .random-replace-btn{flex:0 0 auto;border:1px solid #ffb74d;background:#fff8ee;color:#e65100;border-radius:7px;padding:6px 9px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .oge-replace-bar .random-replace-btn:hover{background:#ffedd4;}
 .oge-replace-bar .random-replace-btn:focus-visible{outline:3px solid #14b8a6;outline-offset:2px;}
-@media print{.oge-replace-bar,.oge-generation-row,.oge-variant-switch{display:none!important;}}
+@media print{.oge-fast-variant-panel,.oge-replace-bar,.oge-generation-row,.oge-variant-switch{display:none!important;}}
+.oge-fast-variant-panel{margin:4px 0 22px;padding:19px 20px 16px;border:1px solid rgba(20,184,166,.58);border-radius:14px;background:linear-gradient(130deg,rgba(20,184,166,.15),rgba(251,191,36,.07));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.oge-fast-panel-title{font-size:1.22em;font-weight:800;color:#fbbf24;margin-bottom:7px}
+.oge-fast-panel-note{color:#d1e9e7;line-height:1.5;font-size:14px}
+.oge-fast-manual-tip{color:#a9d0cd;font-size:12.5px;margin-top:9px;line-height:1.45}
+.oge-fast-variant-panel .oge-generation-row{margin:12px 0 0;justify-content:space-between;}
+.oge-fast-variant-panel .oge-fast-btn{width:auto;flex:1 1 280px;margin:0!important;padding:12px 15px!important;font-size:1.02em!important;}
+.oge-manual-generation-row{flex-direction:column;gap:7px}
+.oge-manual-generation-row .oge-manual-btn{width:100%;margin:0!important}
+.oge-manual-hint{font-size:12px;color:#a6cacb;text-align:center}
+.oge-manual-hint a{color:#fbbf24;text-decoration:underline}
+@media(max-width:640px){.oge-fast-variant-panel{padding:13px}.oge-fast-variant-panel .oge-generation-row{justify-content:center}.oge-fast-panel-title{font-size:1.08em}}
 .oge-generation-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin:20px 0;}
 .oge-variant-count-label{color:#fbbf24;font-weight:700;font-size:16px;}
 #oge-variant-count{width:80px;padding:11px 9px;border:2px solid #14b8a6;border-radius:9px;background:#0b2232;color:white;font-size:18px;text-align:center;font-weight:bold;}
@@ -1704,10 +1726,9 @@ body.auth-locked > *:not(#passwordGate) {
 </style>
 
 <div id="generation-actions-anchor" style="scroll-margin-top:90px;"></div>
-        <div class="oge-generation-row">
-          <label for="oge-variant-count" class="oge-variant-count-label">Количество вариантов</label>
-          <input id="oge-variant-count" type="number" min="1" max="40" step="1" value="1" title="От 1 до 40 вариантов" aria-label="Количество вариантов">
-          <button class="btn-generate" onclick="safeGenerateVariant(event)">Сгенерировать варианты</button>
+        <div class="oge-generation-row oge-manual-generation-row">
+          <button type="button" class="btn-generate oge-manual-btn" onclick="safeGenerateVariant(event,'manual')">Сгенерировать выбранные задания</button>
+          <span class="oge-manual-hint">Собирает только отмеченные задания. Без выбора генерация не запускается. <a href="#oge-fast-variant-panel">Полный вариант 1–25 — наверху ↑</a></span>
         </div>
         <div id="oge-variant-switch" class="oge-variant-switch" style="display:none"></div>
         
@@ -2640,7 +2661,7 @@ body.auth-locked > *:not(#passwordGate) {
 
     window.adjustOgePracticeStickyHeights = adjustOgePracticeStickyHeights;
 
-    function buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts = new Map()) {
+    function buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts = new Map(), autoFull = false) {
         const database = window.ogePracticeDatabase || {};
         const trainerTasks = [];
         const scenarioTasks = [];
@@ -2648,7 +2669,7 @@ body.auth-locked > *:not(#passwordGate) {
         // Тренажёр не имеет отдельного поля количества: каждая отмеченная тема
         // добавляет все прототипы своего каталога ровно по одному разу.
         // Порядок каталога сохраняется всегда и не зависит от общей галочки «Упорядочить задания».
-        const selectedTrainerThemes = getOgeTrainerThemeIds().filter(themeId => {
+        const selectedTrainerThemes = autoFull ? [] : getOgeTrainerThemeIds().filter(themeId => {
             const cb = document.getElementById(`practice-trainer-theme-${themeId}`);
             return cb && cb.checked;
         });
@@ -2710,9 +2731,9 @@ body.auth-locked > *:not(#passwordGate) {
         });
 
         const scenarioInput = document.getElementById('count-practice-scenarios');
-        const requestedSets = scenarioInput ? Math.max(0, parseInt(scenarioInput.value, 10) || 0) : 0;
+        const requestedSets = autoFull ? 1 : (scenarioInput ? Math.max(0, parseInt(scenarioInput.value, 10) || 0) : 0);
         if (requestedSets > 0) {
-            const selectedScenarioThemes = getOgeScenarioThemeIds().filter(themeId => {
+            const selectedScenarioThemes = autoFull ? getOgeScenarioThemeIds() : getOgeScenarioThemeIds().filter(themeId => {
                 const cb = document.getElementById(`practice-scenario-theme-${themeId}`);
                 return cb && cb.checked;
             });
@@ -2726,11 +2747,11 @@ body.auth-locked > *:not(#passwordGate) {
                     const themeScenarios = [];
                     (theme.scenarios || []).forEach((scenario, scenarioIndex) => {
                         const cb = document.getElementById(`practice-scenario-${themeId}-${scenarioIndex}`);
-                        if (!cb || !cb.checked) return;
+                        if (!autoFull && (!cb || !cb.checked)) return;
                         const selectedByNumber = {};
                         let complete = true;
                         for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
-                            const indexes = getSelectedScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
+                            const indexes = autoFull ? (Array.isArray(scenario.tasks?.[taskNumber]) ? scenario.tasks[taskNumber].map((_,i)=>i) : []) : getSelectedScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
                             selectedByNumber[taskNumber] = indexes;
                             if (indexes.length === 0) complete = false;
                         }
@@ -3261,7 +3282,7 @@ body.auth-locked > *:not(#passwordGate) {
         const kind=block.kind || 'main', data=block.data;
         if (!data || !Array.isArray(data.prototypes)) return [];
         const tid=block.tid;
-        if (kind==='extra' && String(tid).replace(/\D/g,'')==='19') return data.prototypes;
+        if (block.autoFull || (kind==='extra' && String(tid).replace(/\D/g,'')==='19')) return data.prototypes;
         return data.prototypes.filter((p,index)=>{
             const cb=document.getElementById(getPrototypeCheckboxId(tid,index,kind));
             return cb && cb.checked;
@@ -3390,6 +3411,10 @@ body.auth-locked > *:not(#passwordGate) {
     function ogeRecordUsage(snapshot, usage) {
         (snapshot||[]).forEach(b=>(b.tasks||[]).forEach(t=>{
             const k=ogeTaskGlobalKey(t,b);usage.set(k,(usage.get(k)||0)+1);
+            if(t?.theory && b.kind!=='practice'){
+                const protoKey='proto:'+b.tid+':'+String(t.theory.code||t.theory.desc||'');
+                usage.set(protoKey,(usage.get(protoKey)||0)+1);
+            }
             const m=t?.__ogeScenarioMeta;
             if(m && Number(m.taskNumber)===1){
                 const theme=String(m.groupId||'').split(':')[0];
@@ -3427,20 +3452,47 @@ body.auth-locked > *:not(#passwordGate) {
         generateVariant({snapshot:batch[index].snapshot});
         ogeRenderVariantSwitcher();
     }
-    function safeGenerateVariant(event) {
-        if(event){event.preventDefault();event.stopPropagation();}
-        const btn=event&&event.currentTarget?event.currentTarget:document.querySelector('.btn-generate');
+    function ogeNormalizeVariantCount() {
         const input=document.getElementById('oge-variant-count');
-        let count=Number(input?.value||1);
-        if(!Number.isInteger(count)||count<1||count>40){alert('Укажите целое количество вариантов от 1 до 40.');return;}
+        if(!input)return 1;
+        const raw=Number(input.value);
+        const count=Number.isFinite(raw)?Math.max(1,Math.min(40,Math.round(raw))):1;
+        input.value=String(count);
+        return count;
+    }
+    function ogeHasManualSelection() {
+        if(Number(document.getElementById('count-practice-scenarios')?.value||0)>0) return true;
+        if(getOgeTrainerThemeIds().some(t=>document.getElementById('practice-trainer-theme-'+t)?.checked)) return true;
+        return [...document.querySelectorAll('input[id^="count-task"],input[id^="count-extra-task"]')].some(el=>Number(el.value||0)>0);
+    }
+    function safeGenerateVariant(event, requestedMode='manual') {
+        if(event){event.preventDefault();event.stopPropagation();}
+        const btn=event&&event.currentTarget?event.currentTarget:document.querySelector('.oge-fast-btn');
+        const count=ogeNormalizeVariantCount();
+        // Полная сборка 1–25 запускается ТОЛЬКО верхней кнопкой.
+        // Нижняя кнопка не должна запускать генерацию при пустом ручном выборе.
+        const full=requestedMode==='full';
+        if(!full && !ogeHasManualSelection()){
+            alert('Для выборочной генерации сначала отметьте нужные задания. Для полного варианта 1–25 воспользуйтесь верхней кнопкой.');
+            return;
+        }
         if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Генерирую 1 из '+count+'…';}
         window.ogeVariantBatch=[];window.ogeActiveVariantIndex=0;
         const usage=new Map();
         let current=0;
         const makeNext=()=>{
             try{
-                generateVariant({silent:true,usageCounts:usage});
+                generateVariant({silent:true,usageCounts:usage,autoFull:full});
                 if(!window.ogeVariantSnapshot || !window.ogeVariantSnapshot.length) throw Error('Не выбраны задания для генерации.');
+                if(full) {
+                    const numbers=new Set();
+                    window.ogeVariantSnapshot.forEach(b=>{
+                        if(b.kind==='practice') (b.tasks||[]).forEach(t=>numbers.add(Number(t.examNumber||t.__ogeScenarioMeta?.taskNumber||t.__ogeTrainerMeta?.proto?.examNumber)));
+                        else numbers.add(Number(String(b.tid).replace(/\D/g,'')));
+                    });
+                    const missing=Array.from({length:25},(_,i)=>i+1).filter(n=>!numbers.has(n));
+                    if(missing.length) throw Error('Не удалось сформировать полный вариант: нет заданий № '+missing.join(', ')+'. Проверьте, что банки этих номеров подключены.');
+                }
                 window.ogeVariantBatch.push(ogeBuildBatchEntry());
                 ogeRecordUsage(window.ogeVariantSnapshot,usage);
                 current++;
@@ -3452,6 +3504,8 @@ body.auth-locked > *:not(#passwordGate) {
                     generateVariant({snapshot:window.ogeVariantBatch[0].snapshot});
                     ogeRenderVariantSwitcher();
                     if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Сгенерировать варианты';}
+                    const preview=document.getElementById('output-section');
+                    if(preview)preview.scrollIntoView({behavior:'smooth',block:'start'});
                 }
             }catch(e){
                 console.error(e);
@@ -3663,7 +3717,7 @@ body.auth-locked > *:not(#passwordGate) {
             orderedTasks: orderedTasks
         };
 
-        const practiceGroups = frozenSnapshot ? {trainerTasks:[],scenarioTasks:[]} : buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts);
+        const practiceGroups = frozenSnapshot ? {trainerTasks:[],scenarioTasks:[]} : buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts, !!options.autoFull);
         const trainerTasks = practiceGroups.trainerTasks || [];
         const scenarioTasks = practiceGroups.scenarioTasks || [];
 
@@ -3680,7 +3734,7 @@ body.auth-locked > *:not(#passwordGate) {
 
         // Сначала связанные задания ОГЭ 1–5, затем основные и дополнительные блоки 6+.
         const generationBlocks = frozenSnapshot
-            ? frozenSnapshot.map(b => ({tid:b.tid,kind:b.kind,data:b.data,frozenTasks:b.tasks}))
+            ? frozenSnapshot.map(b => ({tid:b.tid,kind:b.kind,data:b.data,frozenTasks:b.tasks,autoFull:!!b.autoFull}))
             : [];
         if (!frozenSnapshot && trainerTasks.length > 0) {
             generationBlocks.push({ tid: '__oge_trainer__', kind: 'practice', data: { title: 'Задания 1–5. Тренажёры по прототипам' }, tasks: trainerTasks });
@@ -3691,14 +3745,14 @@ body.auth-locked > *:not(#passwordGate) {
 
         if (!frozenSnapshot) getUniqueTaskIds().forEach(tid => {
             const mainCountInput = document.getElementById(`count-${tid}`);
-            const mainCount = mainCountInput ? (parseInt(mainCountInput.value, 10) || 0) : 0;
+            const mainCount = options.autoFull ? 1 : (mainCountInput ? (parseInt(mainCountInput.value, 10) || 0) : 0);
             if (mainCount > 0 && window.database[tid]) {
-                generationBlocks.push({ tid, kind: 'main', data: window.database[tid], requiredCount: mainCount });
+                generationBlocks.push({ tid, kind: 'main', data: window.database[tid], requiredCount: mainCount, autoFull: !!options.autoFull });
             }
 
             const extraData = getExtraTaskData(tid);
             const extraCountInput = document.getElementById(`count-extra-${tid}`);
-            const extraCount = extraCountInput ? (parseInt(extraCountInput.value, 10) || 0) : 0;
+            const extraCount = options.autoFull ? 0 : (extraCountInput ? (parseInt(extraCountInput.value, 10) || 0) : 0);
             if (extraData && extraCount > 0) {
                 generationBlocks.push({ tid, kind: 'extra', data: extraData, requiredCount: extraCount });
             }
@@ -3724,7 +3778,7 @@ body.auth-locked > *:not(#passwordGate) {
                 const requiredCount = block.requiredCount || 0;
                 if (requiredCount <= 0 || !sourceData || !Array.isArray(sourceData.prototypes)) continue;
 
-                const selectedProtos = (kind === 'extra' && String(tid).replace(/\D/g, '') === '19')
+                const selectedProtos = (block.autoFull && kind==='main') ? sourceData.prototypes.filter(p=>Array.isArray(p.tasks) && p.tasks.length>0) : (kind === 'extra' && String(tid).replace(/\D/g, '') === '19')
                     ? sourceData.prototypes
                     : sourceData.prototypes.filter((p, idx) => {
                         const checkbox = document.getElementById(getPrototypeCheckboxId(tid, idx, kind));
@@ -3772,6 +3826,9 @@ body.auth-locked > *:not(#passwordGate) {
                     })).filter(pool => pool.tasks.length > 0);
 
                     if (!preservePrototypeOrder) pools = shuffleArray(pools);
+                    if(block.autoFull) pools.sort((a,b)=>
+                        (usageCounts.get('proto:'+tid+':'+String(a.theory?.code||a.theory?.desc||''))||0)-
+                        (usageCounts.get('proto:'+tid+':'+String(b.theory?.code||b.theory?.desc||''))||0));
                     const maxTasksInProto = Math.max(...pools.map(pool => pool.tasks.length));
                     const roundTasks = [];
 
@@ -3802,7 +3859,7 @@ body.auth-locked > *:not(#passwordGate) {
 
             if (finalTasks.length === 0) continue;
             const blockSnapshotIndex = snapshotBuilt.length;
-            snapshotBuilt.push({tid,kind,data:sourceData,tasks:finalTasks.slice()});
+            snapshotBuilt.push({tid,kind,data:sourceData,tasks:finalTasks.slice(),autoFull:!!block.autoFull});
             hasContent = true;
 
             // ЧАСТЬ 2: как в генераторе ЕГЭ — без автоматической проверки и без разборов.
@@ -5488,10 +5545,14 @@ body.auth-locked > *:not(#passwordGate) {
 
     function generateTowerGame() {
         try {
-            if (getOgeGameEligibleTasks().length !== 9) {
-                alert("Для игры 'Башня знаний' нужно ровно 9 заданий первой части (№1–19).");
+            const eligibleTowerTasks=getOgeGameEligibleTasks();
+            // В игре ровно девять заданий — ТОЛЬКО те, что выбрал учитель.
+            // Никакого случайного выбора девяти задач из полного варианта.
+            if (eligibleTowerTasks.length !== 9) {
+                alert('Для игры «Башня знаний» нужно ровно 9 заданий первой части (№1–19). Сейчас: ' + eligibleTowerTasks.length + '. Выберите ровно девять заданий и сгенерируйте их нижней кнопкой.');
                 return;
             }
+            const selectedTowerTasks=eligibleTowerTasks;
             if (typeof window.TOWER_TEMPLATE !== 'string' || !window.TOWER_TEMPLATE.includes('/*__CONFIG_DATA__*/')) {
                 alert("Не удалось загрузить шаблон игры «Башня знаний». Обновите страницу через Ctrl+F5 и проверьте файл tower_template.js.");
                 return;
@@ -5501,7 +5562,7 @@ body.auth-locked > *:not(#passwordGate) {
                 ? document.getElementById('toggle-show-correct').checked
                 : false;
 
-            const gameQuestions = getOgeGameEligibleTasks().map(t => {
+            const gameQuestions = selectedTowerTasks.map(t => {
                 let cleanText = String(t.text || '');
                 try {
                     const tmp = document.createElement('div');
@@ -5546,7 +5607,7 @@ body.auth-locked > *:not(#passwordGate) {
             };
 
             const configScript = 'window.__EMBEDDED_CFG__ = ' + JSON.stringify(cfg) + ';';
-            const finalHtml = window.TOWER_TEMPLATE
+            let finalHtml = window.TOWER_TEMPLATE
                 .replace('/*__CONFIG_DATA__*/', configScript)
                 .replace('<head>', '<head><base href="https://svetlana18011991.github.io/generator11prof/">');
 
@@ -5787,7 +5848,7 @@ body.auth-locked > *:not(#passwordGate) {
 
         const configScript = "window.__MOTIVATION_CFG__ = " + JSON.stringify(cfg) + ";";
         const baseTag = '<base href="https://svetlana18011991.github.io/generator11prof/">';
-        const finalHtml = window.window.MOTIVATION_TEMPLATE
+        let finalHtml = window.MOTIVATION_TEMPLATE
             .replace("/*__CONFIG_DATA__*/", configScript)
             .replace("<head>", "<head>" + baseTag);
 
