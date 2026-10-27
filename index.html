@@ -46,7 +46,7 @@
     <script src="task13_extra.js?v=20260917-answers2x2-1"></script>
     <script src="task14.js?v=20260917-1"></script>
     <script src="task14_extra.js?v=20260917-1"></script>
-    <script src="task15.js?v=20261017-1"></script>
+    <script src="task15.js?v=20261027-angle-arc-2"></script>
     <script src="task15_extra.js?v=20261018-7-finalfix"></script>
     <!-- Задание 16: окружность и круг -->
     <script src="task16.js?v=20261018-3"></script>
@@ -5202,7 +5202,7 @@ body.auth-locked > *:not(#passwordGate) {
         if(batch.length) return batch;
         return [{snapshot:window.ogeVariantSnapshot,printGroups:window.ogePrintableGroups||{}}];
     }
-    // Альбомный A4: задания по порядку, число листов определяется содержимым.
+    // Альбомный A4: полный вариант всегда на трёх листах, подборки — по объёму.
     function ogePrintStripUserInterface(node) {
         if (!node) return node;
         node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .sticker-print, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
@@ -5396,7 +5396,7 @@ body.auth-locked > *:not(#passwordGate) {
             });
             const firstColumn='<div class="oge-exam-column"><div class="oge-exam-column-content">'+units.join('')+'</div></div>';
             const secondColumn='<div class="oge-exam-column"><div class="oge-exam-column-content"></div></div>';
-            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-exam-page="'+(i+1)+'-1">'
+            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-print-pages="'+(complete?3:0)+'" data-exam-page="'+(i+1)+'-1">'
                +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
                +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
         });
@@ -5423,7 +5423,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-page{width:277mm;height:190mm;max-height:190mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
 .oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
 .oge-exam-flow-unit{display:flow-root;break-inside:avoid;page-break-inside:avoid;}
-.oge-exam-flow-unit .oge-exam-task{margin-bottom:3.6mm;}
+.oge-exam-flow-unit .oge-exam-task{margin-bottom:2mm;}
 
 .oge-exam-header{height:8mm;flex:0 0 8mm;display:flex;justify-content:space-between;align-items:center;font-size:10.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
 .oge-exam-header strong{font-size:10.5pt;}
@@ -5435,33 +5435,34 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Georgia,"Times New Roman",serif;color:#777;display:flex;align-items:end;justify-content:space-between;gap:5mm;border-top:.25pt solid #ddd;padding-top:.8mm;} .oge-exam-footer .brand{font-style:italic;font-size:8.1pt;color:#757575}.oge-exam-footer a{color:#626d80;text-decoration:none;border-bottom:.25pt solid #a3a3a3;}
 .oge-exam-part1{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:0 0 2mm;}
 .oge-exam-part2{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:2mm 0 3mm;}
-.oge-exam-intro{margin:0 0 2.6mm 0;font:11pt/1.35 Georgia,"Times New Roman",serif;color:#111;}
+.oge-exam-intro{margin:0 0 1.5mm 0;font:var(--oge-print-font,11pt)/1.30 Georgia,"Times New Roman",serif;color:#111;}
 .oge-exam-intro-label{text-align:left;font-weight:600;margin:0 0 2mm;}
 .oge-exam-intro .oge-practice-common{margin:0;padding:0;border:none;box-shadow:none;background:transparent;}
 .oge-exam-intro h3,.oge-exam-intro h4{font-size:9pt;margin:0 0 1mm;}
-.oge-exam-intro div,.oge-exam-intro p{line-height:1.35;margin:0 0 1.8mm;}
-.oge-exam-task{font:11pt/1.36 Georgia,"Times New Roman",serif;color:#111;margin:0 0 3.6mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
+.oge-exam-intro div,.oge-exam-intro p{line-height:1.30;margin:0 0 1.2mm;}
+.oge-exam-task{font:var(--oge-print-font,11pt)/1.30 Georgia,"Times New Roman",serif;color:#111;margin:0 0 2mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
 .oge-exam-task-name{display:block;font-weight:700;white-space:nowrap;margin-bottom:.8mm;}
 .oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
-.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:9.5pt;}
-.oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:1mm 1.2mm;vertical-align:top;}
-.oge-exam-task table{font-size:9.5pt;}
+.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(8.5pt,.85em);line-height:1.22;}
+.oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:.5mm 1.2mm;vertical-align:top;}
+.oge-exam-task table{font-size:max(8.5pt,.85em);}
 .oge-match11-print{margin:2.2mm 0!important;max-width:54mm!important;table-layout:fixed!important;text-align:center;border:1px solid #888;}
 .oge-match11-print th,.oge-match11-print td{width:33.33%;padding:1.1mm 4mm!important;text-align:center;border:1px solid #777;}
 .oge-match11-print td{height:8mm;}
+.oge-exam-statement svg{max-height:38mm;}
 .oge-exam-statement mjx-container svg{max-width:100%;height:auto;}
 .oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
 .oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
-.oge-exam-geometry .oge-exam-diagram img,.oge-exam-geometry .oge-exam-diagram svg{max-height:33mm;}
+.oge-exam-geometry .oge-exam-diagram img,.oge-exam-geometry .oge-exam-diagram svg{max-height:30mm;}
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
-.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:66mm;margin:2mm auto;}
+.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:50mm;margin:2mm auto;}
 .oge-exam-intro *{max-width:100%;}
-.oge-exam-statement .common-table{font-size:9.5pt;margin:2mm 0;}
+.oge-exam-statement .common-table{font-size:max(8.5pt,.85em);margin:2mm 0;}
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
@@ -5471,10 +5472,48 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 </style></head><body>${pages}
 <script>
 (function(){
+function solvePrintColumns(heights,count,available){
+ if(count>heights.length)return null;
+ var prefix=[0];
+ heights.forEach(function(height){prefix.push(prefix[prefix.length-1]+height)});
+ var target=prefix[heights.length]/count;
+ var costs=Array.from({length:count+1},function(){return Array(heights.length+1).fill(Infinity)});
+ var cuts=Array.from({length:count+1},function(){return []});
+ costs[0][0]=0;
+ for(var k=1;k<=count;k++){
+   for(var end=k;end<=heights.length;end++){
+     for(var from=end-1;from>=k-1;from--){
+       var height=prefix[end]-prefix[from];
+       if(height>available)break;
+       var cost=costs[k-1][from]+Math.pow(height-target,2);
+       if(cost<costs[k][end]){costs[k][end]=cost;cuts[k][end]=from}
+     }
+   }
+ }
+ if(!Number.isFinite(costs[count][heights.length]))return null;
+ var ranges=[],cursor=heights.length;
+ for(var group=count;group>0;group--){
+   var boundary=cuts[group][cursor];ranges.unshift([boundary,cursor]);cursor=boundary;
+ }
+ return ranges;
+}
 function paginateCollections(){
- // Измеряем уже отрисованные формулы и картинки при одном читаемом размере шрифта.
+ // Измеряем уже отрисованные формулы и картинки; номер страницы не зависит от номера задачи.
  Array.from(document.querySelectorAll('.oge-exam-flow-page')).forEach(function(start){
-   var units=Array.from(start.querySelector('.oge-exam-column-content').children);
+   var firstColumn=start.querySelector('.oge-exam-column');
+   var units=Array.from(firstColumn.querySelector('.oge-exam-column-content').children);
+   var fixedPages=Number(start.getAttribute('data-print-pages')||0),ranges=null;
+   var available=firstColumn.clientHeight-3;
+   if(fixedPages){
+     // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
+     // Ни одна колонка и ни одно отдельное задание не уменьшаются независимо от остальных.
+     for(var quarterPoints=46;quarterPoints>=36;quarterPoints--){
+       start.style.setProperty('--oge-print-font',(quarterPoints/4)+'pt');
+       ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
+       if(ranges)break;
+     }
+     if(!ranges)throw new Error('Не удалось разместить полный вариант на трёх листах');
+   }
    units.forEach(function(el){el.remove()});
    var template=start.cloneNode(true);
    var sheets=[start],sheet=start,columnIndex=0;
@@ -5488,51 +5527,33 @@ function paginateCollections(){
      if(!sheet.classList.contains('oge-exam-wide-page')&&columnIndex===0)columnIndex=1;
      else nextPage();
    }
-   units.forEach(function(unit){
-     if(sheet.classList.contains('oge-exam-wide-page'))nextPage();
-     content().appendChild(unit);
-     if(fits())return;
-     if(content().children.length>1){
-       unit.remove();advance();content().appendChild(unit);
+   if(fixedPages){
+     for(var page=1;page<fixedPages;page++)nextPage();
+     sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column-content'))})
+       .forEach(function(box,index){box.replaceChildren.apply(box,units.slice(ranges[index][0],ranges[index][1]))});
+   }else{
+     units.forEach(function(unit){
+       if(sheet.classList.contains('oge-exam-wide-page'))nextPage();
+       content().appendChild(unit);
        if(fits())return;
-     }
-     // Редкий очень высокий блок получает целый лист по ширине вместо мелкого шрифта.
-     unit.remove();
-     if(columnIndex!==0)nextPage();
-     sheet.classList.add('oge-exam-wide-page');
-     content().appendChild(unit);
-     if(!fits())throw new Error('Условие задания слишком велико для одного листа');
-   });
-   // Распределяем поток равномерно по уже найденному числу листов:
-   // это не даёт одному короткому заданию остаться на последней странице.
-   if(!sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
-     var cols=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))});
-     var contents=cols.map(function(col){return col.querySelector('.oge-exam-column-content')});
-     var count=Math.min(cols.length,units.length);
-     var prefix=[0];
-     units.forEach(function(unit){prefix.push(prefix[prefix.length-1]+unit.getBoundingClientRect().height)});
-     var available=Math.min.apply(null,cols.map(function(col){return col.clientHeight}))-3;
-     var target=prefix[units.length]/count;
-     var costs=Array.from({length:count+1},function(){return Array(units.length+1).fill(Infinity)});
-     var cuts=Array.from({length:count+1},function(){return []});
-     costs[0][0]=0;
-     for(var k=1;k<=count;k++){
-       for(var end=k;end<=units.length;end++){
-         for(var from=end-1;from>=k-1;from--){
-           var height=prefix[end]-prefix[from];
-           if(height>available)break;
-           var cost=costs[k-1][from]+Math.pow(height-target,2);
-           if(cost<costs[k][end]){costs[k][end]=cost;cuts[k][end]=from}
-         }
+       if(content().children.length>1){
+         unit.remove();advance();content().appendChild(unit);
+         if(fits())return;
        }
-     }
-     if(Number.isFinite(costs[count][units.length])){
-       var ranges=[],cursor=units.length;
-       for(var group=count;group>0;group--){
-         var boundary=cuts[group][cursor];ranges.unshift([boundary,cursor]);cursor=boundary;
-       }
-       contents.forEach(function(box,index){
-         var range=ranges[index];box.replaceChildren.apply(box,range?units.slice(range[0],range[1]):[]);
+       // Слишком высокий блок в выборочной подборке получает целый лист по ширине.
+       unit.remove();
+       if(columnIndex!==0)nextPage();
+       sheet.classList.add('oge-exam-wide-page');
+       content().appendChild(unit);
+       if(!fits())throw new Error('Условие задания слишком велико для одного листа');
+     });
+     if(!sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
+       var cols=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))});
+       ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),
+         Math.min(cols.length,units.length),Math.min.apply(null,cols.map(function(col){return col.clientHeight}))-3);
+       if(ranges)cols.forEach(function(col,index){
+         var range=ranges[index],box=col.querySelector('.oge-exam-column-content');
+         box.replaceChildren.apply(box,range?units.slice(range[0],range[1]):[]);
        });
      }
    }
@@ -5540,6 +5561,10 @@ function paginateCollections(){
    sheets.forEach(function(pg,i){
      pg.setAttribute('data-exam-page',start.getAttribute('data-batch-variant')+'-'+(i+1));
      pg.querySelector('.oge-exam-page-counter').textContent=label+' · страница '+(i+1)+' из '+sheets.length;
+     pg.querySelectorAll('.oge-exam-column').forEach(function(col){
+       if(col.clientHeight && col.querySelector('.oge-exam-column-content').scrollHeight>col.clientHeight-1)
+         throw new Error('Задания выходят за границы листа');
+     });
    });
  });
 }

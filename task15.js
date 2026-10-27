@@ -20,7 +20,14 @@
         return drawAt(0);
     }
     function triSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C'));}
-    function extSvg(){return wrap(L(45,120,125,25)+L(125,25,190,120)+L(45,120,235,120)+T(31,140,'A')+T(121,20,'B')+T(185,140,'C'));}
+    function exteriorAngleArc(cx,cy,bx,by,r){
+        const length=Math.hypot(bx-cx,by-cy);
+        const x=Number((cx+r*(bx-cx)/length).toFixed(3));
+        const y=Number((cy+r*(by-cy)/length).toFixed(3));
+        return '<path d="M '+(cx+r)+' '+cy+' A '+r+' '+r+' 0 0 0 '+x+' '+y+'" fill="none" stroke="'+C+'" stroke-width="2"/>';
+    }
+    function extSvg(){return wrap(L(45,120,125,25)+L(125,25,190,120)+L(45,120,235,120)+exteriorAngleArc(190,120,125,25,29)+T(31,140,'A')+T(121,20,'B')+T(185,140,'C'));}
+    function isoExtSvg(){return wrap('<g fill="none" stroke="'+C+'" stroke-width="2"><path d="M 45 120 L 125 25 L 205 120 L 245 120 L 45 120"/><path d="M 81 69 L 91 78 M 159 78 L 169 69" stroke-width="2.5"/>'+exteriorAngleArc(205,120,125,25,22)+'</g>'+T(32,140,'A')+T(121,20,'B')+T(201,140,'C'));}
     function rightSvg(){return wrap(L(45,120,200,120)+L(200,120,200,30)+L(45,120,200,30)+L(188,120,188,108)+L(188,108,200,108)+T(31,140,'A')+T(204,26,'B')+T(204,140,'C'));}
     function isoSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+tickOnSegment(50,120,130,25,0.46,13,2.5)+tickOnSegment(130,25,210,120,0.54,13,2.5)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C'));}
     function bisectorSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,181,81)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(185,78,'D'));}
@@ -66,7 +73,7 @@
         },
         {
             "desc": "15.2. Внешний угол треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"190\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"235\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 219 120 A 29 29 0 0 0 201 98\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"185\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
+            "svg_code": extSvg(),
             "theory_task": "В треугольнике ABC угол C равен 97°. Найдите внешний угол при вершине C. Ответ дайте в градусах.",
             "theory_sol": "Внутренний и внешний углы при вершине C образуют развёрнутый угол: \\[180^\\circ-97^\\circ=83^\\circ.\\]<br><br><b>Ответ:</b> 83",
             "tasks": [
@@ -150,7 +157,7 @@
         },
         {
             "desc": "15.5. Внешний угол равнобедренного треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"><path d=\"M 45 120 L 125 25 L 205 120 L 245 120 L 45 120\"/><path d=\"M 81 69 L 91 78 M 159 78 L 169 69\" stroke-width=\"2.5\"/><path d=\"M 216 104 A 22 22 0 0 1 232 120\"/></g><g font-family=\"serif\" font-size=\"15\" fill=\"#111827\"><text x=\"32\" y=\"140\">A</text><text x=\"121\" y=\"20\">B</text><text x=\"201\" y=\"140\">C</text></g></svg></div>",
+            "svg_code": isoExtSvg(),
             "theory_task": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 123°. Найдите угол ABC. Ответ дайте в градусах.",
             "theory_sol": "Внутренний угол C равен \\(180^\\circ-123^\\circ=57^\\circ\\). Углы при основании равны, поэтому \\(\\angle A=57^\\circ\\). \\[\\angle B=180^\\circ-57^\\circ-57^\\circ=66^\\circ.\\]<br><br><b>Ответ:</b> 66",
             "tasks": [

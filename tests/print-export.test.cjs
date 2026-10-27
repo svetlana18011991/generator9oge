@@ -164,11 +164,12 @@ function taskNumbers(html) {
     return Array.from(html.matchAll(/data-exam-task="(\d+)"/g), match => Number(match[1]));
 }
 
-test('full variants start independent content flows instead of three fixed sheets', () => {
+test('full variants reserve three pages with independent content flows', () => {
     const numbers = Array.from({ length: 25 }, (_, index) => index + 1);
     const html = buildPrintPages([numbers, numbers]);
     assert.equal(Array.from(html.matchAll(/<article\b/g)).length, 2);
     assert.equal(Array.from(html.matchAll(/oge-exam-flow-page/g)).length, 2);
+    assert.equal(Array.from(html.matchAll(/data-print-pages="3"/g)).length, 2);
     assert.deepEqual(taskNumbers(html), [...numbers, ...numbers]);
     assert.match(html, /<strong>Вариант 1<\/strong>/);
     assert.match(html, /<strong>Вариант 2<\/strong>/);
@@ -179,6 +180,7 @@ test('sparse selections retain exam numbers in order without empty sheets', () =
     assert.deepEqual(taskNumbers(html), [6, 13, 20, 24]);
     assert.equal(Array.from(html.matchAll(/<article\b/g)).length, 1);
     assert.match(html, /<strong>Подборка 1<\/strong>/);
+    assert.match(html, /data-print-pages="0"/);
 });
 
 test('part two heading belongs to the same flow unit as its first selected task', () => {
@@ -209,4 +211,48 @@ test('a diagram that fails while loading prevents printing', async () => {
     image.onerror();
     await flushPromises();
     assert.deepEqual(events, ['alert']);
+});
+
+
+function solveColumns(heights, count, available) {
+    const solver = source.slice(
+        source.indexOf('function solvePrintColumns('),
+        source.indexOf('function paginateCollections()')
+    );
+    const result = vm.runInNewContext(solver + '\nsolvePrintColumns(heights, count, available);', {
+        heights, count, available
+    });
+    return result === null ? null : JSON.parse(JSON.stringify(result));
+}
+
+test('three-page column plan keeps all task blocks in order within six columns', () => {
+    const heights = [90, 70, 130, 50, 80, 90, 30, 140, 70, 60, 100, 80];
+    const ranges = solveColumns(heights, 6, 220);
+    assert.equal(ranges.length, 6, 'Three pages must have exactly six columns');
+    let next = 0;
+    for (const [from, end] of ranges) {
+        assert.equal(from, next, 'The next column must continue from the previous block');
+        assert.ok(end > from, 'Every column must contain content');
+        assert.ok(heights.slice(from, end).reduce((a, b) => a + b, 0) <= 220);
+        next = end;
+    }
+    assert.equal(next, heights.length, 'No task block may be lost');
+});
+
+test('column solver balances a feasible plan and rejects an extra-column overflow', () => {
+    assert.deepEqual(solveColumns(Array(12).fill(50), 6, 150), [
+        [0, 2], [2, 4], [4, 6], [6, 8], [8, 10], [10, 12]
+    ]);
+    assert.equal(solveColumns(Array(7).fill(120), 6, 130), null,
+        'A plan needing seven columns must not silently create a fourth sheet');
+    assert.ok(solveColumns(Array(7).fill(100), 6, 210),
+        'A feasible resized plan must still use six columns');
+});
+
+test('a 25-task selection with a duplicate does not masquerade as a complete variant', () => {
+    const numbers = Array.from({ length: 24 }, (_, index) => index + 1).concat(24);
+    const html = buildPrintPages([numbers]);
+    assert.match(html, /data-print-pages="0"/);
+    assert.match(html, /<strong>Подборка 1<\/strong>/);
+    assert.doesNotMatch(html, /data-print-pages="3"/);
 });
