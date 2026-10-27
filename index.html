@@ -517,7 +517,7 @@
             #print-container, #print-footer-fixed { display: none !important; } 
         }
         @media print {
-            @page { margin: 12mm 12mm 16mm 12mm; size: A4; } 
+            @page { margin: 9mm 9mm 10mm 9mm; size: A4 portrait; } 
             body { background: #fff !important; margin: 0 !important; padding: 0 !important; color: #111 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .layout-wrapper, #game-modal, #pres-modal, #proto-tooltip, .modal-overlay, .generator-starfield { display: none !important; }
             #print-container { display: block !important; width: 100%; }
@@ -1685,8 +1685,31 @@ body.auth-locked > *:not(#passwordGate) {
 
         <div id="dynamic-tasks"></div>
 
-        <div id="generation-actions-anchor" style="scroll-margin-top:90px;"></div>
-        <button class="btn-generate" onclick="safeGenerateVariant(event)">Сгенерировать вариант</button>
+        
+<style id="oge-task-replacement-style">
+/* Кнопки замены аналогичны генератору ЕГЭ; видны только в предпросмотре автора. */
+.oge-replace-bar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 9px;clear:both;}
+.oge-replace-bar .random-replace-btn{flex:0 0 auto;border:1px solid #ffb74d;background:#fff8ee;color:#e65100;border-radius:7px;padding:6px 9px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.oge-replace-bar .random-replace-btn:hover{background:#ffedd4;}
+.oge-replace-bar .random-replace-btn:focus-visible{outline:3px solid #14b8a6;outline-offset:2px;}
+@media print{.oge-replace-bar,.oge-generation-row,.oge-variant-switch{display:none!important;}}
+.oge-generation-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+.oge-variant-count-label{color:#fbbf24;font-weight:700;font-size:16px;}
+#oge-variant-count{width:80px;padding:11px 9px;border:2px solid #14b8a6;border-radius:9px;background:#0b2232;color:white;font-size:18px;text-align:center;font-weight:bold;}
+.oge-variant-switch{margin:12px 0 20px;padding:14px 18px;border-radius:12px;background:rgba(20,184,166,.10);border:1px solid rgba(20,184,166,.43);text-align:center;color:#d6f8f2;}
+.oge-variant-switch label{font-weight:700;margin-right:12px;}
+.oge-variant-switch select{background:#153247;color:white;border:1px solid #14b8a6;padding:9px 13px;border-radius:8px;font-weight:700;}
+.oge-replace-bar .oge-replace-type-btn{color:#09695c;border-color:#27b5a3;background:#edfffa;}
+.oge-replace-bar .oge-replace-type-btn:hover{background:#d7f9f0;}
+</style>
+
+<div id="generation-actions-anchor" style="scroll-margin-top:90px;"></div>
+        <div class="oge-generation-row">
+          <label for="oge-variant-count" class="oge-variant-count-label">Количество вариантов</label>
+          <input id="oge-variant-count" type="number" min="1" max="40" step="1" value="1" title="От 1 до 40 вариантов" aria-label="Количество вариантов">
+          <button class="btn-generate" onclick="safeGenerateVariant(event)">Сгенерировать варианты</button>
+        </div>
+        <div id="oge-variant-switch" class="oge-variant-switch" style="display:none"></div>
         
         <div id="info-board"></div>
         
@@ -2617,7 +2640,7 @@ body.auth-locked > *:not(#passwordGate) {
 
     window.adjustOgePracticeStickyHeights = adjustOgePracticeStickyHeights;
 
-    function buildOgePracticeTasks(infoBoard, orderedTasks) {
+    function buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts = new Map()) {
         const database = window.ogePracticeDatabase || {};
         const trainerTasks = [];
         const scenarioTasks = [];
@@ -2652,8 +2675,9 @@ body.auth-locked > *:not(#passwordGate) {
                         svg_code: ''
                     }));
                 trainerTasks.push({
-                    text: proto.text || '',
-                    displayText: `<div style="margin-bottom:5px;"><span style="display:inline-block; background:#eaf2ff; color:#003399; border:1px solid #99b7df; border-radius:6px; padding:2px 8px; font-weight:800;">${proto.id || ''}</span></div>${proto.text || ''}`,
+                    examNumber:Number(proto.examNumber),
+                    __ogeTrainerMeta:{themeId,proto,candidates:selectedPrototypes.filter(p=>Number(p.examNumber)===Number(proto.examNumber)), commonText,commonImageHTML},
+                    text: proto.text || '',                     displayText: `<div style="margin-bottom:5px;"><span style="display:inline-block; background:#eaf2ff; color:#003399; border:1px solid #99b7df; border-radius:6px; padding:2px 8px; font-weight:800;">${proto.id || ''}</span></div>${proto.text || ''}`,
                     displaySvg: '',
                     printSvg: useDraftDiagram ? imageHTML : '',
                     draftSvg: useDraftDiagram ? imageHTML : '',
@@ -2734,6 +2758,7 @@ body.auth-locked > *:not(#passwordGate) {
 
                     function refillThemePool() {
                         let pool = orderedTasks ? [...availableThemeIds] : shuffleArray([...availableThemeIds]);
+                        pool.sort((a,b)=>(usageCounts.get('theme:'+a)||0)-(usageCounts.get('theme:'+b)||0));
                         if (lastThemeId && pool.length > 1 && pool[0] === lastThemeId) {
                             const swapIndex = pool.findIndex(themeId => themeId !== lastThemeId);
                             if (swapIndex > 0) [pool[0], pool[swapIndex]] = [pool[swapIndex], pool[0]];
@@ -2752,6 +2777,7 @@ body.auth-locked > *:not(#passwordGate) {
                     function refillScenarioPool(themeId) {
                         const available = selectedScenariosByTheme.get(themeId) || [];
                         let pool = orderedTasks ? [...available] : shuffleArray([...available]);
+                        pool.sort((a,b)=>(usageCounts.get('scene:'+themeId+':'+a.scenarioIndex)||0)-(usageCounts.get('scene:'+themeId+':'+b.scenarioIndex)||0));
                         const lastScenarioIndex = lastScenarioIndexes.get(themeId);
                         if (lastScenarioIndex !== undefined && pool.length > 1 && pool[0].scenarioIndex === lastScenarioIndex) {
                             const swapIndex = pool.findIndex(state => state.scenarioIndex !== lastScenarioIndex);
@@ -2789,9 +2815,9 @@ body.auth-locked > *:not(#passwordGate) {
                             const allTasks = scenario.tasks && Array.isArray(scenario.tasks[taskNumber]) ? scenario.tasks[taskNumber] : [];
                             const indexes = state.selectedByNumber[taskNumber];
                             const candidates = indexes.map(i => allTasks[i]).filter(Boolean);
-                            const minUse = Math.min(...candidates.map((task, idx) => usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${indexes[idx]}`) || 0));
+                            const minUse = Math.min(...candidates.map((task, idx) => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${indexes[idx]}`) || 0) + (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(task))||0)));
                             let candidatePairs = candidates.map((task, idx) => ({ task, originalIndex: indexes[idx] }))
-                                .filter(pair => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) === minUse);
+                                .filter(pair => ((usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) + (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(pair.task))||0)) === minUse);
                             candidatePairs = shuffleArray(candidatePairs);
                             const chosenPair = candidatePairs[0];
                             const chosen = chosenPair.task;
@@ -2808,6 +2834,12 @@ body.auth-locked > *:not(#passwordGate) {
                             const standaloneText = makeOgePracticeStandalone(theme.title, scenario, setNumber, taskNumber, chosen);
                             const useDraftDiagram = taskNumber !== 5;
                             scenarioTasks.push({
+                                examNumber: taskNumber,
+                                __ogeScenarioMeta: {
+                                    chosen, candidates: indexes.map(i => allTasks[i]).filter(Boolean),
+                                    themeTitle: theme.title, scenario, setNumber, taskNumber, diagramHTML,
+                                    groupId: `${state.themeId}:${state.scenarioIndex}:${setNumber}`
+                                },
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
                                 displaySvg: '',
@@ -3015,9 +3047,11 @@ body.auth-locked > *:not(#passwordGate) {
             </div>`;
         }
 
-        syncPracticeThemeMaster();
-        syncPracticeCountWithThemes();
-        setPracticeMode('trainer');
+        if (typeof syncPracticeThemeMaster === 'function') syncPracticeThemeMaster();
+        else { handlePracticeTrainerThemeChange(); handlePracticeScenarioThemeChange(); }
+        if (typeof syncPracticeCountWithThemes === 'function') syncPracticeCountWithThemes();
+        else syncPracticeScenarioCount();
+        if (typeof setPracticeMode === 'function') setPracticeMode('trainer');
         updateTaskTotal();
         if (window.MathJax) {
             MathJax.typesetPromise([container]).catch(err => console.log(err.message));
@@ -3217,37 +3251,216 @@ body.auth-locked > *:not(#passwordGate) {
         input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    function safeGenerateVariant(event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
 
-        const btn = event && event.currentTarget ? event.currentTarget : document.querySelector('.btn-generate');
-        const infoBoard = document.getElementById('info-board');
-
-        if (btn) {
-            btn.disabled = true;
-            btn.dataset.oldText = btn.textContent;
-            btn.textContent = 'Генерирую...';
-        }
-
-        setTimeout(() => {
-            try {
-                generateVariant();
-            } catch (err) {
-                console.error(err);
-                if (infoBoard) {
-                    infoBoard.style.display = 'block';
-                    infoBoard.innerHTML = '<b>Ошибка при повторной генерации:</b> ' + (err && err.message ? err.message : err);
-                }
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = btn.dataset.oldText || 'Сгенерировать вариант';
-                }
+    // Точечная замена как в ЕГЭ: сохраняем остальные уже выбранные задачи.
+    window.ogeVariantSnapshot = null;
+    function ogeTaskReplacementKey(t) {
+        return String(t && (t.id ?? t.text ?? '') || '');
+    }
+    function ogeSelectedPrototypesForBlock(block) {
+        const kind=block.kind || 'main', data=block.data;
+        if (!data || !Array.isArray(data.prototypes)) return [];
+        const tid=block.tid;
+        if (kind==='extra' && String(tid).replace(/\D/g,'')==='19') return data.prototypes;
+        return data.prototypes.filter((p,index)=>{
+            const cb=document.getElementById(getPrototypeCheckboxId(tid,index,kind));
+            return cb && cb.checked;
+        });
+    }
+    function ogeItemTypeCode(t) {
+        if (t && t.__ogeScenarioMeta) return String(t.__ogeScenarioMeta.chosen?.typeId||'');
+        if (t && t.__ogeTrainerMeta) return String(t.__ogeTrainerMeta.proto?.id||'');
+        return String(t && t.theory && (t.theory.code||t.theory.desc||t.theory.topic)||'');
+    }
+    function ogeTaskReplacementKey(t) {
+        return String(t && (t.id ?? t.text ?? '') || '');
+    }
+    function ogeReplacementButton(blockIndex, itemIndex, item, kind) {
+        let inside=false,type=false;
+        if (kind === 'practice') {
+            const scenario=item&&item.__ogeScenarioMeta;
+            const trainer=item&&item.__ogeTrainerMeta;
+            if (scenario && Array.isArray(scenario.candidates)) {
+                inside=scenario.candidates.filter(t=>String(t.typeId||'')===String(scenario.chosen?.typeId||'')).length>1;
+                type=scenario.candidates.some(t=>String(t.typeId||'')!==String(scenario.chosen?.typeId||''));
+            } else if (trainer) {
+                inside=false; // Каталог содержит отдельные типы, а не аналоги внутри типа.
+                type=trainer.candidates.some(p=>String(p.id||'')!==String(trainer.proto.id||''));
             }
-        }, 0);
+        } else {
+            const p=item&&item.theory;
+            inside=!!(p&&Array.isArray(p.tasks)&&p.tasks.length>1);
+            const snap=window.ogeVariantSnapshot;
+            const block=snap&&snap[blockIndex];
+            if (block) type=ogeSelectedPrototypesForBlock(block).some(q=>q!==p && String(q.code||q.desc||'')!==String(p?.code||p?.desc||''));
+        }
+        if (!inside && !type) return '';
+        return `<div class="oge-replace-bar">${inside?`<button class="random-replace-btn" type="button" title="Другой пример того же типа; остальные задачи не изменятся" onclick="replaceOgeVariantTask(${blockIndex},${itemIndex},'inside')">🔄 Заменить внутри типа</button>`:''}${type?`<button class="random-replace-btn oge-replace-type-btn" type="button" title="Выбрать другой прототип; остальные задачи не изменятся" onclick="replaceOgeVariantTask(${blockIndex},${itemIndex},'type')">↔ Заменить тип</button>`:''}</div>`;
+    }
+    function replaceOgeVariantTask(blockIndex,itemIndex,mode='inside') {
+        const snap=window.ogeVariantSnapshot;
+        if (!Array.isArray(snap) || !snap[blockIndex] || !Array.isArray(snap[blockIndex].tasks)) return;
+        const block=snap[blockIndex],old=block.tasks[itemIndex];
+        if (!old) return;
+        let replacement=null;
+        if (block.kind==='practice' && old.__ogeScenarioMeta) {
+            const meta=old.__ogeScenarioMeta;
+            const oldType=String(meta.chosen?.typeId||'');
+            const alternatives=meta.candidates.filter(t=>ogeTaskReplacementKey(t)!==ogeTaskReplacementKey(meta.chosen) &&
+                (mode==='type' ? String(t.typeId||'')!==oldType : String(t.typeId||'')===oldType));
+            if (!alternatives.length) {alert('Других задач для этой замены нет.');return;}
+            const next=alternatives[Math.floor(Math.random()*alternatives.length)];
+            const num=meta.taskNumber,useDiagram=num!==5,diag=meta.diagramHTML||'';
+            const standalone=makeOgePracticeStandalone(meta.themeTitle,meta.scenario,meta.setNumber,num,next);
+            const alt=meta.candidates.filter(t=>t!==next).map(t=>({text:`<b>${t.typeId||`Задание ${num}`}.</b> ${t.text||''}`,answer:String(t.answer??''),svg_code:''}));
+            replacement={...old,text:next.text||'',displayText:next.text||'',standaloneText:standalone,
+                printSvg:useDiagram?(next.printSvg||next.imageHTML||next.svg_code||diag):'',
+                draftSvg:useDiagram?(next.draftSvg||next.imageHTML||next.svg_code||diag):'',
+                standaloneSvg:next.standaloneSvg||next.imageHTML||next.svg_code||diag,
+                gameText:standalone,gameSvg:useDiagram?(next.gameSvg||next.draftSvg||next.imageHTML||next.svg_code||diag):'',
+                presentationText:num===5&&/<table\b/i.test(String(next.text||''))?next.text:standalone,
+                presentationHasTable:num===5&&/<table\b/i.test(String(next.text||'')),
+                answer:String(next.answer??''),accepts:Array.isArray(next.accepts)&&next.accepts.length?next.accepts.map(String):[String(next.answer??'')],
+                forceDraftDiagram:useDiagram&&Boolean(diag||next.svg_code||next.imageHTML),
+                printLayout:next.printLayout||(diag?'image-grid':''),printGridHeight:next.printGridHeight||125,
+                theory:{...old.theory,theory_task:standalone,theory_sol:next.solution||'Разбор пока не добавлен.',tasks:alt},
+                __ogeScenarioMeta:{...meta,chosen:next}};
+        } else if (block.kind==='practice' && old.__ogeTrainerMeta) {
+            const meta=old.__ogeTrainerMeta;
+            if(mode==='inside') {
+                const same=(old.theory&&old.theory.tasks||[]).filter(t=>ogeTaskReplacementKey(t)!==ogeTaskReplacementKey(old));
+                if (!same.length) return;
+                const next=same[Math.floor(Math.random()*same.length)];
+                replacement={...old,text:next.text,displayText:next.text,answer:String(next.answer||''),accepts:[String(next.answer||'')]};
+            } else {
+                const other=meta.candidates.filter(p=>String(p.id||'')!==String(meta.proto.id||''));
+                if (!other.length) return;
+                const proto=other[Math.floor(Math.random()*other.length)],num=Number(proto.examNumber),image=proto.imageHTML||proto.svg_code||'';
+                const standalone=`${meta.commonText||''}<div><b>Прототип ${proto.id||''}.</b> ${proto.text||''}</div>`;
+                replacement={...old,text:proto.text||'',displayText:`<div style="margin-bottom:5px"><b>Прототип ${proto.id||''}</b></div>${proto.text||''}`,
+                    standaloneText:standalone,gameText:standalone,presentationText:standalone,
+                    printSvg:num!==5?image:'',draftSvg:num!==5?image:'',gameSvg:num!==5?image:'',standaloneSvg:image,
+                    answer:String(proto.answer??''),accepts:Array.isArray(proto.accepts)&&proto.accepts.length?proto.accepts.map(String):[String(proto.answer??'')],
+                    __ogeTrainerMeta:{...meta,proto},theory:{...old.theory,theory_task:standalone,theory_sol:proto.solution||'Разбор пока не добавлен.'}};
+            }
+        } else {
+            const p=old.theory;
+            if (mode==='type') {
+                const pool=ogeSelectedPrototypesForBlock(block).filter(q=>q!==p&&String(q.code||q.desc||'')!==String(p?.code||p?.desc||'')&&Array.isArray(q.tasks)&&q.tasks.length);
+                if(!pool.length) {alert('Для замены типа отметьте другие прототипы этого задания в настройках.');return;}
+                const usedCodes=new Set(block.tasks.filter((t,i)=>i!==itemIndex).map(ogeItemTypeCode));
+                const rare=pool.filter(q=>!usedCodes.has(String(q.code||q.desc||'')));
+                const src=(rare.length?rare:pool)[Math.floor(Math.random()*(rare.length?rare:pool).length)];
+                const usedTasks=new Set(block.tasks.filter((t,i)=>i!==itemIndex).map(ogeTaskReplacementKey));
+                const candidates=src.tasks.filter(t=>!usedTasks.has(ogeTaskReplacementKey(t)));
+                const next=(candidates.length?candidates:src.tasks)[Math.floor(Math.random()*(candidates.length?candidates:src.tasks).length)];
+                replacement={...next,svg:next.svg_code||src.svg_code||'',theory:src};
+            } else {
+                if (!p||!Array.isArray(p.tasks)||p.tasks.length<2) return;
+                const alternatives=p.tasks.filter(t=>ogeTaskReplacementKey(t)!==ogeTaskReplacementKey(old));
+                const used=new Set(block.tasks.filter((t,i)=>i!==itemIndex).map(ogeTaskReplacementKey));
+                const fresh=alternatives.filter(t=>!used.has(ogeTaskReplacementKey(t)));
+                const pool=fresh.length?fresh:alternatives;
+                if(!pool.length) return;
+                const next=pool[Math.floor(Math.random()*pool.length)];
+                replacement={...next,svg:next.svg_code||p.svg_code||'',theory:p};
+            }
+        }
+        if (!replacement) return;
+        const nextSnapshot=snap.map((b,bi)=>bi===blockIndex?{...b,tasks:b.tasks.map((t,ti)=>ti===itemIndex?replacement:t)}:b);
+        try {
+            generateVariant({snapshot:nextSnapshot});
+            ogeSyncCurrentVariantInBatch();
+            requestAnimationFrame(()=>{
+                const target=document.querySelector(`[data-oge-block-index="${blockIndex}"][data-oge-item-index="${itemIndex}"]`);
+                if(target) target.scrollIntoView({behavior:'smooth',block:'center'});
+            });
+        } catch(e) {console.error('Ошибка замены:',e);alert('Не удалось заменить задание: '+(e.message||e));}
+    }
+
+    window.ogeVariantBatch=[];
+    window.ogeActiveVariantIndex=0;
+    function ogeTaskGlobalKey(task,block) {
+        if (task?.__ogeScenarioMeta) {
+            const m=task.__ogeScenarioMeta;
+            return `scenario:${m.groupId}:${m.taskNumber}:${ogeTaskReplacementKey(m.chosen)}`;
+        }
+        return String(block?.tid||'')+':'+ogeTaskReplacementKey(task);
+    }
+    function ogeRecordUsage(snapshot, usage) {
+        (snapshot||[]).forEach(b=>(b.tasks||[]).forEach(t=>{
+            const k=ogeTaskGlobalKey(t,b);usage.set(k,(usage.get(k)||0)+1);
+            const m=t?.__ogeScenarioMeta;
+            if(m && Number(m.taskNumber)===1){
+                const theme=String(m.groupId||'').split(':')[0];
+                const scenario=String(m.groupId||'').split(':')[1];
+                const tk='theme:'+theme, sk='scene:'+theme+':'+scenario;
+                usage.set(tk,(usage.get(tk)||0)+1);
+                usage.set(sk,(usage.get(sk)||0)+1);
+            }
+        }));
+    }
+    function ogeBuildBatchEntry() {
+        return {snapshot:window.ogeVariantSnapshot,printHTML:currentPrintHTML,
+            printGroups:JSON.parse(JSON.stringify(window.ogePrintableGroups||{})),
+            answersHTML:currentAnswersHTML};
+    }
+    function ogeSyncCurrentVariantInBatch() {
+        const index=window.ogeActiveVariantIndex||0;
+        if(!Array.isArray(window.ogeVariantBatch)||!window.ogeVariantBatch.length)return;
+        window.ogeVariantBatch[index]=ogeBuildBatchEntry();
+        ogeRenderVariantSwitcher();
+    }
+    function ogeRenderVariantSwitcher(){
+        const el=document.getElementById('oge-variant-switch');
+        if(!el)return;
+        const batch=window.ogeVariantBatch||[];
+        if(batch.length<=1){el.style.display='none';el.innerHTML='';return;}
+        const index=window.ogeActiveVariantIndex||0;
+        el.style.display='block';
+        el.innerHTML=`<label for="oge-active-variant">Просмотр варианта</label><select id="oge-active-variant" onchange="ogeSelectVariant(Number(this.value))">${batch.map((b,i)=>`<option value="${i}" ${i===index?'selected':''}>Вариант №${i+1}</option>`).join('')}</select><div style="font-size:13px;margin-top:7px;opacity:.85">Печатный файл содержит все ${batch.length} ${batch.length%10===1&&batch.length%100!==11?'вариант':batch.length%10>=2&&batch.length%10<=4&&(batch.length%100<12||batch.length%100>14)?'варианта':'вариантов'}. Замены сохраняются отдельно для каждого варианта.</div>`;
+    }
+    function ogeSelectVariant(index){
+        const batch=window.ogeVariantBatch||[];
+        if(!batch[index])return;
+        window.ogeActiveVariantIndex=index;
+        generateVariant({snapshot:batch[index].snapshot});
+        ogeRenderVariantSwitcher();
+    }
+    function safeGenerateVariant(event) {
+        if(event){event.preventDefault();event.stopPropagation();}
+        const btn=event&&event.currentTarget?event.currentTarget:document.querySelector('.btn-generate');
+        const input=document.getElementById('oge-variant-count');
+        let count=Number(input?.value||1);
+        if(!Number.isInteger(count)||count<1||count>40){alert('Укажите целое количество вариантов от 1 до 40.');return;}
+        if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Генерирую 1 из '+count+'…';}
+        window.ogeVariantBatch=[];window.ogeActiveVariantIndex=0;
+        const usage=new Map();
+        let current=0;
+        const makeNext=()=>{
+            try{
+                generateVariant({silent:true,usageCounts:usage});
+                if(!window.ogeVariantSnapshot || !window.ogeVariantSnapshot.length) throw Error('Не выбраны задания для генерации.');
+                window.ogeVariantBatch.push(ogeBuildBatchEntry());
+                ogeRecordUsage(window.ogeVariantSnapshot,usage);
+                current++;
+                if(current<count){
+                    if(btn)btn.textContent='Генерирую '+(current+1)+' из '+count+'…';
+                    setTimeout(makeNext,0);
+                } else {
+                    window.ogeActiveVariantIndex=0;
+                    generateVariant({snapshot:window.ogeVariantBatch[0].snapshot});
+                    ogeRenderVariantSwitcher();
+                    if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Сгенерировать варианты';}
+                }
+            }catch(e){
+                console.error(e);
+                const board=document.getElementById('info-board');
+                if(board){board.style.display='block';board.innerHTML='<b>Ошибка генерации:</b> '+String(e.message||e);}
+                if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||'Сгенерировать варианты';}
+            }
+        };
+        setTimeout(makeNext,0);
     }
 
     function resetTaskCounts() {
@@ -3390,7 +3603,11 @@ body.auth-locked > *:not(#passwordGate) {
         return array;
     }
 
-    function generateVariant() {
+    function generateVariant(options = {}) {
+        const frozenSnapshot = options && Array.isArray(options.snapshot) ? options.snapshot : null;
+        const usageCounts = options && options.usageCounts instanceof Map ? options.usageCounts : new Map();
+        const printGroups={'1-5':[],'6-14':[],'15-25':[]};
+        const snapshotBuilt = [];
         const infoBoard = document.getElementById('info-board');
         infoBoard.style.display = 'none';
         infoBoard.innerHTML = '';
@@ -3446,7 +3663,7 @@ body.auth-locked > *:not(#passwordGate) {
             orderedTasks: orderedTasks
         };
 
-        const practiceGroups = buildOgePracticeTasks(infoBoard, orderedTasks);
+        const practiceGroups = frozenSnapshot ? {trainerTasks:[],scenarioTasks:[]} : buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts);
         const trainerTasks = practiceGroups.trainerTasks || [];
         const scenarioTasks = practiceGroups.scenarioTasks || [];
 
@@ -3462,15 +3679,17 @@ body.auth-locked > *:not(#passwordGate) {
             : 'Задания 1–5. Комплекты по сюжетам';
 
         // Сначала связанные задания ОГЭ 1–5, затем основные и дополнительные блоки 6+.
-        const generationBlocks = [];
-        if (trainerTasks.length > 0) {
+        const generationBlocks = frozenSnapshot
+            ? frozenSnapshot.map(b => ({tid:b.tid,kind:b.kind,data:b.data,frozenTasks:b.tasks}))
+            : [];
+        if (!frozenSnapshot && trainerTasks.length > 0) {
             generationBlocks.push({ tid: '__oge_trainer__', kind: 'practice', data: { title: 'Задания 1–5. Тренажёры по прототипам' }, tasks: trainerTasks });
         }
-        if (scenarioTasks.length > 0) {
+        if (!frozenSnapshot && scenarioTasks.length > 0) {
             generationBlocks.push({ tid: '__oge_scenarios__', kind: 'practice', data: { title: scenarioBlockTitle }, tasks: scenarioTasks });
         }
 
-        getUniqueTaskIds().forEach(tid => {
+        if (!frozenSnapshot) getUniqueTaskIds().forEach(tid => {
             const mainCountInput = document.getElementById(`count-${tid}`);
             const mainCount = mainCountInput ? (parseInt(mainCountInput.value, 10) || 0) : 0;
             if (mainCount > 0 && window.database[tid]) {
@@ -3495,7 +3714,10 @@ body.auth-locked > *:not(#passwordGate) {
                 : sourceData;
             let finalTasks = [];
 
-            if (isPracticeBlock) {
+            if (Array.isArray(block.frozenTasks)) {
+                finalTasks = block.frozenTasks.slice();
+                window.selectedBlockTitles.push(blockData.title);
+            } else if (isPracticeBlock) {
                 finalTasks = block.tasks || [];
                 window.selectedBlockTitles.push(blockData.title);
             } else {
@@ -3519,9 +3741,10 @@ body.auth-locked > *:not(#passwordGate) {
                 // Если галочка выключена, выбранные задания можно перемешивать.
                 const preservePrototypeOrder = orderedTasks;
                 const activePools = selectedProtos.map(p => ({
-                    tasks: shuffleArray([...p.tasks]),
-                    protoSvg: p.svg_code || '',
-                    theory: p
+                    tasks: shuffleArray([...p.tasks]).sort((a,b)=>
+                        (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(a))||0)-
+                        (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(b))||0)),
+                    protoSvg: p.svg_code || '',                     theory: p
                 }));
 
                 const availableCount = activePools.reduce((sum, pool) => sum + pool.tasks.length, 0);
@@ -3543,7 +3766,9 @@ body.auth-locked > *:not(#passwordGate) {
                     let pools = activePools.map(pool => ({
                         protoSvg: pool.protoSvg || '',
                         theory: pool.theory,
-                        tasks: shuffleArray([...pool.tasks])
+                        tasks: shuffleArray([...pool.tasks]).sort((a,b)=>
+                            (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(a))||0)-
+                            (usageCounts.get(String(tid)+':'+ogeTaskReplacementKey(b))||0))
                     })).filter(pool => pool.tasks.length > 0);
 
                     if (!preservePrototypeOrder) pools = shuffleArray(pools);
@@ -3576,6 +3801,8 @@ body.auth-locked > *:not(#passwordGate) {
             }
 
             if (finalTasks.length === 0) continue;
+            const blockSnapshotIndex = snapshotBuilt.length;
+            snapshotBuilt.push({tid,kind,data:sourceData,tasks:finalTasks.slice()});
             hasContent = true;
 
             // ЧАСТЬ 2: как в генераторе ЕГЭ — без автоматической проверки и без разборов.
@@ -3595,8 +3822,10 @@ body.auth-locked > *:not(#passwordGate) {
                     if (!selectedIdsByProto[key]) selectedIdsByProto[key] = new Set();
                     selectedIdsByProto[key].add(String(t.id ?? t.text ?? ''));
                 });
-                finalTasks.forEach(item => {
+                finalTasks.forEach((item,itemIndex) => {
+                    const printOffset = currentPrintHTML.length;
                     taskCounter++;
+                    const replacementControl = ogeReplacementButton(blockSnapshotIndex,itemIndex,item,kind);
                     const part2Answer = String(item.answer || '').trim();
                     const proto = item.theory || {};
                     const protoKey = String(proto.code || proto.desc || '');
@@ -3622,9 +3851,10 @@ body.auth-locked > *:not(#passwordGate) {
                         ? `<button class="btn-settings second-answer-btn" id="second-answer-btn-${taskCounter}" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;font-weight:bold;padding:9px 13px" onclick="window.showSecondPartAnswer('${taskCounter}')">ПОКАЗАТЬ ОТВЕТ</button>`
                         : '';
                     const actionArea = `<div style="margin-top:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:20px;padding:7px 11px;cursor:pointer">✏️</button>${answerButton}<button class="btn-settings" type="button" style="background:#e3f2fd;color:#003399;border:1px solid #003399;font-weight:bold;padding:9px 13px" onclick="window.openTheoryModalLocal('oge${part2TaskNum}-analogs-${taskCounter}')">АНАЛОГИ</button><div id="oge${part2TaskNum}-analogs-${taskCounter}" style="display:none">${encodeURIComponent(analogsHtml)}</div><div id="second-answer-data-${taskCounter}" style="display:none">${encodeURIComponent(part2Answer)}</div><div id="second-final-answer-${taskCounter}" style="display:none;flex-basis:100%;background:#eef6ff;border-left:4px solid #003399;border-radius:6px;padding:12px 14px;color:#273448"></div></div>`;
-                    currentInteractiveHTML += `<div class="generated-task-block second-part-task oge-part2-item" data-part="2" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div>${actionArea}</div></div>${buildOgePart2ScratchpadHTML(String(taskCounter),true)}</div>`;
+                    currentInteractiveHTML += `<div class="generated-task-block second-part-task oge-part2-item" data-part="2" data-oge-block-index="${blockSnapshotIndex}" data-oge-item-index="${itemIndex}" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc">${replacementControl}<div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div>${actionArea}</div></div>${buildOgePart2ScratchpadHTML(String(taskCounter),true)}</div>`;
                     currentPrintHTML += `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px"></div></div></div></div>`;
                     currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || (isProofTask ? 'Задача на доказательство. Проверка развёрнутого решения учителем.' : 'Ответ отсутствует')}</div>`;
+                    printGroups['15-25'].push((itemIndex===0 ? `<h4>Задание ${part2TaskNum}</h4>` : '')+currentPrintHTML.slice(printOffset));
                     window.currentGeneratedTasks.push({text:item.text,draftText:item.text,presentationText:item.text,answer:part2Answer,part:2,isSecondPart:true,taskNumber:part2TaskNum,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
                 });
                 continue;
@@ -3636,7 +3866,9 @@ body.auth-locked > *:not(#passwordGate) {
             currentAnswersHTML += `<h3>${blockData.title}</h3><div>`;
 
             let lastExtraTopicInVariant = null;
-            finalTasks.forEach(item => {
+            finalTasks.forEach((item,itemIndex) => {
+                const printOffset = currentPrintHTML.length;
+                const replacementControl = ogeReplacementButton(blockSnapshotIndex,itemIndex,item,kind);
                 // Тематические рубрики видны не только в настройке, но и в самом варианте.
                 if (orderedTasks && kind === 'extra' && sourceData.preserveTopicOrder === true && String(tid).replace(/\D/g, '') !== '19') {
                     const currentTopic = item.theory && item.theory.topic ? String(item.theory.topic) : '';
@@ -4088,7 +4320,7 @@ body.auth-locked > *:not(#passwordGate) {
                 if (!interactiveTaskCore) {
                     interactiveTaskCore = `<div style="display:flex; align-items:flex-start; gap:15px; flex-grow:1; min-width:0;"><div style="flex-shrink:0; font-weight:bold; font-size:1.1em; padding-top:2px;">${taskCounter}.</div>${mainSvg ? `<div style="flex-shrink:0; min-width:150px; max-width:350px;">${mainSvg}</div>` : ""}<div style="flex-grow:1; min-width:0;"><div>${renderText}</div><div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; clear:both;"><input type="text" class="ans-box" id="ans-interactive-${taskCounter}" data-task-num="${taskCounter}" placeholder="Ответ..." data-ans="${acceptedAnswerString}" style="padding:10px 15px; border:2px solid #ccc; border-radius:6px; font-size:16px; font-weight:bold; width:150px; outline:none; transition:0.3s;">${instantBtn}${drawBtn}${helpBtn}<span class="answer-feedback" id="feedback-${taskCounter}" style="font-weight:bold; font-size:15px; display:none;"></span></div></div></div>`;
                 }
-                currentInteractiveHTML += `<div style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;"><div style="display:flex; align-items:flex-start; justify-content:space-between;">${interactiveTaskCore}${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
+                currentInteractiveHTML += `<div class="generated-task-block" data-oge-block-index="${blockSnapshotIndex}" data-oge-item-index="${itemIndex}" style="margin-bottom:30px; clear:both; overflow:hidden; border-bottom:1px dashed #ddd; padding-bottom:20px;">${replacementControl}<div style="display:flex; align-items:flex-start; justify-content:space-between;">${interactiveTaskCore}${stickerHTMLInteractive}</div>${scratchpadHTML}</div>`;
                 
                 if (isStacked11) {
                     const p11 = stacked11Parts || splitTask11ExtraHTML(renderText || '');
@@ -4125,11 +4357,19 @@ body.auth-locked > *:not(#passwordGate) {
                 if (item.afterHTML) currentInteractiveHTML += item.afterHTML;
                 if (item.afterPrintHTML) currentPrintHTML += item.afterPrintHTML;
                 if (item.afterAnswersHTML) currentAnswersHTML += item.afterAnswersHTML;
+                const examNum = kind==='practice' ? Number(item.examNumber||item.__ogeScenarioMeta?.taskNumber||item.__ogeTrainerMeta?.proto?.examNumber||0)
+                    : Number(String(tid).replace(/\D/g,''));
+                const group = examNum<=5?'1-5':examNum<=14?'6-14':'15-25';
+                if(examNum>=1 && examNum<=25) printGroups[group].push(
+                    (itemIndex===0 ? `<h4 class="oge-print-block-caption">${blockData.title}</h4>` : '')+
+                    currentPrintHTML.slice(printOffset).replace(/<div style="page-break-before:always; break-before:page; height:0;"><\/div>/g,''));
             });
             currentInteractiveHTML += `</div>`; currentPrintHTML += `</div>`; currentAnswersHTML += `</div>`;
         }
 
-        if (hasContent) { document.getElementById('output-section').style.display = 'block'; document.getElementById('btn-group').style.display = 'flex'; renderPreview(); }
+        window.ogeVariantSnapshot = hasContent ? snapshotBuilt : null;
+        window.ogePrintableGroups = printGroups;
+        if (hasContent && !options.silent) { document.getElementById('output-section').style.display = 'block'; document.getElementById('btn-group').style.display = 'flex'; renderPreview(); }
     }
 
     window.CANVAS_LOGIC_SCRIPT = `
@@ -4523,6 +4763,7 @@ body.auth-locked > *:not(#passwordGate) {
         }
         let showCorrectOnError = document.getElementById('toggle-show-correct').checked;
         
+        const pupilInteractiveHTML = String(currentInteractiveHTML).replace(/<div class="oge-replace-bar">[\s\S]*?<\/div>/g, '');
         let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -4563,7 +4804,7 @@ body.auth-locked > *:not(#passwordGate) {
             <div class="timer-box" id="timer-display">⏱ 00:00</div>
             <h1 style="text-align: center; color: #003399; border-bottom: 2px solid #ff8c00; padding-bottom: 15px; margin-top:0;">Тренировочный вариант</h1>
             ${sig}
-            ${currentInteractiveHTML}
+            ${pupilInteractiveHTML}
             <button id="btn-check" onclick="checkAll()" style="display:block; width:100%; padding:15px; font-size:18px; font-weight:bold; background:#ff8c00; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-top:30px; transition:0.3s;">ПОДВЕСТИ ИТОГИ</button>
             <div id="res-box" style="display:none; text-align:center; margin-top:30px; padding:20px; background:rgba(255,255,255,0.9); border:2px dashed #003399; border-radius:8px; font-size:1.2em; font-weight:bold;"></div>
         </div>
@@ -4872,6 +5113,27 @@ body.auth-locked > *:not(#passwordGate) {
         downloadBlobSafely(blob, "Интерактивный_вариант.html");
     }
 
+    function ogeBatchPrintData() {
+        const batch=window.ogeVariantBatch||[];
+        if(batch.length) return batch;
+        return [{snapshot:window.ogeVariantSnapshot,printGroups:window.ogePrintableGroups||{}}];
+    }
+    function buildOgeBatchPrintHTML(sigPrint) {
+        const batch=ogeBatchPrintData();
+        const pieces=[['1-5','Задания 1–5'],['6-14','Задания 6–14'],['15-25','Задания 15–25']];
+        const escape=(s)=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return batch.map((entry,vi)=>pieces.map(([key,title],pi)=>{
+            const fragments=entry.printGroups?.[key]||[];
+            const content=fragments.length?fragments.join(''):'<p style="color:#777">Задания этого диапазона не выбраны.</p>';
+            return `<article class="oge-print-sheet" data-oge-sheet="${vi+1}-${pi+1}">
+                <div class="oge-sheet-inner">
+                    <header class="oge-sheet-heading"><strong>Вариант №${vi+1}</strong><span>${escape(title)} · лист ${pi+1} из 3</span></header>
+                    ${pi===0&&sigPrint?`<div class="oge-sheet-author">${sigPrint}</div>`:''}
+                    <div class="oge-sheet-tasks">${content}</div>
+                </div>
+            </article>`;
+        }).join('')).join('');
+    }
     function downloadPrintPDF() {
         if (!currentPrintHTML) { alert("Сначала сгенерируйте вариант!"); return; }
 
@@ -5102,9 +5364,33 @@ body.auth-locked > *:not(#passwordGate) {
 
             img { max-width:100% !important; page-break-inside:avoid; }
             svg { overflow:visible; }
+            .print-page{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;box-shadow:none!important;}
+            .oge-print-sheet{display:block!important;position:relative;width:100%;height:266mm;overflow:hidden!important;
+                break-after:page!important;page-break-after:always!important;margin:0!important;padding:0!important;}
+            .oge-print-sheet:last-child{break-after:auto!important;page-break-after:auto!important;}
+            .oge-sheet-inner{width:100%;max-width:100%;transform-origin:top left;}
+            .oge-sheet-heading{font-family:Arial,sans-serif;display:flex;justify-content:space-between;align-items:center;
+                color:#0e3d52;border-bottom:2px solid #14b8a6;padding:0 0 3mm;margin:0 0 3mm;font-size:14px;}
+            .oge-sheet-heading strong{font-size:17px;}
+            .oge-sheet-tasks h4.oge-print-block-caption{font-size:12px!important;margin:2mm 0 1mm!important;padding:0!important;
+                background:none!important;border:0!important;color:#0e5663!important;}
+            .oge-sheet-tasks h3{font-size:12px!important;margin:2mm 0 1mm!important;padding:1mm 2mm!important;}
+            .oge-sheet-tasks .task-print-block,.oge-sheet-tasks .task20-part2-item{margin:0 0 2mm!important;padding:2mm!important;
+                border-radius:5px!important;font-size:12px!important;}
+            .oge-sheet-tasks .task-print-text,.oge-sheet-tasks .task-print-answer{font-size:12px!important;}
+            .oge-sheet-tasks .task-print-img{max-width:43mm!important;width:43mm!important;min-width:35mm!important;flex-basis:43mm!important;}
+            .oge-sheet-tasks .task-print-img img,.oge-sheet-tasks .task-print-img svg{max-width:43mm!important;max-height:38mm!important;}
+            .oge-sheet-tasks .sticker-print{display:none!important;}
+            .oge-sheet-tasks .oge-practice-common{padding:2mm!important;margin:1mm 0 2mm!important;}
+            .oge-sheet-tasks .oge-practice-common p{margin:2mm 0!important;}
         }
 
         @media screen {
+            .oge-print-sheet{background:#fff;border:1px solid #d7e5e8;box-shadow:0 5px 18px rgba(0,0,0,.13);margin:0 auto 24px;
+                padding:14px;min-height:250px;max-width:850px;overflow:hidden;}
+            .oge-sheet-heading{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid #14b8a6;
+                padding-bottom:12px;margin-bottom:12px;color:#0e3d52;font-family:Arial,sans-serif;}
+            .oge-sheet-author .print-author{font-size:18px;}
             body {
                 background:#eef3f8;
                 font-family:"Times New Roman", serif;
@@ -5136,16 +5422,32 @@ body.auth-locked > *:not(#passwordGate) {
 <body>
     <div id="print-footer-fixed">Шкатулка математических интерактивов</div>
     <main class="print-page">
-        <header class="print-header">
-            <h1 class="print-title">Тренировочный вариант</h1>
-            <div class="print-subtitle">ОГЭ по математике</div>
-            ${sigPrint}
-        </header>
-        ${currentPrintHTML}
+        ${buildOgeBatchPrintHTML(sigPrint)}
     </main>
     <script>
         ${window.CANVAS_LOGIC_SCRIPT}
-        setTimeout(function(){ window.print(); }, 1500);
+        (async function(){
+            try {
+                if(window.MathJax&&MathJax.typesetPromise) await MathJax.typesetPromise();
+                await Promise.all(Array.from(document.images).map(img=>img.complete?Promise.resolve():
+                    new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;setTimeout(resolve,2200);})))
+                if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+            }catch(e){console.warn(e)}
+            const mmPx=96/25.4, available=263*mmPx;
+            document.querySelectorAll('.oge-print-sheet').forEach(sheet=>{
+                const inner=sheet.querySelector('.oge-sheet-inner');
+                if(!inner)return;
+                inner.style.zoom='1';
+                const height=inner.scrollHeight;
+                if(height>available){
+                    inner.style.zoom=String(Math.max(0.04,Math.min(1,available/height*0.985)));
+                    // Слишком длинные комплекты автоматически уменьшаются без обрезания.
+                    const actual=inner.getBoundingClientRect().height;
+                    if(actual>available) inner.style.zoom=String(Math.max(0.025,Number(inner.style.zoom)*available/actual*0.97));
+                }
+            });
+            setTimeout(()=>window.print(),350);
+        })();
     ${window.SCRIPT_END}
 </body>
 </html>`;
