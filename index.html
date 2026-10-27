@@ -5292,7 +5292,7 @@ body.auth-locked > *:not(#passwordGate) {
         if(batch.length) return batch;
         return [{snapshot:window.ogeVariantSnapshot,printGroups:window.ogePrintableGroups||{}}];
     }
-    // Альбомный A4: полный вариант всегда на трёх листах, подборки — по объёму.
+    // Альбомный A4: полный вариант строго на трёх листах; стикеры размещаются только в свободных областях.
     function ogePrintStripUserInterface(node) {
         if (!node) return node;
         node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
@@ -5539,6 +5539,9 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-task{font:var(--oge-print-font,11pt)/1.30 Georgia,"Times New Roman",serif;color:#111;margin:0 0 2mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
 .oge-exam-task-name{display:block;font-weight:700;white-space:nowrap;margin-bottom:.8mm;}
 .oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
+/* Изолируем каждый стикер внутри своего задания. Иначе float может выйти
+   за нижнюю границу блока и попасть на колонтитул другого листа. */
+.oge-exam-statement{display:flow-root;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
 .oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:fixed;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(7.4pt,.78em);line-height:1.16;}
@@ -5563,10 +5566,12 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
-/* Стикеры печатаются компактно внутри задания, не перекрывая условие. */
-.oge-exam-sticker{float:right;display:block;width:17mm;max-width:17mm;margin:0 0 1.5mm 2mm;text-align:center;break-inside:avoid;page-break-inside:avoid;}
-.oge-exam-sticker img{display:block!important;max-width:16mm!important;max-height:15mm!important;width:auto!important;height:auto!important;margin:0 auto!important;object-fit:contain;filter:none!important;}
-.oge-exam-sticker div{font-size:6pt!important;line-height:1.1!important;max-width:17mm!important;transform:none!important;color:#444!important;overflow-wrap:anywhere;}
+/* Стикеры не участвуют в расчёте высоты заданий. После пагинации их
+   вставляют только в реально свободные места печатных колонок. */
+.oge-exam-sticker{display:none!important;}
+.oge-exam-free-sticker{position:absolute;z-index:1;width:18mm;max-width:18mm;box-sizing:border-box;text-align:center;break-inside:avoid;page-break-inside:avoid;pointer-events:none;}
+.oge-exam-free-sticker img{display:block!important;max-width:15mm!important;max-height:13mm!important;width:auto!important;height:auto!important;margin:0 auto!important;object-fit:contain;filter:none!important;transform:none!important;}
+.oge-exam-free-sticker div{font-size:6pt!important;line-height:1.1!important;max-width:18mm!important;max-height:8mm!important;overflow:hidden!important;transform:none!important;color:#444!important;overflow-wrap:anywhere;}
 .oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings{display:none!important;}
 @media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:277mm;}}
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
@@ -5599,28 +5604,44 @@ function solvePrintColumns(heights,count,available){
  return ranges;
 }
 function paginateCollections(){
- // Измеряем уже отрисованные формулы и картинки; номер страницы не зависит от номера задачи.
+ // В полном варианте строго ТРИ альбомных листа. Сначала без стикеров
+ // размещаем задания; затем украшаем только пустую часть колонок.
  Array.from(document.querySelectorAll('.oge-exam-flow-page')).forEach(function(start){
    var firstColumn=start.querySelector('.oge-exam-column');
    var units=Array.from(firstColumn.querySelector('.oge-exam-column-content').children);
-   var fixedPages=Number(start.getAttribute('data-print-pages')||0),ranges=null;
-   var available=firstColumn.clientHeight-3;
-   if(fixedPages){
-     // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
-     // Ни одна колонка и ни одно отдельное задание не уменьшаются независимо от остальных.
-     for(var quarterPoints=46;quarterPoints>=36;quarterPoints--){
+   var desiredPages=Number(start.getAttribute('data-print-pages')||0);
+   var variantsStickers=[];
+   units.forEach(function(unit){
+     unit.querySelectorAll('.oge-exam-sticker').forEach(function(sticker){
+       variantsStickers.push({unit:unit,html:sticker.innerHTML});
+       sticker.remove(); // Не резервируем место для украшения.
+     });
+   });
+   var available=firstColumn.clientHeight-9;
+   var unitHeights=function(){
+     return units.map(function(unit){
+       var box=unit.getBoundingClientRect();
+       return Math.ceil(Math.max(box.height,unit.scrollHeight)+2);
+     });
+   };
+   var ranges=null;
+   if(desiredPages){
+     // На шести колонках распределяем только содержание заданий.
+     // В отличие от прежней версии, стикеры не увеличивают высоту блоков.
+     for(var quarterPoints=46;quarterPoints>=34&&!ranges;quarterPoints--){
        start.style.setProperty('--oge-print-font',(quarterPoints/4)+'pt');
-       ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
-       if(ranges)break;
+       ranges=solvePrintColumns(unitHeights(),desiredPages*2,available);
      }
-     if(!ranges)throw new Error('Не удалось разместить полный вариант на трёх листах');
+     if(!ranges){
+       throw new Error('Полный вариант без стикеров не помещается на три страницы: необходимо уменьшить объём условий');
+     }
    }
-   units.forEach(function(el){el.remove()});
+   units.forEach(function(unit){unit.remove()});
    var template=start.cloneNode(true);
    var sheets=[start],sheet=start,columnIndex=0;
    function columns(){return Array.from(sheet.querySelectorAll('.oge-exam-column'))}
    function content(){return columns()[columnIndex].querySelector('.oge-exam-column-content')}
-   function fits(){return content().scrollHeight<=columns()[columnIndex].clientHeight-2}
+   function fits(){return content().scrollHeight<=columns()[columnIndex].clientHeight-5}
    function nextPage(){
      var next=template.cloneNode(true);sheet.after(next);sheets.push(next);sheet=next;columnIndex=0;
    }
@@ -5628,11 +5649,13 @@ function paginateCollections(){
      if(!sheet.classList.contains('oge-exam-wide-page')&&columnIndex===0)columnIndex=1;
      else nextPage();
    }
-   if(fixedPages){
-     for(var page=1;page<fixedPages;page++)nextPage();
+   if(desiredPages){
+     for(var page=1;page<desiredPages;page++)nextPage();
      sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column-content'))})
        .forEach(function(box,index){box.replaceChildren.apply(box,units.slice(ranges[index][0],ranges[index][1]))});
    }else{
+     // Для одиночной выборочной подборки сохраняется обычная постраничная
+     // печать — ограничение в три листа относится только к полным вариантам.
      units.forEach(function(unit){
        if(sheet.classList.contains('oge-exam-wide-page'))nextPage();
        content().appendChild(unit);
@@ -5641,19 +5664,17 @@ function paginateCollections(){
          unit.remove();advance();content().appendChild(unit);
          if(fits())return;
        }
-       // Слишком высокий блок в выборочной подборке получает целый лист по ширине.
        unit.remove();
        if(columnIndex!==0)nextPage();
        sheet.classList.add('oge-exam-wide-page');
        content().appendChild(unit);
-       if(!fits())throw new Error('Условие задания слишком велико для одного листа');
+       if(!fits())throw new Error('Одно из заданий не помещается по высоте на страницу');
      });
      if(!sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
        var cols=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))});
-       ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),
-         Math.min(cols.length,units.length),Math.min.apply(null,cols.map(function(col){return col.clientHeight}))-3);
-       if(ranges)cols.forEach(function(col,index){
-         var range=ranges[index],box=col.querySelector('.oge-exam-column-content');
+       var balanced=solvePrintColumns(unitHeights(),Math.min(cols.length,units.length),available);
+       if(balanced)cols.forEach(function(col,index){
+         var range=balanced[index],box=col.querySelector('.oge-exam-column-content');
          box.replaceChildren.apply(box,range?units.slice(range[0],range[1]):[]);
        });
      }
@@ -5663,9 +5684,43 @@ function paginateCollections(){
      pg.setAttribute('data-exam-page',start.getAttribute('data-batch-variant')+'-'+(i+1));
      pg.querySelector('.oge-exam-page-counter').textContent=label+' · страница '+(i+1)+' из '+sheets.length;
      pg.querySelectorAll('.oge-exam-column').forEach(function(col){
-       if(col.clientHeight && col.querySelector('.oge-exam-column-content').scrollHeight>col.clientHeight-1)
-         throw new Error('Задания выходят за границы листа');
+       var box=col.querySelector('.oge-exam-column-content');
+       if(col.clientHeight && box.scrollHeight>col.clientHeight-1)
+         throw new Error('Условия выходят за нижнюю границу страницы');
+       if(col.clientWidth && box.scrollWidth>col.clientWidth+2)
+         throw new Error('Условия выходят за боковую границу страницы');
      });
+   });
+   // Ищем свободное поле ПОД заданиями. Каждая колонка допускает не более
+   // двух маленьких стикеров в один ряд, ни один не перекрывает текст.
+   var allColumns=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))})
+     .filter(function(col){return getComputedStyle(col).display!=='none'});
+   var occupancy=new Map();
+   variantsStickers.forEach(function(sticker){
+     var ownColumn=sticker.unit.closest('.oge-exam-column');
+     var candidates=ownColumn?[ownColumn].concat(allColumns.filter(function(col){return col!==ownColumn})):allColumns;
+     for(var i=0;i<candidates.length;i++){
+       var col=candidates[i],box=col.querySelector('.oge-exam-column-content');
+       var filled=occupancy.get(col)||0;
+       if(filled>=2)continue;
+       var freeTop=Math.ceil(Math.max(box.scrollHeight,box.getBoundingClientRect().height))+7;
+       var freeHeight=col.clientHeight-freeTop-8;
+       if(freeHeight<54)continue; // Меньше 14 мм: не пытаться втискивать.
+       var decorative=document.createElement('div');
+       decorative.className='oge-exam-free-sticker';
+       decorative.innerHTML=sticker.html;
+       decorative.style.left=(filled===0?'calc(100% - 44mm)':'calc(100% - 22mm)');
+       decorative.style.top=freeTop+'px';
+       decorative.style.visibility='hidden';
+       col.appendChild(decorative);
+       var stickerHeight=Math.ceil(decorative.getBoundingClientRect().height);
+       if(stickerHeight>0&&stickerHeight<=freeHeight){
+         decorative.style.visibility='visible';
+         occupancy.set(col,filled+1);
+         break;
+       }
+       decorative.remove(); // Нет места: стикер пропускаем без ошибки.
+     }
    });
  });
 }
@@ -5693,7 +5748,7 @@ async function fitAndPrint(){
  try{paginateCollections();}
  catch(err){
    console.error('Подготовка страниц',err);
-   alert('Не удалось разместить одно из заданий на листе. Попробуйте заменить это задание и скачать файл ещё раз.');
+   alert('Не удалось разместить все задания на заданных страницах. Стикеры уже исключены из расчёта. Подробности — в консоли браузера.');
    return;
  }
  setTimeout(function(){window.print()},420);
