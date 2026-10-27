@@ -1198,168 +1198,162 @@
 }
 
 
-/* Password gate */
-body.auth-locked{
-    overflow:hidden !important;
+
+/* --- Доступ по паролю: экран входа --- */
+body.auth-locked {
+    overflow: hidden;
 }
-body.auth-locked > :not(#passwordGate){
-    display:none !important;
+body.auth-locked > *:not(#passwordGate) {
+    display: none !important;
 }
-.password-gate{
-    position:fixed;
-    inset:0;
-    z-index:2147483647;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:22px;
-    background:radial-gradient(circle at top, rgba(255,255,255,.16), transparent 34%), linear-gradient(135deg, #1c1644 0%, #38226d 42%, #12152f 100%);
-    font-family:Arial, sans-serif;
-    color:#24193c;
+#passwordGate {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at top, rgba(255, 196, 75, 0.18), transparent 42%),
+        radial-gradient(circle at bottom, rgba(255, 166, 64, 0.12), transparent 36%),
+        #121212;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    color: #f5f5f5;
 }
-.password-gate-card{
-    width:min(430px, 100%);
-    box-sizing:border-box;
-    background:rgba(255,255,255,.96);
-    border-radius:26px;
-    padding:30px 28px 26px;
-    box-shadow:0 24px 70px rgba(0,0,0,.36);
-    text-align:center;
-    border:1px solid rgba(255,255,255,.5);
+.password-gate-card {
+    width: min(470px, 100%);
+    background: linear-gradient(180deg, rgba(42,42,42,0.98), rgba(24,24,24,0.96));
+    border: 1px solid rgba(255, 140, 0, 0.65);
+    border-radius: 18px;
+    padding: 30px 26px;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.42), 0 0 24px rgba(255,140,0,0.14);
+    box-sizing: border-box;
+    text-align: center;
 }
-.password-gate-badge{
-    width:64px;
-    height:64px;
-    margin:0 auto 14px;
-    border-radius:22px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg, #ffe7a8, #ff9bd0);
-    font-size:31px;
-    box-shadow:0 10px 24px rgba(117,67,148,.22);
+.password-gate-title {
+    margin: 0 0 8px;
+    color: #ff8c00;
+    font-size: 1.55em;
+    line-height: 1.2;
 }
-.password-gate-title{
-    margin:0 0 8px;
-    font-size:25px;
-    line-height:1.15;
-    color:#22143a;
+.password-gate-text {
+    margin: 0 0 20px;
+    color: #d6d6d6;
+    line-height: 1.45;
+    font-size: 0.98em;
 }
-.password-gate-text{
-    margin:0 0 20px;
-    font-size:15px;
-    line-height:1.45;
-    color:#5d5271;
+.password-gate-field-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 12px;
 }
-.password-gate-form{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin:0;
+.password-gate-inputbox {
+    position: relative;
+    flex: 1;
+    min-width: 0;
 }
-.password-gate-remember{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:9px;
-    margin:2px 0 0;
-    color:#5d5271;
-    font-size:14px;
-    text-align:left;
-    cursor:pointer;
-    user-select:none;
+#passwordGateInput {
+    width: 100%;
+    min-width: 0;
+    background: #ffffff !important;
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    caret-color: #111111 !important;
+    border: 2px solid rgba(255, 140, 0, 0.72);
+    border-radius: 10px;
+    padding: 13px 52px 13px 14px;
+    font-size: 18px;
+    line-height: 1.2;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
 }
-.password-gate-remember input{
-    width:17px;
-    height:17px;
-    margin:0;
-    accent-color:#7047d9;
-    cursor:pointer;
+#passwordGateInput.password-gate-masked {
+    -webkit-text-security: disc;
+    text-security: disc;
 }
-.password-gate-remember span{
-    line-height:1.3;
+#passwordGateInput::placeholder {
+    color: #777777;
+    opacity: 1;
+    -webkit-text-fill-color: #777777;
 }
-.password-gate-input-wrap{
-    position:relative;
-    flex:1;
-    min-width:0;
+#passwordGateInput:focus {
+    border-color: #ffb15c;
+    box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.22);
 }
-.password-gate-input{
-    width:100%;
-    height:48px;
-    box-sizing:border-box;
-    border:2px solid #ded6ec;
-    border-radius:14px;
-    padding:0 48px 0 14px;
-    font-size:17px;
-    outline:none;
-    transition:border-color .18s ease, box-shadow .18s ease;
+.password-gate-eye {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #333333;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
-.password-gate-input.is-hidden{
-    -webkit-text-security:disc;
-    text-security:disc;
+.password-gate-eye:hover,
+.password-gate-eye:focus {
+    background: rgba(255, 140, 0, 0.14);
+    outline: none;
 }
-.password-gate-input:focus{
-    border-color:#8f57d8;
-    box-shadow:0 0 0 4px rgba(143,87,216,.14);
+.password-gate-submit {
+    background: #ff8c00;
+    color: #121212;
+    border: 2px solid #ff8c00;
+    border-radius: 10px;
+    padding: 0 18px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.18s;
+    white-space: nowrap;
 }
-.password-gate-eye{
-    position:absolute;
-    right:8px;
-    top:50%;
-    transform:translateY(-50%);
-    width:34px;
-    height:34px;
-    border:0;
-    border-radius:10px;
-    background:rgba(112,71,217,.09);
-    color:#4f3477;
-    font-size:17px;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.password-gate-submit:hover {
+    background: #ffad3d;
+    border-color: #ffad3d;
 }
-.password-gate-eye:hover{
-    background:rgba(112,71,217,.15);
+.password-gate-remember {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    text-align: left;
+    color: #d8d8d8;
+    font-size: 0.92em;
+    line-height: 1.35;
+    margin: 10px 0 0;
+    cursor: pointer;
 }
-.password-gate-button{
-    height:48px;
-    border:0;
-    border-radius:14px;
-    padding:0 18px;
-    background:linear-gradient(135deg, #7047d9, #b44bd4);
-    color:#fff;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-    box-shadow:0 10px 20px rgba(112,71,217,.25);
+.password-gate-remember input {
+    margin-top: 2px;
+    accent-color: #ff8c00;
 }
-.password-gate-button:hover{
-    filter:brightness(1.05);
+.password-gate-error {
+    margin-top: 12px;
+    color: #ff8a80;
+    font-weight: 700;
 }
-.password-gate-error{
-    margin:12px 0 0;
-    color:#c52747;
-    font-size:14px;
-    min-height:20px;
+.password-gate-note {
+    margin-top: 14px;
+    color: #a9a9a9;
+    font-size: 0.84em;
+    line-height: 1.35;
 }
-.password-gate-hint{
-    margin:16px 0 0;
-    color:#8a819a;
-    font-size:12px;
-}
-@media(max-width:520px){
-    .password-gate-card{
-        padding:26px 20px 22px;
-        border-radius:22px;
-    }
-    .password-gate-form{
-        flex-direction:column;
-    }
-    .password-gate-button{
-        width:100%;
-    }
+@media (max-width: 520px) {
+    .password-gate-card { padding: 24px 18px; }
+    .password-gate-field-wrap { flex-direction: column; }
+    .password-gate-submit { width: 100%; padding: 12px 16px; }
 }
 </style>
 
@@ -1420,25 +1414,43 @@ body.auth-locked > :not(#passwordGate){
 </head>
 <body class="auth-locked">
 
-<div id="passwordGate" class="password-gate" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
-    <div class="password-gate-card">
-        <div class="password-gate-badge" aria-hidden="true">🔐</div>
-        <h1 id="passwordGateTitle" class="password-gate-title">Доступ к генератору</h1>
-        <p class="password-gate-text">Введите пароль, чтобы открыть генератор вариантов.</p>
-        <form id="passwordGateForm" class="password-gate-form" autocomplete="off">
-            <div class="password-gate-input-wrap">
-                <input id="passwordGateInput" class="password-gate-input is-hidden" type="text" placeholder="Пароль" aria-label="Пароль" autocomplete="off" autocapitalize="none" spellcheck="false" inputmode="text" lang="ru" autofocus>
-                <button id="passwordGateToggle" class="password-gate-eye" type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль">👁️</button>
+<div id="passwordGate" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
+    <form id="passwordGateForm" class="password-gate-card" autocomplete="off">
+        <h2 id="passwordGateTitle" class="password-gate-title">Доступ к генератору</h2>
+        <p class="password-gate-text">Введите пароль из письма, чтобы открыть генератор.</p>
+        <div class="password-gate-field-wrap">
+            <div class="password-gate-inputbox">
+                <input
+                    id="passwordGateInput"
+                    class="password-gate-masked"
+                    type="text"
+                    inputmode="text"
+                    lang="ru"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="Пароль из письма"
+                    aria-label="Пароль из письма"
+                >
+                <button
+                    type="button"
+                    id="passwordGateEye"
+                    class="password-gate-eye"
+                    aria-label="Показать пароль"
+                    title="Показать пароль"
+                >👁</button>
             </div>
-            <button class="password-gate-button" type="submit">Открыть</button>
-            <label class="password-gate-remember">
-                <input id="passwordGateRemember" type="checkbox">
-                <span>Запомнить пароль на этом устройстве на 30 дней</span>
-            </label>
-        </form>
-        <p id="passwordGateError" class="password-gate-error" hidden>Неверный пароль. Проверьте раскладку и попробуйте ещё раз.</p>
-        <p class="password-gate-hint">Введите пароль из письма. Можно вводить в любом регистре, без лишних пробелов.</p>
-    </div>
+            <button type="submit" class="password-gate-submit">Войти</button>
+        </div>
+        <label class="password-gate-remember">
+            <input type="checkbox" id="passwordGateRemember">
+            <span>Запомнить пароль на этом устройстве на 30 дней</span>
+        </label>
+        <div id="passwordGateError" class="password-gate-error" hidden>Пароль не подошёл. Проверьте ввод и попробуйте ещё раз.</div>
+        <div class="password-gate-note">Можно вводить в любом регистре. Лишние пробелы в начале и конце не учитываются.</div>
+    </form>
+</div>
 </div>
 
 
@@ -3277,6 +3289,51 @@ body.auth-locked > :not(#passwordGate){
         }
     }
 
+    function buildOgePart2ScratchpadHTML(draftId, isSecondPart = false, diagramHTML = "") {
+        // Один общий шаблон черновика для обычной задачи, задач для отработки и аналогов.
+        // Во второй части рабочая область ровно в 3 раза выше видимого окна: 320 × 3 = 960 px.
+        // Это сохраняет прокрутку для длинного решения, но не создаёт тяжёлый canvas 2880 px,
+        // из-за которого письмо в аналогах могло заметно подвисать.
+        const scratchViewportStyle = isSecondPart
+            ? "height:320px;overflow-y:auto;overflow-x:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;"
+            : "height:320px;overflow:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;";
+        const scratchWorkspaceHeight = isSecondPart ? 960 : 320;
+
+        return `<div id="draw-wrapper-${draftId}" class="${isSecondPart ? 'second-part-scratchpad' : ''}" style="display:none; margin-top:20px; width:100%; transition:all 0.3s ease; clear:both;">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:5px; background:#e3f2fd; padding:8px 15px; border-radius:8px; border:1px solid #bbdefb; color:#333;">
+                <button onclick="window.setTool('${draftId}', 'pointer')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Указатель (Перетаскивание)">👆</button>
+                <button onclick="window.setTool('${draftId}', 'zoom')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Лупа: нажмите на чертёж, чтобы открыть его крупно">🔍</button>
+                <button onclick="window.setTool('${draftId}', 'pen')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Карандаш">🖊️</button>
+                <button onclick="window.setTool('${draftId}', 'highlighter')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Выделитель — полупрозрачный маркер">🖍️</button>
+                <button onclick="window.undoCanvas('${draftId}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Отменить действие">↶</button>
+                <button onclick="window.redoCanvas('${draftId}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Повторить действие">↷</button>
+                <select id="tool-select-${draftId}" onchange="window.setTool('${draftId}', this.value)" style="background:#fff; border:1px solid #90caf9; border-radius:4px; padding:4px 8px; font-size:14px; cursor:pointer; outline:none; color:#003399; font-weight:500;">
+                    <option value="" disabled selected hidden>🔺 Фигуры</option>
+                    <option value="line">📏 Прямая</option>
+                    <option value="vector">↗️ Вектор</option>
+                    <option value="circle">⭕ Окружность</option>
+                    <option value="triangle">🔺 Треугольник</option>
+                    <option value="cylinder">🛢️ Цилиндр</option>
+                    <option value="cone">🍦 Конус</option>
+                    <option value="sphere">🔮 Сфера</option>
+                </select>
+                <input type="color" id="color-${draftId}" value="#003399" style="cursor:pointer; height:30px; width:35px; border:none; background:transparent; padding:0;" title="Цвет">
+                <input type="range" id="size-${draftId}" min="1" max="15" value="3" style="cursor:pointer; width:80px;" title="Толщина линии">
+                <button onclick="window.setTool('${draftId}', 'eraser')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Ластик">🧽</button>
+                <div style="flex-grow:1;"></div>
+                <button onclick="window.clearCanvas('${draftId}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
+                <input type="hidden" id="tool-${draftId}" value="pen">
+            </div>
+            <div style="${scratchViewportStyle}">
+                <div style="position:relative; width:100%; height:${scratchWorkspaceHeight}px; background-color:#fff; background-size:20px 20px; background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">
+                    ${diagramHTML || ''}
+                    <canvas id="canvas-${draftId}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action:none; cursor:crosshair;"></canvas>
+                </div>
+            </div>
+        </div>`;
+    }
+
+
     function renderPreview() {
         let theme = document.getElementById("theme-select").value;
         let customBg = getSelectedCustomBg();
@@ -3507,20 +3564,42 @@ body.auth-locked > :not(#passwordGate){
                 currentInteractiveHTML += h;
                 currentPrintHTML += h;
                 currentAnswersHTML += `<h3>Часть 2. Задание 20</h3><p>Ответы к заданиям с развёрнутым ответом. Оценивание решения выполняет учитель.</p>`;
+                // Как в ЕГЭ: аналоги — только из того же прототипа, за исключением всех задач этого
+                // прототипа, уже включённых в вариант (не показываем исходную задачу снова).
+                const selectedIdsByProto = {};
+                finalTasks.forEach(t => {
+                    const key = String(t.theory && t.theory.code || t.theory && t.theory.desc || '');
+                    if (!selectedIdsByProto[key]) selectedIdsByProto[key] = new Set();
+                    selectedIdsByProto[key].add(String(t.id ?? t.text ?? ''));
+                });
                 finalTasks.forEach(item => {
                     taskCounter++;
                     const part2Answer = String(item.answer || '').trim();
-                    const baseTask20 = `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px" class="part2-workspace"></div></div></div></div>`;
-                    // Только интерактивный режим: показываем правильный ответ по запросу ученика.
-                    // Не проверяем развёрнутое решение и не показываем разбор.
-                    const reveal20 = part2Answer ? `<div class="task20-answer-toggle" style="margin-top:12px"><button type="button" aria-expanded="false" onclick="const panel=this.nextElementSibling;const showing=panel.hidden;panel.hidden=!showing;this.setAttribute('aria-expanded',String(showing));this.textContent=showing?'Скрыть ответ':'Показать ответ';if(showing && window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([panel]);" style="background:#fff7e9;border:1px solid #e8b869;border-radius:7px;padding:9px 14px;color:#99530d;font-weight:700;cursor:pointer">Показать ответ</button><div hidden style="margin-top:10px;padding:10px 14px;border-left:3px solid #f59e0b;background:#fffaf0;color:#2f3338"><b>Ответ:</b> ${part2Answer}</div></div>` : '';
-                    // В шаблоне ровно три завершающих </div>; подставляем кнопку
-                    // ПЕРЕД их закрытием, а не ищем четыре несуществующих тега.
-                    currentInteractiveHTML += baseTask20.replace(/<\/div><\/div><\/div>$/, `${reveal20}</div></div></div>`);
-                    currentPrintHTML += baseTask20;
-                    // В документе ответов правильный ответ показывается сразу.
+                    const proto = item.theory || {};
+                    const protoKey = String(proto.code || proto.desc || '');
+                    const usedIds = selectedIdsByProto[protoKey] || new Set();
+                    const analogList = (Array.isArray(proto.tasks) ? proto.tasks : []).filter(a => !usedIds.has(String(a.id ?? a.text ?? '')));
+                    let analogsHtml = `<h3 style="margin-top:0;color:#003399">Аналоги · ${proto.desc || 'Задание 20'}</h3>`;
+                    if (!analogList.length) {
+                        analogsHtml += `<div style="padding:14px;background:#f5f5f5;border-radius:8px">Все похожие задания этого типа уже вошли в текущий вариант.</div>`;
+                    } else {
+                        analogsHtml += `<ol style="padding-left:24px">`;
+                        analogList.forEach((a, ai) => {
+                            const aid = `oge20-analog-${taskCounter}-${ai+1}`;
+                            const answer = String(a.answer || 'Ответ отсутствует');
+                            const draft = buildOgePart2ScratchpadHTML(aid, true);
+                            analogsHtml += `<li style="margin-bottom:22px;padding-bottom:16px;border-bottom:1px dashed #cbd5e1"><div style="line-height:1.55;font-size:17px">${a.text}</div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px"><button type="button" onclick="window.toggleCanvas('${aid}')" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:19px;padding:7px 11px;cursor:pointer" title="Открыть черновик">✏️</button><button type="button" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.textContent=b.hidden?'ПОКАЗАТЬ ОТВЕТ':'СКРЫТЬ ОТВЕТ';if(!b.hidden && window.MathJax && MathJax.typesetPromise)MathJax.typesetPromise([b]);" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;border-radius:6px;padding:9px 13px;font-weight:bold;cursor:pointer">ПОКАЗАТЬ ОТВЕТ</button><div hidden style="flex-basis:100%;background:#eef6ff;color:#273448;border-left:4px solid #003399;padding:10px;border-radius:5px"><b>Ответ:</b> ${answer}</div></div>${draft}</li>`;
+                        });
+                        analogsHtml += `</ol>`;
+                    }
+                    const answerButton = part2Answer
+                        ? `<button class="btn-settings second-answer-btn" id="second-answer-btn-${taskCounter}" style="background:#e8f5e9;color:#1b5e20;border:1px solid #4caf50;font-weight:bold;padding:9px 13px" onclick="window.showSecondPartAnswer('${taskCounter}')">ПОКАЗАТЬ ОТВЕТ</button>`
+                        : '';
+                    const actionArea = `<div style="margin-top:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" onclick="window.toggleCanvas('${taskCounter}')" title="Открыть черновик" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:6px;font-size:20px;padding:7px 11px;cursor:pointer">✏️</button>${answerButton}<button class="btn-settings" type="button" style="background:#e3f2fd;color:#003399;border:1px solid #003399;font-weight:bold;padding:9px 13px" onclick="window.openTheoryModalLocal('oge20-analogs-${taskCounter}')">АНАЛОГИ</button><div id="oge20-analogs-${taskCounter}" style="display:none">${encodeURIComponent(analogsHtml)}</div><div id="second-answer-data-${taskCounter}" style="display:none">${encodeURIComponent(part2Answer)}</div><div id="second-final-answer-${taskCounter}" style="display:none;flex-basis:100%;background:#eef6ff;border-left:4px solid #003399;border-radius:6px;padding:12px 14px;color:#273448"></div></div>`;
+                    currentInteractiveHTML += `<div class="generated-task-block second-part-task task20-part2-item" data-part="2" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div>${actionArea}</div></div>${buildOgePart2ScratchpadHTML(String(taskCounter),true)}</div>`;
+                    currentPrintHTML += `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px"></div></div></div></div>`;
                     currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || 'Ответ отсутствует'}</div>`;
-                    window.currentGeneratedTasks.push({text:item.text, draftText:item.text, presentationText:item.text, answer:part2Answer, part:2, taskNumber:20, sourcePage:item.sourcePage, taskId:item.id});
+                    window.currentGeneratedTasks.push({text:item.text,draftText:item.text,presentationText:item.text,answer:part2Answer,part:2,isSecondPart:true,taskNumber:20,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
                 });
                 continue;
             }
@@ -4038,6 +4117,16 @@ body.auth-locked > :not(#passwordGate){
                 if(window.MathJax) MathJax.typesetPromise([document.getElementById('modal-overlay')]);
             }
         };
+        window.showSecondPartAnswer = function(id) {
+            const data = document.getElementById('second-answer-data-' + id);
+            const target = document.getElementById('second-final-answer-' + id);
+            const btn = document.getElementById('second-answer-btn-' + id);
+            if (!data || !target) return;
+            target.innerHTML = '<b>Ответ:</b> ' + decodeURIComponent(data.textContent || '');
+            target.style.display = 'block';
+            if (btn) btn.style.display = 'none';
+            if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([target]).catch(()=>{});
+        };
         window.toggleCanvas = function(id) {
             let w = document.getElementById('draw-wrapper-' + id);
             if (!w) return;
@@ -4159,8 +4248,8 @@ body.auth-locked > :not(#passwordGate){
             if (window.mainCanvases[id] && window.mainCanvases[id].canvas === canvas) return;
             if (window.mainCanvases[id] && window.mainCanvases[id].canvas !== canvas) delete window.mainCanvases[id];
             let ctx = canvas.getContext('2d');
-            canvas.width = canvas.parentElement.clientWidth || 750; 
-            canvas.height = canvas.parentElement.clientHeight || 250; 
+            canvas.width = Math.max(1, Math.round(canvas.getBoundingClientRect().width || canvas.parentElement.clientWidth || 750)); 
+            canvas.height = Math.max(1, Math.round(canvas.getBoundingClientRect().height || canvas.parentElement.clientHeight || 250)); 
             ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             
             let objects = []; let currentObj = null; let draggingObj = null; let action = null; 
@@ -4175,7 +4264,7 @@ body.auth-locked > :not(#passwordGate){
 
             function getRawBounds(obj) {
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-                if (obj.tool === 'pen' || obj.tool === 'eraser') {
+                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
                     if(!obj.points || obj.points.length === 0) return {minX:0, minY:0, maxX:0, maxY:0};
                     obj.points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
                 } else {
@@ -4192,8 +4281,8 @@ body.auth-locked > :not(#passwordGate){
                 ctx.save(); let cx = obj.cx || 0; let cy = obj.cy || 0; let s = obj.scale || 1;
                 ctx.translate((obj.x || 0) + cx, (obj.y || 0) + cy); ctx.rotate(obj.angle || 0); ctx.scale(s, s); ctx.translate(-cx, -cy);
                 ctx.strokeStyle = obj.color; ctx.lineWidth = obj.size;
-                if (obj.tool === 'pen' || obj.tool === 'eraser') {
-                    ctx.globalCompositeOperation = obj.tool === 'eraser' ? 'destination-out' : 'source-over';
+                if (obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser') {
+                    ctx.globalCompositeOperation = obj.tool === 'eraser' ? 'destination-out' : 'source-over'; if (obj.tool === 'highlighter') {ctx.globalAlpha=.25;ctx.lineWidth = Math.max(12, (Number(obj.size)||3)*4);}
                     if(obj.tool === 'eraser') ctx.lineWidth = obj.size * 3;
                     ctx.beginPath();
                     if(obj.points && obj.points.length > 0) { ctx.moveTo(obj.points[0].x, obj.points[0].y); for(let i=1; i<obj.points.length; i++) ctx.lineTo(obj.points[i].x, obj.points[i].y); }
@@ -4257,7 +4346,7 @@ body.auth-locked > :not(#passwordGate){
                     }
                     if (!hitHandle) { draggingObj = null; action = null; for (let i = objects.length - 1; i >= 0; i--) { if (objects[i].tool === 'eraser') continue; let lp = getLocalPos(p, objects[i]); let b = getRawBounds(objects[i]); if (lp.x >= b.minX && lp.x <= b.maxX && lp.y >= b.minY && lp.y <= b.maxY) { draggingObj = objects[i]; action = 'move'; dragStartX = p.x; dragStartY = p.y; break; } } }
                     renderAll();
-                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
+                } else { currentObj = { tool: tool, color: color, size: size, x: 0, y: 0, scale: 1, angle: 0 }; if (tool === 'pen' || tool === 'highlighter' || tool === 'eraser') { currentObj.points = [p]; } else { currentObj.sx = p.x; currentObj.sy = p.y; currentObj.ex = p.x; currentObj.ey = p.y; } }
                 if (e.cancelable) e.preventDefault();
             }
 
@@ -4268,7 +4357,7 @@ body.auth-locked > :not(#passwordGate){
                     else if (action === 'scale') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentDist = Math.hypot(p.x - tx, p.y - ty); draggingObj.scale = Math.max(0.1, initialScale * (currentDist / dragStartDist)); }
                     else if (action === 'rotate') { let tx = (draggingObj.x||0) + (draggingObj.cx||0); let ty = (draggingObj.y||0) + (draggingObj.cy||0); let currentAngle = Math.atan2(p.y - ty, p.x - tx); draggingObj.angle = initialAngle + (currentAngle - dragStartAngle); }
                     renderAll();
-                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
+                } else if (currentObj) { if (currentObj.tool === 'pen' || currentObj.tool === 'highlighter' || currentObj.tool === 'eraser') { currentObj.points.push(p); } else { currentObj.ex = p.x; currentObj.ey = p.y; } renderAll(); }
             }
 
             function stopDraw() { if(!isDrawing) return; isDrawing = false; let changed = false; if (currentObj) { let b = getRawBounds(currentObj); currentObj.cx = (b.minX + b.maxX) / 2; currentObj.cy = (b.minY + b.maxY) / 2; objects.push(currentObj); currentObj = null; changed = true; } else if (draggingObj && action) { changed = true; } action = null; if (changed) saveHistory(); renderAll(); }
@@ -4284,7 +4373,7 @@ body.auth-locked > :not(#passwordGate){
         window.redoCanvas = function(id) { if (window.mainCanvases[id] && window.mainCanvases[id].redo) window.mainCanvases[id].redo(); };
         window.setTool = function(id, tool) {
             let t = document.getElementById('tool-' + id); if(t) t.value = tool; 
-            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
+            let sel = document.getElementById('tool-select-' + id); if(sel && (tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'pointer' || tool === 'zoom')) sel.value = "";
             let canvas = document.getElementById('canvas-' + id);
             if(canvas) {
                 if (tool === 'eraser') { canvas.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>🧽</text></svg>') 0 20, auto"; } 
@@ -4971,7 +5060,19 @@ body.auth-locked > :not(#passwordGate){
         downloadBlobSafely(blob, "Ответы.html");
     }
 
-    function openGameMenu() { if (window.currentGeneratedTasks.length === 0) { alert("Сгенерируйте вариант!"); return; } document.getElementById('game-modal').style.display='flex'; }
+    function getOgeGameEligibleTasks() {
+        return (window.currentGeneratedTasks || []).filter(t => !t.isSecondPart && Number(t.part || 1) !== 2 && Number(t.taskNumber || 0) < 20);
+    }
+    function warnOgeGamePartTwo() {
+        const excluded = (window.currentGeneratedTasks || []).length - getOgeGameEligibleTasks().length;
+        if (excluded > 0) alert('Игра создаётся только по заданиям первой части (№1–19). Задания второй части (№20 и далее) в игру не войдут.');
+    }
+    function openGameMenu() {
+        if (!(window.currentGeneratedTasks || []).length) { alert('Сгенерируйте вариант!'); return; }
+        if (!getOgeGameEligibleTasks().length) { alert('Игры создаются только по заданиям первой части (№1–19). В выбранном варианте нет заданий первой части.'); return; }
+        warnOgeGamePartTwo();
+        document.getElementById('game-modal').style.display='flex';
+    }
     function openPresentationMenu() { 
         if (window.currentGeneratedTasks.length === 0) { alert("Сгенерируйте вариант!"); return; } 
         window.generatorSettings = window.generatorSettings || {};
@@ -4984,8 +5085,8 @@ body.auth-locked > :not(#passwordGate){
 
     function generateTowerGame() {
         try {
-            if (window.currentGeneratedTasks.length !== 9) {
-                alert("Для игры 'Башня знаний' нужно ровно 9 заданий.");
+            if (getOgeGameEligibleTasks().length !== 9) {
+                alert("Для игры 'Башня знаний' нужно ровно 9 заданий первой части (№1–19).");
                 return;
             }
             if (typeof window.TOWER_TEMPLATE !== 'string' || !window.TOWER_TEMPLATE.includes('/*__CONFIG_DATA__*/')) {
@@ -4997,7 +5098,7 @@ body.auth-locked > :not(#passwordGate){
                 ? document.getElementById('toggle-show-correct').checked
                 : false;
 
-            const gameQuestions = window.currentGeneratedTasks.map(t => {
+            const gameQuestions = getOgeGameEligibleTasks().map(t => {
                 let cleanText = String(t.text || '');
                 try {
                     const tmp = document.createElement('div');
@@ -5127,7 +5228,7 @@ body.auth-locked > :not(#passwordGate){
         const holder = document.getElementById('motivation-puzzle-preview');
         if (!holder) return;
 
-        const n = window.currentGeneratedTasks && window.currentGeneratedTasks.length ? window.currentGeneratedTasks.length : 12;
+        const n = getOgeGameEligibleTasks().length || 12;
         const layout = buildMotivationPieceLayout(n);
 
         holder.innerHTML = '';
@@ -5153,7 +5254,7 @@ body.auth-locked > :not(#passwordGate){
     }
 
     function openMotivationEditor() {
-        if (window.currentGeneratedTasks.length === 0) {
+        if (getOgeGameEligibleTasks().length === 0) {
             alert("Сначала сгенерируйте вариант.");
             return;
         }
@@ -5238,7 +5339,7 @@ body.auth-locked > :not(#passwordGate){
     }
 
     function generateMotivationGame() {
-        if (window.currentGeneratedTasks.length === 0) {
+        if (getOgeGameEligibleTasks().length === 0) {
             alert("Сначала сгенерируйте вариант.");
             return;
         }
@@ -5251,7 +5352,7 @@ body.auth-locked > :not(#passwordGate){
         const note = document.getElementById('motivation-editor-note');
         if (note) note.style.display = 'none';
 
-        const questions = window.currentGeneratedTasks.map(t => {
+        const questions = getOgeGameEligibleTasks().map(t => {
             let fullPrompt = t.text || '';
             if (t.svg) {
                 fullPrompt = `<div style="background:#fff; padding:14px; border-radius:10px; margin-bottom:12px; text-align:center; color:#000;">${t.svg}</div>` + fullPrompt;
@@ -5292,10 +5393,10 @@ body.auth-locked > :not(#passwordGate){
     }
 
     window.generateBattleGame = function generateBattleGame() {
-        if (window.currentGeneratedTasks.length === 0) { alert("Сначала сгенерируйте вариант."); return; }
+        if (getOgeGameEligibleTasks().length === 0) { alert("Баттл создаётся только по заданиям первой части (№1–19)."); return; }
         if (typeof BATTLE_TEMPLATE === 'undefined') { alert("Не найден battle_template.js. Подключите файл рядом с index.html."); return; }
 
-        let gameQuestions = window.currentGeneratedTasks.map(t => {
+        let gameQuestions = getOgeGameEligibleTasks().map(t => {
             let cleanText = String(t.text || '');
             try {
                 const tmp = document.createElement('div');
@@ -5384,21 +5485,15 @@ body.auth-locked > :not(#passwordGate){
 </script>
 
 
-<script>
+<script id="password-gate-script">
 (function(){
-    var PASSWORD_HASH = 532287797;
-    var SESSION_STORAGE_KEY = 'generator_access_ok_v1';
-    var REMEMBER_STORAGE_KEY = 'generator_access_remember_v1';
+    var PASSWORD_HASH = 1274326927;
+    var SESSION_STORAGE_KEY = 'generator_access_ok_exam26_eye_v1';
+    var REMEMBER_STORAGE_KEY = 'generator_access_remember_exam26_eye_v1';
     var REMEMBER_DAYS = 30;
-    var gate = document.getElementById('passwordGate');
-    var form = document.getElementById('passwordGateForm');
-    var input = document.getElementById('passwordGateInput');
-    var toggle = document.getElementById('passwordGateToggle');
-    var remember = document.getElementById('passwordGateRemember');
-    var error = document.getElementById('passwordGateError');
 
     function normalize(value){
-        return String(value || '').trim().toLowerCase();
+        return String(value || '').replace(/\s+/g, '').toLocaleLowerCase('ru-RU');
     }
 
     function hashPassword(value){
@@ -5435,6 +5530,7 @@ body.auth-locked > :not(#passwordGate){
 
     function unlock(saveForCurrentSession, saveForThirtyDays){
         document.body.classList.remove('auth-locked');
+        var gate = document.getElementById('passwordGate');
         if (gate) gate.remove();
         if (saveForThirtyDays) {
             saveRememberedAccess();
@@ -5443,51 +5539,61 @@ body.auth-locked > :not(#passwordGate){
         }
     }
 
-    try {
-        if (sessionStorage.getItem(SESSION_STORAGE_KEY) === String(PASSWORD_HASH) || hasRememberedAccess()) {
-            unlock(false, false);
-            return;
-        }
-    } catch(e) {
-        if (hasRememberedAccess()) {
-            unlock(false, false);
-            return;
+    function alreadyUnlocked(){
+        try {
+            return sessionStorage.getItem(SESSION_STORAGE_KEY) === String(PASSWORD_HASH) || hasRememberedAccess();
+        } catch(e) {
+            return hasRememberedAccess();
         }
     }
 
-    if (!gate || !form || !input) return;
-
-    function setPasswordVisibility(isVisible){
-        input.classList.toggle('is-hidden', !isVisible);
-        if (toggle) {
-            toggle.setAttribute('aria-pressed', String(isVisible));
-            toggle.setAttribute('aria-label', isVisible ? 'Скрыть пароль' : 'Показать пароль');
-            toggle.setAttribute('title', isVisible ? 'Скрыть пароль' : 'Показать пароль');
-            toggle.textContent = isVisible ? '🙈' : '👁️';
+    function initGate(){
+        if (alreadyUnlocked()) {
+            unlock(false, false);
+            return;
         }
-    }
 
-    setPasswordVisibility(false);
+        var form = document.getElementById('passwordGateForm');
+        var input = document.getElementById('passwordGateInput');
+        var remember = document.getElementById('passwordGateRemember');
+        var error = document.getElementById('passwordGateError');
+        var eye = document.getElementById('passwordGateEye');
+        if (!form || !input) return;
 
-    if (toggle) {
-        toggle.addEventListener('click', function(){
-            setPasswordVisibility(input.classList.contains('is-hidden'));
-            input.focus();
+        if (eye) {
+            eye.addEventListener('click', function(){
+                var isMasked = input.classList.toggle('password-gate-masked');
+                eye.setAttribute('aria-label', isMasked ? 'Показать пароль' : 'Скрыть пароль');
+                eye.setAttribute('title', isMasked ? 'Показать пароль' : 'Скрыть пароль');
+                eye.textContent = isMasked ? '👁' : '●●●';
+                input.focus();
+                try { input.setSelectionRange(input.value.length, input.value.length); } catch(e) {}
+            });
+        }
+
+        form.addEventListener('submit', function(event){
+            event.preventDefault();
+            if (hashPassword(input.value) === PASSWORD_HASH) {
+                unlock(true, !!(remember && remember.checked));
+            } else {
+                if (error) error.hidden = false;
+                input.value = '';
+                input.focus();
+            }
         });
+
+        input.addEventListener('input', function(){
+            if (error) error.hidden = true;
+        });
+
+        setTimeout(function(){ input.focus(); }, 80);
     }
 
-    setTimeout(function(){ input.focus(); }, 80);
-
-    form.addEventListener('submit', function(event){
-        event.preventDefault();
-        if (hashPassword(input.value) === PASSWORD_HASH) {
-            unlock(true, !!(remember && remember.checked));
-        } else {
-            if (error) error.hidden = false;
-            input.value = '';
-            input.focus();
-        }
-    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGate);
+    } else {
+        initGate();
+    }
 })();
 </script>
 </body>
