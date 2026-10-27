@@ -5322,17 +5322,17 @@ body.auth-locked > *:not(#passwordGate) {
 <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]}};${window.SCRIPT_END}
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
 <style>
-@page{size:A4 portrait;margin:10mm 11mm 10mm 11mm;}
+@page{size:A4 landscape;margin:9mm 10mm 9mm 10mm;}
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Arial,Helvetica,sans-serif;}
-.oge-exam-page{width:188mm;height:275mm;max-height:275mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
+.oge-exam-page{width:277mm;height:190mm;max-height:190mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
 .oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
-.oge-exam-header{height:9mm;flex:0 0 9mm;display:flex;justify-content:space-between;align-items:center;font-size:9.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
+.oge-exam-header{height:8mm;flex:0 0 8mm;display:flex;justify-content:space-between;align-items:center;font-size:9.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
 .oge-exam-header strong{font-size:9.5pt;}
-.oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:8.4mm;align-items:start;height:254mm;flex:0 0 254mm;overflow:hidden;}
-.oge-exam-column{width:100%;height:254mm;overflow:hidden;position:relative;min-width:0;}
+.oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:9mm;align-items:start;height:174mm;flex:0 0 174mm;overflow:hidden;}
+.oge-exam-column{width:100%;height:174mm;overflow:hidden;position:relative;min-width:0;}
 .oge-exam-column-content{width:100%;transform-origin:top left;overflow:visible;}
-.oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Arial,Helvetica,sans-serif;color:#555;display:flex;align-items:end;justify-content:flex-end;}
+.oge-exam-footer{flex:0 0 4mm;height:4mm;font:8pt Arial,Helvetica,sans-serif;color:#555;display:flex;align-items:end;justify-content:flex-end;}
 .oge-exam-part1{font:bold 10pt Arial,Helvetica,sans-serif;text-align:center;padding:0 0 2mm;}
 .oge-exam-part2{font:bold 11pt Arial,Helvetica,sans-serif;text-align:center;padding:2mm 0 3mm;}
 .oge-exam-intro{margin:0 0 2.6mm 0;font:9pt/1.24 Arial,Helvetica,sans-serif;color:#111;}
@@ -5355,14 +5355,14 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Arial,Helvet
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
 .oge-exam-geometry .oge-exam-diagram img,.oge-exam-geometry .oge-exam-diagram svg{max-height:33mm;}
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
-.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:74mm;margin:2mm auto;}
+.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:66mm;margin:2mm auto;}
 .oge-exam-intro *{max-width:100%;}
 .oge-exam-statement .common-table{font-size:7.5pt;margin:2mm 0;}
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
 .oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings,.oge-exam-column-content .sticker-print{display:none!important;}
-@media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:188mm;}}
+@media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:277mm;}}
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;filter:grayscale(1);}}
 </style></head><body>${pages}
 <script>
@@ -5392,7 +5392,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 ${window.SCRIPT_END}
 </body></html>`;
         const blob=new Blob([printHtml],{type:'text/html;charset=utf-8'});
-        downloadBlobSafely(blob,'ОГЭ_Варианты_для_печати_A4.html');
+        downloadBlobSafely(blob,'ОГЭ_Варианты_для_печати_A4_альбомная.html');
     }
 
     function downloadAnswers() {
