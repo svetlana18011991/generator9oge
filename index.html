@@ -5202,13 +5202,12 @@ body.auth-locked > *:not(#passwordGate) {
         if(batch.length) return batch;
         return [{snapshot:window.ogeVariantSnapshot,printGroups:window.ogePrintableGroups||{}}];
     }
-    // Печать по образцу экзаменационного варианта: 3 страницы, A4-книжная,
-    // две колонки, задания 1–5 / 6–14 / 15–25 без интерактивных элементов.
+    // Альбомный A4: задания по порядку, число листов определяется содержимым.
     function ogePrintStripUserInterface(node) {
         if (!node) return node;
         node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .sticker-print, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
         node.querySelectorAll('img').forEach(img=>{img.loading='eager';});
-        node.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+        node.querySelectorAll('[id]').forEach(el=>{if(!el.closest('svg'))el.removeAttribute('id');});
         node.querySelectorAll('*').forEach(el=>{
             el.removeAttribute('onclick');el.removeAttribute('onmousedown');el.removeAttribute('onmouseup');
             el.removeAttribute('onmouseenter');el.removeAttribute('onmouseleave');
@@ -5260,6 +5259,11 @@ body.auth-locked > *:not(#passwordGate) {
             const first=cloned.firstElementChild;
             if(first) {
                 let textHolder=first.cloneNode(true);
+                const leading=textHolder.firstElementChild;
+                // У stacked11 отдельная ячейка с порядковым номером уже заменена заголовком.
+                if((textHolder.getAttribute('style')||'').includes('grid-template-columns:auto minmax(0,1fr)')
+                    && leading && leading.tagName==='DIV' && /^\s*\d{1,2}\.\s*$/.test(leading.textContent)
+                    && leading.nextElementSibling?.tagName==='DIV') leading.remove();
                 content=textHolder.innerHTML;
             } else content=cloned.innerHTML;
             const visuals=[...cloned.querySelectorAll('img,svg')];
@@ -5296,10 +5300,36 @@ body.auth-locked > *:not(#passwordGate) {
         });
         return {items,common};
     }
+    function ogePrintIntroBlocks(common) {
+        const host=document.createElement('div');host.innerHTML=common;
+        const blocks=[];
+        function collect(node) {
+            if(node.nodeType===Node.TEXT_NODE) {
+                if(node.textContent.trim()) {
+                    const paragraph=document.createElement('p');paragraph.textContent=node.textContent;
+                    blocks.push(paragraph.outerHTML);
+                }
+                return;
+            }
+            if(node.nodeType!==Node.ELEMENT_NODE)return;
+            // Разделяем только текстовые обёртки, сохраняя планы, рисунки и таблицы целиком.
+            const layout=(node.getAttribute('style')||'');
+            const children=Array.from(node.childNodes).filter(child=>child.nodeType!==Node.TEXT_NODE||child.textContent.trim());
+            const blockWrapper=children.length && children.every(child=>child.nodeType===Node.ELEMENT_NODE
+                && /^(P|DIV|TABLE|UL|OL|SECTION|ARTICLE|BLOCKQUOTE)$/.test(child.tagName));
+            if(node.tagName==='DIV' && blockWrapper && !node.querySelector('img,svg,canvas')
+                && !/display\s*:\s*(grid|flex)|position\s*:\s*(absolute|relative)/i.test(layout)) {
+                Array.from(node.childNodes).forEach(collect);
+            } else if(node.textContent.trim() || node.querySelector('img,svg') || node.matches('img,svg')) {
+                blocks.push(node.outerHTML);
+            }
+        }
+        Array.from(host.childNodes).forEach(collect);
+        return blocks;
+    }
     function buildOgeBatchPrintHTML() {
         const batch=Array.isArray(window.ogeVariantBatch)&&window.ogeVariantBatch.length
             ?window.ogeVariantBatch:[{printGroups:window.ogePrintableGroups||{}}];
-        const makeColumn=(tasks,extra='')=>'<div class="oge-exam-column"><div class="oge-exam-column-content">'+extra+tasks.map(x=>x.html).join('')+'</div></div>';
         const printBrand='<span class="brand">Шкатулка математических интерактивов · <a href="https://shkatulka.sistema-math.ru/">shkatulka.sistema-math.ru</a></span>';
         const pages=[];
         batch.forEach((entry,i)=>{
@@ -5328,54 +5358,47 @@ body.auth-locked > *:not(#passwordGate) {
                 if(diagram){sharedDiagram=diagram.outerHTML;diagram.remove();p1.items[0].html=temp.innerHTML;}
             }
             const p1IsFull=[1,2,3,4,5].every(n=>p1.items.some(t=>t.num===n));
-            const intro=p1.common?'<div class="oge-exam-intro"><div class="oge-exam-intro-label">'
-               +(p1IsFull?'Прочитайте внимательно текст и выполните задания 1–5.':'Прочитайте текст и выполните выбранные задания.')
-               +'</div>'+sharedDiagram+p1.common+'</div>':'';
             const tasks=[...p1.items,...p2.items,...p3.items].sort((a,b)=>a.num-b.num);
             const taskNumbers=tasks.map(t=>t.num);
             const complete=taskNumbers.length===25&&new Set(taskNumbers).size===25
                   &&Array.from({length:25},(_,k)=>k+1).every(n=>taskNumbers.includes(n));
             const headingLabel=(complete?'Вариант ':'Подборка ')+(i+1);
             const heading='<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>'+headingLabel+'</strong></header>';
-            if(complete){
-                // Полноценный вариант: строго три альбомных листа по образцу ОГЭ.
-                const book=[
-                    {index:1,left:p1.items.filter(t=>t.num<=1),right:p1.items.filter(t=>t.num>=2),extraLeft:'<div class="oge-exam-part1">Часть 1</div>'+intro,extraRight:''},
-                    {index:2,left:p2.items.filter(t=>t.num<=10),right:p2.items.filter(t=>t.num>=11),extraLeft:'',extraRight:''},
-                    {index:3,left:p3.items.filter(t=>t.num<=19),right:p3.items.filter(t=>t.num>=20),extraLeft:'',extraRight:'<div class="oge-exam-part2">Часть 2</div>'}
-                ];
-                book.forEach(pg=>{
-                    pages.push('<article class="oge-exam-page" data-exam-page="'+(i+1)+'-'+pg.index+'">'
-                        +heading+'<div class="oge-exam-columns">'
-                        +makeColumn(pg.left,pg.extraLeft)+makeColumn(pg.right,pg.extraRight)
-                        +'</div><footer class="oge-exam-footer">'+printBrand+'<span>'+headingLabel+' · страница '+pg.index+' из 3</span></footer></article>');
-                });
-            }else if(tasks.length){
-                // Выборочная подборка: последовательная вёрстка БЕЗ жёстких
-                // страниц 1–5 / 6–14 / 15–25 и без пустых страниц между темами.
-                // После набора MathJax скрипт печати распределит блоки по двум
-                // колонкам и создаст следующий лист только при их заполнении.
-                const units=[];
-                let part1Done=false,part2Done=false,introDone=false;
-                const unit=html=>'<div class="oge-exam-flow-unit">'+html+'</div>';
-                tasks.forEach(task=>{
-                    if(task.num<=19&&!part1Done){
-                        units.push(unit('<div class="oge-exam-part1">Часть 1</div>'));
-                        part1Done=true;
-                    }
-                    if(task.num<=5 && intro && !introDone){units.push(unit(intro));introDone=true;}
-                    if(task.num>=20&&!part2Done){
-                        units.push(unit('<div class="oge-exam-part2">Часть 2</div>'));
-                        part2Done=true;
-                    }
-                    units.push(unit(task.html));
-                });
-                const firstColumn='<div class="oge-exam-column"><div class="oge-exam-column-content">'+units.join('')+'</div></div>';
-                const secondColumn='<div class="oge-exam-column"><div class="oge-exam-column-content"></div></div>';
-                pages.push('<article class="oge-exam-page oge-exam-partial-page" data-batch-variant="'+(i+1)+'" data-exam-page="'+(i+1)+'-1">'
-                   +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
-                   +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
-            }
+            if(!tasks.length)return;
+            const units=[];
+            const unit=html=>'<div class="oge-exam-flow-unit">'+html+'</div>';
+            let part1Done=false,part2Done=false,introDone=false;
+            tasks.forEach(task=>{
+                let prefix='';
+                if(task.num<=19&&!part1Done){
+                    prefix='<div class="oge-exam-part1">Часть 1</div>';
+                    part1Done=true;
+                }
+                if(task.num>=20&&!part2Done){
+                    prefix='<div class="oge-exam-part2">Часть 2</div>';
+                    part2Done=true;
+                }
+                if(task.num<=5 && p1.common && !introDone){
+                    const label='<div class="oge-exam-intro-label">'
+                        +(p1IsFull?'Прочитайте внимательно текст и выполните задания 1–5.':'Прочитайте текст и выполните выбранные задания.')+'</div>';
+                    const blocks=ogePrintIntroBlocks(p1.common);
+                    if(sharedDiagram)blocks.unshift(sharedDiagram);
+                    if(!blocks.length)blocks.push('');
+                    // Заголовок остаётся с началом условия, последний абзац — с первой задачей.
+                    blocks.forEach((block,index)=>{
+                        const intro='<div class="oge-exam-intro">'+(index===0?label:'')+block+'</div>';
+                        if(index===blocks.length-1)prefix+=intro;
+                        else {units.push(unit(prefix+intro));prefix='';}
+                    });
+                    introDone=true;
+                }
+                units.push(unit(prefix+task.html));
+            });
+            const firstColumn='<div class="oge-exam-column"><div class="oge-exam-column-content">'+units.join('')+'</div></div>';
+            const secondColumn='<div class="oge-exam-column"><div class="oge-exam-column-content"></div></div>';
+            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-exam-page="'+(i+1)+'-1">'
+               +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
+               +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
         });
         return pages.join('');
     }
@@ -5399,30 +5422,32 @@ body.auth-locked > *:not(#passwordGate) {
 html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Times New Roman",serif;}
 .oge-exam-page{width:277mm;height:190mm;max-height:190mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
 .oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
-.oge-exam-flow-unit{display:block;break-inside:avoid;page-break-inside:avoid;}
+.oge-exam-flow-unit{display:flow-root;break-inside:avoid;page-break-inside:avoid;}
 .oge-exam-flow-unit .oge-exam-task{margin-bottom:3.6mm;}
 
-.oge-exam-header{height:8mm;flex:0 0 8mm;display:flex;justify-content:space-between;align-items:center;font-size:9.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
-.oge-exam-header strong{font-size:9.5pt;}
+.oge-exam-header{height:8mm;flex:0 0 8mm;display:flex;justify-content:space-between;align-items:center;font-size:10.5pt;font-weight:700;border-bottom:.35pt solid #666;margin:0 0 2mm 0;}
+.oge-exam-header strong{font-size:10.5pt;}
 .oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:9mm;align-items:start;height:173mm;flex:0 0 173mm;overflow:hidden;}
 .oge-exam-column{width:100%;height:173mm;overflow:hidden;position:relative;min-width:0;}
-.oge-exam-column-content{width:100%;transform-origin:top left;overflow:visible;}
+.oge-exam-column-content{display:flow-root;width:100%;overflow:visible;}
+.oge-exam-wide-page .oge-exam-columns{grid-template-columns:minmax(0,1fr);}
+.oge-exam-wide-page .oge-exam-column+ .oge-exam-column{display:none;}
 .oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Georgia,"Times New Roman",serif;color:#777;display:flex;align-items:end;justify-content:space-between;gap:5mm;border-top:.25pt solid #ddd;padding-top:.8mm;} .oge-exam-footer .brand{font-style:italic;font-size:8.1pt;color:#757575}.oge-exam-footer a{color:#626d80;text-decoration:none;border-bottom:.25pt solid #a3a3a3;}
-.oge-exam-part1{font:bold 10pt Georgia,"Times New Roman",serif;text-align:center;padding:0 0 2mm;}
-.oge-exam-part2{font:bold 11pt Georgia,"Times New Roman",serif;text-align:center;padding:2mm 0 3mm;}
-.oge-exam-intro{margin:0 0 2.6mm 0;font:9.3pt/1.30 Georgia,"Times New Roman",serif;color:#111;}
+.oge-exam-part1{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:0 0 2mm;}
+.oge-exam-part2{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:2mm 0 3mm;}
+.oge-exam-intro{margin:0 0 2.6mm 0;font:11pt/1.35 Georgia,"Times New Roman",serif;color:#111;}
 .oge-exam-intro-label{text-align:left;font-weight:600;margin:0 0 2mm;}
 .oge-exam-intro .oge-practice-common{margin:0;padding:0;border:none;box-shadow:none;background:transparent;}
 .oge-exam-intro h3,.oge-exam-intro h4{font-size:9pt;margin:0 0 1mm;}
-.oge-exam-intro div,.oge-exam-intro p{line-height:1.24;margin:0 0 1.5mm;}
-.oge-exam-task{font:9.4pt/1.32 Georgia,"Times New Roman",serif;color:#111;margin:0 0 3.6mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
-.oge-exam-task-name{font-weight:700;white-space:nowrap;}
+.oge-exam-intro div,.oge-exam-intro p{line-height:1.35;margin:0 0 1.8mm;}
+.oge-exam-task{font:11pt/1.36 Georgia,"Times New Roman",serif;color:#111;margin:0 0 3.6mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
+.oge-exam-task-name{display:block;font-weight:700;white-space:nowrap;margin-bottom:.8mm;}
 .oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
-.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:8pt;}
+.oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:auto;max-width:100%;width:100%;margin:1.3mm auto;font-size:9.5pt;}
 .oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:1mm 1.2mm;vertical-align:top;}
-.oge-exam-task table{font-size:8pt;}
+.oge-exam-task table{font-size:9.5pt;}
 .oge-match11-print{margin:2.2mm 0!important;max-width:54mm!important;table-layout:fixed!important;text-align:center;border:1px solid #888;}
 .oge-match11-print th,.oge-match11-print td{width:33.33%;padding:1.1mm 4mm!important;text-align:center;border:1px solid #777;}
 .oge-match11-print td{height:8mm;}
@@ -5436,7 +5461,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:66mm;margin:2mm auto;}
 .oge-exam-intro *{max-width:100%;}
-.oge-exam-statement .common-table{font-size:7.5pt;margin:2mm 0;}
+.oge-exam-statement .common-table{font-size:9.5pt;margin:2mm 0;}
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
@@ -5446,39 +5471,75 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 </style></head><body>${pages}
 <script>
 (function(){
-function paginatePartialCollections(){
- // Точные высоты известны только после MathJax и загрузки рисунков.
- // Каждую выборку распределяем слева направо, сверху вниз, отдельно.
- var starts=Array.from(document.querySelectorAll('.oge-exam-partial-page'));
- starts.forEach(function(start){
-   var firstContent=start.querySelector('.oge-exam-column-content');
-   var units=Array.from(firstContent.children).filter(function(el){return el.classList.contains('oge-exam-flow-unit')});
+function paginateCollections(){
+ // Измеряем уже отрисованные формулы и картинки при одном читаемом размере шрифта.
+ Array.from(document.querySelectorAll('.oge-exam-flow-page')).forEach(function(start){
+   var units=Array.from(start.querySelector('.oge-exam-column-content').children);
    units.forEach(function(el){el.remove()});
    var template=start.cloneNode(true);
-   template.querySelectorAll('.oge-exam-column-content').forEach(function(el){el.innerHTML=''});
-   var sheets=[start], sheet=start, columnIndex=0;
-   function getColumn(){return sheet.querySelectorAll('.oge-exam-column')[columnIndex]}
-   function getContent(){return getColumn().querySelector('.oge-exam-column-content')}
+   var sheets=[start],sheet=start,columnIndex=0;
+   function columns(){return Array.from(sheet.querySelectorAll('.oge-exam-column'))}
+   function content(){return columns()[columnIndex].querySelector('.oge-exam-column-content')}
+   function fits(){return content().scrollHeight<=columns()[columnIndex].clientHeight-2}
+   function nextPage(){
+     var next=template.cloneNode(true);sheet.after(next);sheets.push(next);sheet=next;columnIndex=0;
+   }
    function advance(){
-     if(columnIndex===0){columnIndex=1;return}
-     sheet=template.cloneNode(true);
-     sheets[sheets.length-1].after(sheet);
-     sheets.push(sheet);columnIndex=0;
+     if(!sheet.classList.contains('oge-exam-wide-page')&&columnIndex===0)columnIndex=1;
+     else nextPage();
    }
    units.forEach(function(unit){
-     var attempts=0;
-     while(attempts<3){
-       var col=getColumn(), content=getContent();
-       content.appendChild(unit);
-       if(content.scrollHeight<=col.clientHeight-2 || content.children.length===1)break;
-       unit.remove();advance();attempts++;
+     if(sheet.classList.contains('oge-exam-wide-page'))nextPage();
+     content().appendChild(unit);
+     if(fits())return;
+     if(content().children.length>1){
+       unit.remove();advance();content().appendChild(unit);
+       if(fits())return;
      }
+     // Редкий очень высокий блок получает целый лист по ширине вместо мелкого шрифта.
+     unit.remove();
+     if(columnIndex!==0)nextPage();
+     sheet.classList.add('oge-exam-wide-page');
+     content().appendChild(unit);
+     if(!fits())throw new Error('Условие задания слишком велико для одного листа');
    });
+   // Распределяем поток равномерно по уже найденному числу листов:
+   // это не даёт одному короткому заданию остаться на последней странице.
+   if(!sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
+     var cols=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))});
+     var contents=cols.map(function(col){return col.querySelector('.oge-exam-column-content')});
+     var count=Math.min(cols.length,units.length);
+     var prefix=[0];
+     units.forEach(function(unit){prefix.push(prefix[prefix.length-1]+unit.getBoundingClientRect().height)});
+     var available=Math.min.apply(null,cols.map(function(col){return col.clientHeight}))-3;
+     var target=prefix[units.length]/count;
+     var costs=Array.from({length:count+1},function(){return Array(units.length+1).fill(Infinity)});
+     var cuts=Array.from({length:count+1},function(){return []});
+     costs[0][0]=0;
+     for(var k=1;k<=count;k++){
+       for(var end=k;end<=units.length;end++){
+         for(var from=end-1;from>=k-1;from--){
+           var height=prefix[end]-prefix[from];
+           if(height>available)break;
+           var cost=costs[k-1][from]+Math.pow(height-target,2);
+           if(cost<costs[k][end]){costs[k][end]=cost;cuts[k][end]=from}
+         }
+       }
+     }
+     if(Number.isFinite(costs[count][units.length])){
+       var ranges=[],cursor=units.length;
+       for(var group=count;group>0;group--){
+         var boundary=cuts[group][cursor];ranges.unshift([boundary,cursor]);cursor=boundary;
+       }
+       contents.forEach(function(box,index){
+         var range=ranges[index];box.replaceChildren.apply(box,range?units.slice(range[0],range[1]):[]);
+       });
+     }
+   }
    var label=start.querySelector('.oge-exam-header strong').textContent;
    sheets.forEach(function(pg,i){
      pg.setAttribute('data-exam-page',start.getAttribute('data-batch-variant')+'-'+(i+1));
-     var counter=pg.querySelector('.oge-exam-page-counter');
-     if(counter)counter.textContent=label+' · страница '+(i+1)+' из '+sheets.length;
+     pg.querySelector('.oge-exam-page-counter').textContent=label+' · страница '+(i+1)+' из '+sheets.length;
    });
  });
 }
@@ -5489,26 +5550,26 @@ async function fitAndPrint(){
   if(!window.MathJax||!MathJax.typesetPromise) throw new Error('MathJax не загрузился');
   await MathJax.typesetPromise();
   if(document.querySelector('mjx-container [data-mjx-error]')) throw new Error('Ошибка в формуле');
-  await Promise.all(Array.from(document.images).map(function(im){return im.complete?Promise.resolve():new Promise(function(ok){im.onload=ok;im.onerror=ok;setTimeout(ok,1900)})}));
+  await Promise.all(Array.from(document.images).map(function(im){
+    if(im.complete)return im.naturalWidth===0?Promise.reject(new Error('Не загрузился рисунок')):Promise.resolve();
+    return new Promise(function(ok,fail){
+      var timer=setTimeout(function(){fail(new Error('Рисунок загружается слишком долго'))},15000);
+      im.onload=function(){clearTimeout(timer);ok()};
+      im.onerror=function(){clearTimeout(timer);fail(new Error('Не загрузился рисунок'))};
+    });
+  }));
   if(document.fonts&&document.fonts.ready)await document.fonts.ready;
  }catch(err){
   console.error('Подготовка печати',err);
-  alert('Не удалось подготовить формулы для печати. Закройте этот файл и скачайте файл для печати ещё раз.');
+  alert('Не удалось подготовить формулы или рисунки для печати. Проверьте подключение к интернету и откройте скачанный файл ещё раз.');
   return;
  }
- paginatePartialCollections();
- document.querySelectorAll('.oge-exam-column').forEach(function(column){
-   var content=column.querySelector('.oge-exam-column-content');if(!content)return;
-   content.style.zoom='1';
-   var h=content.scrollHeight;
-   var available=column.clientHeight-3;
-   if(h>available&&available>0){
-     var z=Math.min(1,available/h*.982);
-     content.style.zoom=String(z);
-     var visual=content.getBoundingClientRect().height;
-     if(visual>available)content.style.zoom=String(z*available/visual*.98);
-   }
- });
+ try{paginateCollections();}
+ catch(err){
+   console.error('Подготовка страниц',err);
+   alert('Не удалось разместить одно из заданий на листе. Попробуйте заменить это задание и скачать файл ещё раз.');
+   return;
+ }
  setTimeout(function(){window.print()},420);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fitAndPrint);else fitAndPrint();
