@@ -1609,7 +1609,7 @@ body.auth-locked > *:not(#passwordGate) {
                 <input id="oge-variant-count" type="number" min="1" max="40" step="1" value="1" inputmode="numeric" onblur="ogeNormalizeVariantCount()" title="От 1 до 40 вариантов" aria-label="Количество вариантов">
                 <button type="button" class="btn-generate oge-fast-btn" onclick="safeGenerateVariant(event,'full')">🎲 Сгенерировать полные варианты</button>
             </div>
-            <div class="oge-fast-manual-tip">Нужны только отдельные задания? Отметь их ниже и нажми «Сгенерировать выбранные задания» под настройками. Количество вариантов задаётся здесь.</div>
+            <div class="oge-fast-manual-tip">Нужны только отдельные задания? Отметь их ниже и нажми «Сгенерировать выбранные задания» под настройками. Количество вариантов наверху действует <b>только для полных вариантов 1–25</b>. Выборочная сборка ниже создаётся в одном экземпляре.</div>
         </div>
 
         <div class="task-row">
@@ -3412,6 +3412,7 @@ body.auth-locked > *:not(#passwordGate) {
 
     window.ogeVariantBatch=[];
     window.ogeActiveVariantIndex=0;
+    window.ogeGenerationMode='manual';
     function ogeTaskGlobalKey(task,block) {
         if (task?.__ogeScenarioMeta) {
             const m=task.__ogeScenarioMeta;
@@ -3448,7 +3449,7 @@ body.auth-locked > *:not(#passwordGate) {
         lastTypesByBlock.forEach((types, key) => usage.set(key, [...types]));
     }
     function ogeBuildBatchEntry() {
-        return {snapshot:window.ogeVariantSnapshot,printHTML:currentPrintHTML,
+        return {mode:window.ogeGenerationMode,snapshot:window.ogeVariantSnapshot,printHTML:currentPrintHTML,
             printGroups:JSON.parse(JSON.stringify(window.ogePrintableGroups||{})),
             answersHTML:currentAnswersHTML};
     }
@@ -3499,16 +3500,18 @@ body.auth-locked > *:not(#passwordGate) {
     function safeGenerateVariant(event, requestedMode='manual') {
         if(event){event.preventDefault();event.stopPropagation();}
         const btn=event&&event.currentTarget?event.currentTarget:document.querySelector('.oge-fast-btn');
-        const count=ogeNormalizeVariantCount();
+        const full=requestedMode==='full';
+        // Число в верхней панели НИКОГДА не применяется к выборочной сборке.
+        const count=full ? ogeNormalizeVariantCount() : 1;
         // Полная сборка 1–25 запускается ТОЛЬКО верхней кнопкой.
         // Нижняя кнопка не должна запускать генерацию при пустом ручном выборе.
-        const full=requestedMode==='full';
         if(!full && !ogeHasManualSelection()){
             alert('Для выборочной генерации сначала отметьте нужные задания. Для полного варианта 1–25 воспользуйтесь верхней кнопкой.');
             return;
         }
         if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent='Генерирую 1 из '+count+'…';}
         window.ogeVariantBatch=[];window.ogeActiveVariantIndex=0;
+        window.ogeGenerationMode=full?'full':'manual';
         const usage=new Map();
         let current=0;
         const makeNext=()=>{
@@ -3549,31 +3552,60 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
     function resetTaskCounts() {
-        document.querySelectorAll('input[id^="count-"]').forEach(input => {
-            input.value = 0;
-        });
-        document.querySelectorAll('[data-practice-trainer-theme-checkbox="1"]').forEach(cb => {
-            cb.checked = false;
-        });
-        const trainerMaster = document.getElementById('practice-trainer-theme-all');
-        if (trainerMaster) {
-            trainerMaster.checked = false;
-            trainerMaster.indeterminate = false;
-        }
+        // Сбрасываем сразу ОБА режима: счётчик полных вариантов и ручной набор.
+        const fullCount = document.getElementById('oge-variant-count');
+        if (fullCount) fullCount.value = '1';
+        document.querySelectorAll('input[id^="count-"]').forEach(input => {input.value='0';});
 
+        // Отмеченные ранее темы/сюжеты/тренажёры больше не входят в подборку.
+        document.querySelectorAll('[data-practice-trainer-theme-checkbox="1"], [data-practice-scenario-theme-checkbox="1"], [data-practice-scenario-checkbox="1"]')
+            .forEach(box => {box.checked=false;box.indeterminate=false;});
+        ['practice-trainer-theme-all','practice-scenario-theme-all'].forEach(id => {
+            const master=document.getElementById(id);
+            if(master){master.checked=false;master.indeterminate=false;}
+        });
+        // Внутренние фильтры прототипов возвращаем к состоянию по умолчанию
+        // (все доступны), чтобы новая выборочная сборка не осталась без типов.
+        document.querySelectorAll('input[id^="proto-"], input[id^="topic19-extra-"]').forEach(box => {
+            if(box.type==='checkbox'){box.checked=true;box.indeterminate=false;}
+        });
+        document.querySelectorAll('[data-practice-scenario-number]').forEach(box => {
+            if(box.type==='checkbox'){box.checked=true;box.indeterminate=false;}
+        });
+        getOgeScenarioThemeIds().forEach(themeId => {
+            const theme=window.ogePracticeDatabase && window.ogePracticeDatabase[themeId];
+            (theme?.scenarios || []).forEach((_,index) => updatePracticeScenarioSummary(themeId,index));
+            updatePracticeThemeScenarioStatus(themeId);
+        });
         updatePracticeTrainerSelectedCount();
         updateTaskTotal();
 
-        let note = document.getElementById('task-total-note');
-        if (note) {
-            note.style.display = 'block';
+        // Удаляем и результаты предыдущей генерации, иначе её 5 вариантов
+        // продолжали попадать в ключи/PDF после сброса.
+        window.ogeVariantBatch=[];
+        window.ogeActiveVariantIndex=0;
+        window.ogeGenerationMode='manual';
+        window.ogeVariantSnapshot=null;
+        window.ogePrintableGroups={'1-5':[],'6-14':[],'15-25':[]};
+        window.currentGeneratedTasks=[];
+        window.selectedBlockTitles=[];
+        currentInteractiveHTML='';currentPrintHTML='';currentAnswersHTML='';
+        const output=document.getElementById('output-section');
+        if(output){output.innerHTML='';output.style.display='none';}
+        const actions=document.getElementById('btn-group');
+        if(actions) actions.style.display='none';
+        const board=document.getElementById('info-board');
+        if(board){board.innerHTML='';board.style.display='none';}
+        ogeRenderVariantSwitcher();
+
+        const note=document.getElementById('task-total-note');
+        if(note){
+            note.textContent='Сброшены количество полных вариантов, подборка и предыдущие результаты.';
+            note.style.display='block';
             clearTimeout(window.taskTotalNoteTimer);
-            window.taskTotalNoteTimer = setTimeout(() => {
-                note.style.display = 'none';
-            }, 1800);
+            window.taskTotalNoteTimer=setTimeout(()=>{note.style.display='none';},2600);
         }
     }
-
 
     const tooltip = document.getElementById('proto-tooltip');
     function showTooltip(tid, index, e, kind = 'main') {
@@ -5263,7 +5295,7 @@ body.auth-locked > *:not(#passwordGate) {
     // Альбомный A4: полный вариант всегда на трёх листах, подборки — по объёму.
     function ogePrintStripUserInterface(node) {
         if (!node) return node;
-        node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .sticker-print, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
+        node.querySelectorAll('script,style,button,input,select,textarea,canvas, .task-print-answer, .random-replace-btn, .oge-replace-bar, .btn-help, .btn-instant, .print-author, .oge-practice-toolbar, .oge-practice-controls, .oge-practice-counter, [data-ui-only]').forEach(el=>el.remove());
         node.querySelectorAll('img').forEach(img=>{img.loading='eager';});
         node.querySelectorAll('[id]').forEach(el=>{if(!el.closest('svg'))el.removeAttribute('id');});
         node.querySelectorAll('*').forEach(el=>{
@@ -5292,6 +5324,11 @@ body.auth-locked > *:not(#passwordGate) {
         const task=host.querySelector('.task-print-block, .task20-part2-item');
         if (!task) return '';
         const cloned=ogePrintStripUserInterface(task.cloneNode(true));
+        // Стикер хранится в печатном фрагменте. Переносим его в компактную
+        // боковую область условия, а не удаляем при очистке HTML.
+        const sourceSticker=cloned.querySelector('.sticker-print');
+        const stickerHtml=sourceSticker ? '<div class="oge-exam-sticker">'+sourceSticker.innerHTML+'</div>' : '';
+        if(sourceSticker) sourceSticker.remove();
         cloned.querySelectorAll('.task-print-answer').forEach(el=>el.remove());
         let content='', artwork='';
         const formal=cloned.querySelector('.task-print-text');
@@ -5344,7 +5381,7 @@ body.auth-locked > *:not(#passwordGate) {
         const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
         return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
            +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
-           +body+'</div>'+graph+'</section>';
+           +stickerHtml+body+'</div>'+graph+'</section>';
     }
     function ogePrintArrayToEntries(group, startNum, trueNumbers) {
         const raw=Array.isArray(group)?group:[];
@@ -5418,7 +5455,7 @@ body.auth-locked > *:not(#passwordGate) {
             const p1IsFull=[1,2,3,4,5].every(n=>p1.items.some(t=>t.num===n));
             const tasks=[...p1.items,...p2.items,...p3.items].sort((a,b)=>a.num-b.num);
             const taskNumbers=tasks.map(t=>t.num);
-            const complete=taskNumbers.length===25&&new Set(taskNumbers).size===25
+            const complete=batch[i]?.mode!=='manual' && taskNumbers.length===25&&new Set(taskNumbers).size===25
                   &&Array.from({length:25},(_,k)=>k+1).every(n=>taskNumbers.includes(n));
             const headingLabel=(complete?'Вариант ':'Подборка ')+(i+1);
             const heading='<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>'+headingLabel+'</strong></header>';
@@ -5526,9 +5563,13 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-statement mjx-container,.oge-exam-intro mjx-container{max-width:100%;}
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
-.oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings,.oge-exam-column-content .sticker-print{display:none!important;}
+/* Стикеры печатаются компактно внутри задания, не перекрывая условие. */
+.oge-exam-sticker{float:right;display:block;width:17mm;max-width:17mm;margin:0 0 1.5mm 2mm;text-align:center;break-inside:avoid;page-break-inside:avoid;}
+.oge-exam-sticker img{display:block!important;max-width:16mm!important;max-height:15mm!important;width:auto!important;height:auto!important;margin:0 auto!important;object-fit:contain;filter:none!important;}
+.oge-exam-sticker div{font-size:6pt!important;line-height:1.1!important;max-width:17mm!important;transform:none!important;color:#444!important;overflow-wrap:anywhere;}
+.oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings{display:none!important;}
 @media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:277mm;}}
-@media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;filter:grayscale(1);}}
+@media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 </style></head><body>${pages}
 <script>
 (function(){
@@ -5714,7 +5755,7 @@ ${window.SCRIPT_END}
         const isFullVariant = tasks => tasks.length === 25 &&
             new Set(tasks.map(t => t.num)).size === 25 &&
             Array.from({length:25}, (_,i) => i + 1).every(n => tasks.some(t => t.num === n));
-        const full = variants.every(v => isFullVariant(v.tasks));
+        const full = stored.every(entry => entry.mode !== 'manual') && variants.every(v => isFullVariant(v.tasks));
         const keys = [];
         const used = new Set();
         variants.forEach(v => v.tasks.forEach(task => {
