@@ -209,7 +209,8 @@ function buildPresentationControls(task, index, options) {
         <div id="pres-feedback-${index}" class="pres-feedback" style="width:100%;text-align:center;font-weight:bold;min-height:24px;display:none;"></div>
         ${instantCheck ? `<button class="pres-btn-instant" onclick="checkPresSingle(${index}, '${answerJs}', this, ${showCorrectOnError})" style="background:#e8f5e9;border:1px solid #4CAF50;border-radius:10px;font-size:18px;cursor:pointer;padding:8px 12px;outline:none;box-shadow:0 4px 10px rgba(76,175,80,.2);" title="Проверить">✅</button>` : ''}
         ${showSolutions && task && task.theory && String(task.theory).trim() !== '' ? `<button id="pres-help-${index}" class="btn-settings" style="display:none;background:#e3f2fd;color:#003399;border:1px solid #90caf9;font-size:16px;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;" onclick="event.stopPropagation(); window.openTheoryModalLocal('theory-pres-${index}')" title="Открыть разбор">💡 Разбор</button>` : ''}
-        <button class="pres-btn" onclick="submitTask(${index}, '${answerJs}')" data-correct="${escapePresAttr(task && task.answer)}" style="font-size:1.1em;padding:12px 30px;border-radius:10px;border:none;background:${accent};color:white;cursor:pointer;font-weight:bold;">ОК</button>
+        <button type="button" class="pres-btn" onclick="submitTask(event, ${index}, false)" data-correct="${escapePresAttr(task && task.answer)}" style="font-size:1.1em;padding:12px 30px;border-radius:10px;border:none;background:${accent};color:white;cursor:pointer;font-weight:bold;">ОК</button>
+        <button type="button" class="pres-skip-btn" onclick="submitTask(event, ${index}, true)" style="font-size:1em;padding:10px 16px;border-radius:10px;border:1px solid #b8c5d1;background:#f3f6fa;color:#29465d;cursor:pointer;">Пропустить →</button>
         ${drawButton}
     </div><div id="pres-status-${index}" class="pres-status" style="margin-top:10px;min-height:28px;font-size:18px;font-weight:bold;text-align:center;"></div>`;
 }
@@ -1260,14 +1261,17 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             if (helpBtn && showSolutions) helpBtn.style.display = 'inline-block';
         }
 
-        function submitTask(idx, correctAns) {
-            event.stopPropagation();
-            let input = document.getElementById('ans-'+idx);
-            let userAns = input ? normalizeAnswer(input.value) : '';
-            let timeSpent = Math.round((Date.now() - slideStartTime) / 1000);
-
+        function submitTask(evt, idx, skip) {
+            if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+            const input = document.getElementById('ans-' + idx);
+            const userAns = skip ? '' : (input ? normalizeAnswer(input.value) : '');
+            const slide = input ? input.closest('.slide') : slides[idx + 1];
+            const button = slide ? slide.querySelector('.pres-btn[data-correct]') : null;
+            const correctAns = button ? button.getAttribute('data-correct') : '';
+            const timeSpent = Math.round((Date.now() - slideStartTime) / 1000);
             if (!answeredMap[idx]) {
-                userResults.push({ taskNum: idx + 1, userAns: userAns, correctAns: normalizeAnswer(correctAns), time: timeSpent });
+                userResults.push({ taskNum: idx + 1, userAns: userAns,
+                    correctAns: normalizeAnswer(correctAns), time: timeSpent, skipped: !!skip });
                 answeredMap[idx] = true;
             }
             nextSlide();
@@ -1288,11 +1292,12 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             userResults
                 .sort((a, b) => a.taskNum - b.taskNum)
                 .forEach((res, idx) => {
-                    let isCorrect = (normalizeAnswer(res.userAns) === normalizeAnswer(res.correctAns));
+                    let isCorrect = !res.skipped && res.userAns !== '' &&
+                        (normalizeAnswer(res.userAns) === normalizeAnswer(res.correctAns));
                     if (isCorrect) correctCount++;
                     let rowClass = isCorrect ? 'row-correct' : 'row-incorrect';
                     let displayAns = res.userAns === "" ? "—" : res.userAns;
-                    let resultText = isCorrect ? '✅ Верно' : '❌ Неверно';
+                    let resultText = res.skipped ? '⏭ Пропущено' : (isCorrect ? '✅ Верно' : '❌ Неверно');
                     let correctCell = showCorrectOnError ? \`<td>\${res.correctAns}</td>\` : '';
                     let solutionCell = showSolutions ? \`<td><button class="help-btn" onclick="event.stopPropagation(); window.openTheoryModalLocal('theory-pres-\${res.taskNum - 1}')">Смотреть</button></td>\` : '';
 
@@ -1333,10 +1338,8 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         window.addEventListener('load', () => {
             startPresentationTimer();
             fitPresentationDraftDiagrams();
-            document.querySelectorAll('.pres-btn').forEach(btn => {
-                let match = btn.getAttribute('onclick') ? btn.getAttribute('onclick').match(/submitTask\\((\\d+),\\s*'([^']*)'\\)/) : null;
-                if (match) btn.setAttribute('data-correct', match[2]);
-            });
+            // Correct answers are read from data-correct; never parse inline onclick.
+
 
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([document.body]).then(scheduleFitText).catch(scheduleFitText);
