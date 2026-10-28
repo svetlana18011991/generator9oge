@@ -308,6 +308,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
                 <button type="button" data-tool-btn="pointer" title="Указатель">👆</button>
                 <button type="button" data-tool-btn="zoom" title="Лупа: нажмите на чертёж, чтобы открыть его крупно">🔍</button>
                 <button type="button" data-tool-btn="pen" title="Карандаш">🖊️</button>
+                <button type="button" data-tool-btn="highlighter" title="Выделитель">🖍️</button>
                 <button type="button" id="undoBattle" title="Отменить">↶</button>
                 <button type="button" id="redoBattle" title="Повторить">↷</button>
                 <select id="tool-select-battle">
@@ -955,7 +956,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         draftState.drawing = true;
         draftState.startX = p.x; draftState.startY = p.y;
         draftState.snapshot = ctx.getImageData(0,0,canvas.width,canvas.height);
-        if(draftState.tool === 'pen' || draftState.tool === 'eraser'){
+        if(draftState.tool === 'pen' || draftState.tool === 'highlighter' || draftState.tool === 'eraser'){
             saveDraftState();
             ctx.beginPath();
             ctx.moveTo(p.x,p.y);
@@ -970,12 +971,12 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         const color = $('color-battle') ? $('color-battle').value : '#003399';
         const size = $('size-battle') ? Number($('size-battle').value || 3) : 3;
         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        ctx.lineWidth = draftState.tool === 'eraser' ? size * 3 : size;
+        ctx.lineWidth = draftState.tool === 'eraser' ? size * 3 : draftState.tool === 'highlighter' ? Math.max(13,size*4) : size;
         ctx.strokeStyle = draftState.tool === 'eraser' ? 'rgba(255,255,255,1)' : color;
         ctx.fillStyle = color;
 
-        if(draftState.tool === 'pen' || draftState.tool === 'eraser'){
-            ctx.lineTo(p.x,p.y); ctx.stroke(); return;
+        if(draftState.tool === 'pen' || draftState.tool === 'highlighter' || draftState.tool === 'eraser'){
+            ctx.lineTo(p.x,p.y); if(draftState.tool === 'highlighter'){ctx.save();ctx.globalAlpha=.25;ctx.stroke();ctx.restore();}else{ctx.stroke();} return;
         }
 
         if(draftState.snapshot) ctx.putImageData(draftState.snapshot,0,0);
@@ -1008,7 +1009,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
 
     function endDraft(){
         if(!draftState.drawing) return;
-        if(!(draftState.tool === 'pen' || draftState.tool === 'eraser')) saveDraftState();
+        if(!(draftState.tool === 'pen' || draftState.tool === 'highlighter' || draftState.tool === 'eraser')) saveDraftState();
         draftState.drawing = false;
         draftState.snapshot = null;
     }

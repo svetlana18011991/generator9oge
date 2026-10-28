@@ -289,6 +289,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
                 <button type="button" data-tool="pointer" onclick="setTool('pointer')" title="Указатель">👆</button>
                 <button type="button" data-tool="zoom" onclick="setTool('zoom')" title="Лупа: нажмите на чертёж, чтобы открыть его крупно">🔍</button>
                 <button type="button" data-tool="pen" onclick="setTool('pen')" title="Карандаш">🖊️</button>
+                <button type="button" data-tool="highlighter" onclick="setTool('highlighter')" title="Выделитель">🖍️</button>
                 <button type="button" onclick="undoDraft()" title="Отменить">↶</button>
                 <button type="button" onclick="redoDraft()" title="Повторить">↷</button>
                 <select id="toolSelect" onchange="setTool(this.value)">
@@ -635,7 +636,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         return {x:e.clientX-r.left, y:e.clientY-r.top};
     }
     function getBounds(obj){
-        if(obj.tool === 'pen' || obj.tool === 'eraser'){
+        if(obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser'){
             const xs = obj.points.map(p=>p.x), ys = obj.points.map(p=>p.y);
             return {minX:Math.min(...xs), minY:Math.min(...ys), maxX:Math.max(...xs), maxY:Math.max(...ys)};
         }
@@ -659,12 +660,13 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         ctx.rotate(obj.angle || 0);
         ctx.scale(obj.scale || 1, obj.scale || 1);
         ctx.translate(-(obj.cx || 0), -(obj.cy || 0));
-        ctx.lineWidth = obj.tool === 'eraser' ? (obj.size || 3) * 3 : (obj.size || 3);
+        ctx.lineWidth = obj.tool === 'eraser' ? (obj.size || 3) * 3 : obj.tool === 'highlighter' ? Math.max(13,(obj.size || 3)*4) : (obj.size || 3);
+        if(obj.tool === 'highlighter')ctx.globalAlpha=.25;
         ctx.strokeStyle = obj.tool === 'eraser' ? '#ffffff' : (obj.color || '#003399');
         ctx.fillStyle = obj.color || '#003399';
         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-        if(obj.tool === 'pen' || obj.tool === 'eraser'){
+        if(obj.tool === 'pen' || obj.tool === 'highlighter' || obj.tool === 'eraser'){
             const pts = obj.points || [];
             if(pts.length === 1){
                 ctx.beginPath();
