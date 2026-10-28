@@ -1433,6 +1433,55 @@ body.auth-locked > *:not(#passwordGate) {
 .oge-typed-problem mjx-container[display="true"]{margin:.25em 0!important;text-align:left!important}
 @media(max-width:740px){.oge-typed-problem{font-size:16px}}
 </style>
+<script>(function(){
+  'use strict';
+  if (window.__ogeNoSplitMath) return;
+  window.__ogeNoSplitMath = true;
+  var matcher = /(^|[^\wА-Яа-я])([A-Za-zА-Яа-яα-ωΑ-Ω]{1,4}|[A-Za-zА-Яа-я]{1,3}\d{1,2})[ \t]*([=<>≤≥])[ \t]*([+−-]?(?:\d+(?:[.,]\d+)?|[A-Za-zА-Яа-яα-ωΑ-Ω]{1,4}))(?:[ \t]+(мм|см|км|м|м²|см²|°))?/g;
+  var skip = 'script,style,textarea,pre,code,svg,math,mjx-container,option,[contenteditable="true"],.MathJax,.mjx-container';
+  function fix(root){
+    if(!root || root.nodeType !== 1) return;
+    if(root.matches && root.matches(skip)) return;
+    var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var parent=n.parentElement;
+        if (!parent || !n.nodeValue || !/[=<>≤≥]/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest(skip)) return NodeFilter.FILTER_REJECT;
+        // Never modify MathJax source notation or inline TeX strings.
+        if (/\\\(|\\\[|\\\)|\\\]|\$/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes=[], n;
+    while ((n=tw.nextNode())) nodes.push(n);
+    nodes.forEach(function(t){
+      matcher.lastIndex=0;
+      t.nodeValue=t.nodeValue.replace(matcher,function(full,prefix,left,operator,right,unit){
+        return prefix+left+'\u00a0'+operator+'\u00a0'+right+(unit?'\u00a0'+unit:'');
+      });
+    });
+  }
+  function init(){
+    fix(document.body);
+    var observer=new MutationObserver(function(records){
+      records.forEach(function(record){
+        record.addedNodes.forEach(function(node){
+          if(node.nodeType===1) fix(node);
+        });
+      });
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+  window.ogeKeepMathHTML = function(raw) {
+    if (typeof raw !== 'string' || !/[=<>≤≥]/.test(raw)) return raw;
+    var holder=document.createElement('div');
+    holder.innerHTML=raw;
+    fix(holder);
+    return holder.innerHTML;
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();</script>
 </head>
 <body class="auth-locked">
 
@@ -1513,6 +1562,8 @@ body.auth-locked > *:not(#passwordGate) {
             <p><strong>Задания 1–5</strong> имеют два режима: тренажёры по отдельным прототипам и <strong>«Комплекты по сюжетам»</strong>. В сюжетном блоке один комплект означает <strong>все пять связанных заданий</strong> с общим условием и рисунком. В начале стоит 0 комплектов; нажмите «+», чтобы добавить один. По умолчанию доступны все темы и сюжеты, а через «Настроить» можно ограничить их, например оставить только «Тропинки».</p>
             <p>Следите за строкой <strong>«Набрано задач»</strong>. Кнопка <strong>«Сбросить набор»</strong> очищает выбранные количества и прежнюю генерацию. Кнопка <strong>«К генерации»</strong> переносит вас <strong>вниз, к «Сгенерировать выбранные задания»</strong>. Нажмите её после выбора: будет создана <strong>одна подборка</strong> именно из отмеченных заданий. Число полных вариантов из верхней панели на неё не влияет.</p>
 
+            <p><strong>Задание №19 в полном варианте:</strong> генератор выбирает одну готовую тройку геометрических утверждений. Нужно прочитать все три утверждения и выбрать верные или неверные согласно формулировке вопроса; это одно задание №19. В выборочной сборке доступны отдельные настройки №19.</p>
+
             <h3>5. Дополнительные параметры</h3>
             <ul>
                 <li><strong>Таймер:</strong> задайте количество минут; 0 означает обычный секундомер без ограничения.</li>
@@ -1532,6 +1583,8 @@ body.auth-locked > *:not(#passwordGate) {
                 <li><strong>«Создать игру»</strong> — задания в игровых форматах: «Башня знаний», «Битва с боссом» и «Мотивационное послание». Для последнего можно выбрать готовую картинку или загрузить свою. Некоторые игры требуют определённого количества заданий.</li>
             </ul>
             <p>В заданиях №1–5 для презентаций и игр предусмотрены общее условие сюжета и черновик для пометок на рисунке.</p>
+
+            <p><strong>Справочные материалы:</strong> в интерактивном варианте в уголке экрана есть кнопка <strong>«? Справка»</strong>. Нажмите её, чтобы открыть справочные материалы по алгебре и геометрии; после просмотра окно можно закрыть и продолжить решение. Материалы можно открывать повторно, не покидая задание.</p>
 
             <h3>7. Полезно помнить</h3>
             <p>Сначала определитесь с целью: <strong>контрольная работа на бумаге</strong> — верхняя панель полных вариантов; <strong>тренировка отдельных тем, интерактив или игра</strong> — выборочная сборка ниже. Скачанные файлы остаются самостоятельными: если вы изменили настройки или задания, <strong>сгенерируйте и скачайте новый файл</strong>. После обновления сайта при необходимости нажмите <strong>Ctrl + F5</strong>.</p>
@@ -3912,7 +3965,14 @@ body.auth-locked > *:not(#passwordGate) {
             const mainCountInput = document.getElementById(`count-${tid}`);
             const mainCount = options.autoFull ? 1 : (mainCountInput ? (parseInt(mainCountInput.value, 10) || 0) : 0);
             if (mainCount > 0 && window.database[tid]) {
-                generationBlocks.push({ tid, kind: 'main', data: window.database[tid], requiredCount: mainCount, autoFull: !!options.autoFull });
+                // Только полный вариант: №19 — одна готовая тройка утверждений
+                // вместо отдельного вопроса «верно/неверно». В ручной сборке
+                // основной банк №19 продолжает работать по-прежнему.
+                const number = Number(String(tid).replace(/\D/g, ''));
+                const tripleBank = options.autoFull && number === 19
+                    ? (window.extraDatabase?.task19 || window.extraDatabase?.['19']) : null;
+                const chosenBank = tripleBank?.prototypes?.length ? tripleBank : window.database[tid];
+                generationBlocks.push({ tid, kind: 'main', data: chosenBank, requiredCount: mainCount, autoFull: !!options.autoFull });
             }
 
             const extraData = getExtraTaskData(tid);
@@ -3952,7 +4012,7 @@ body.auth-locked > *:not(#passwordGate) {
                 if (selectedProtos.length === 0) continue;
 
                 window.selectedBlockTitles.push(blockData.title);
-                const isStatements = kind === 'main' &&
+                const isStatements = kind === 'main' && !block.autoFull &&
                     String(tid).replace(/\D/g, '') === '19' &&
                     typeof window.task19MakeStatementTasks === 'function';
                 const availableCount = selectedProtos.reduce((sum,p) => sum +
@@ -4029,7 +4089,7 @@ body.auth-locked > *:not(#passwordGate) {
                     currentPrintHTML += `<div class="task20-part2-item" style="padding:16px 0 22px;border-bottom:1px dashed #ccd6dc;break-inside:avoid;page-break-inside:avoid"><div style="display:flex;align-items:flex-start;gap:13px"><b style="font-size:18px;min-width:24px">${taskCounter}.</b><div style="flex:1;min-width:0"><div style="font-size:17px;line-height:1.6">${item.text}</div><div style="height:66px;border-bottom:1px dotted #cbd5e1;margin-top:12px"></div></div></div></div>`;
                     currentAnswersHTML += `<div style="margin:10px 0 14px;break-inside:avoid"><b>${taskCounter}.</b> ${part2Answer || (isProofTask ? 'Задача на доказательство. Проверка развёрнутого решения учителем.' : 'Ответ отсутствует')}</div>`;
                     printGroups['15-25'].push((itemIndex===0 ? `<h4>Задание ${part2TaskNum}</h4>` : '')+currentPrintHTML.slice(printOffset));
-                    window.currentGeneratedTasks.push({text:item.text,draftText:item.text,presentationText:item.text,answer:part2Answer,part:2,isSecondPart:true,taskNumber:part2TaskNum,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
+                    window.currentGeneratedTasks.push({text:window.ogeKeepMathHTML(item.text),draftText:window.ogeKeepMathHTML(item.text),presentationText:window.ogeKeepMathHTML(item.text),answer:part2Answer,part:2,isSecondPart:true,taskNumber:part2TaskNum,sourcePage:item.sourcePage,taskId:item.id,prototypeCode:proto.code || '',analogs:analogList.map(a=>({id:a.id,text:a.text,answer:a.answer})),analogsHtml});
                 });
                 continue;
             }
@@ -4294,7 +4354,7 @@ body.auth-locked > *:not(#passwordGate) {
                         </div>`;
                 }
 
-                window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: item.gameText !== undefined ? item.gameText : renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck, taskNumber: Number(item.examNumber || item.__ogeScenarioMeta?.taskNumber || String(tid || '').replace(/\D/g, '')) || 0, scenarioGroupId: item.__ogeScenarioMeta?.groupId || '' });
+                window.currentGeneratedTasks.push({ text: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : standaloneText), draftText: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : renderText), presentationText: window.ogeKeepMathHTML(item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText)), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck, taskNumber: Number(item.examNumber || item.__ogeScenarioMeta?.taskNumber || String(tid || '').replace(/\D/g, '')) || 0, scenarioGroupId: item.__ogeScenarioMeta?.groupId || '' });
                 
                 let stickerHTMLInteractive = "";
                 let stickerHTMLPrint = "";
@@ -4840,7 +4900,19 @@ body.auth-locked > *:not(#passwordGate) {
     // Активируем код для превью внутри редактора
     eval(window.CANVAS_LOGIC_SCRIPT);
 
-    function downloadBlobSafely(blob, filename) {
+    const OGE_MATH_NO_SPLIT_SCRIPT = "(function(){\n  'use strict';\n  if (window.__ogeNoSplitMath) return;\n  window.__ogeNoSplitMath = true;\n  var matcher = /(^|[^\\wА-Яа-я])([A-Za-zА-Яа-яα-ωΑ-Ω]{1,4}|[A-Za-zА-Яа-я]{1,3}\\d{1,2})[ \\t]*([=<>≤≥])[ \\t]*([+−-]?(?:\\d+(?:[.,]\\d+)?|[A-Za-zА-Яа-яα-ωΑ-Ω]{1,4}))(?:[ \\t]+(мм|см|км|м|м²|см²|°))?/g;\n  var skip = 'script,style,textarea,pre,code,svg,math,mjx-container,option,[contenteditable=\"true\"],.MathJax,.mjx-container';\n  function fix(root){\n    if(!root || root.nodeType !== 1) return;\n    if(root.matches && root.matches(skip)) return;\n    var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {\n      acceptNode: function(n){\n        var parent=n.parentElement;\n        if (!parent || !n.nodeValue || !/[=<>≤≥]/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;\n        if (parent.closest(skip)) return NodeFilter.FILTER_REJECT;\n        // Never modify MathJax source notation or inline TeX strings.\n        if (/\\\\\\(|\\\\\\[|\\\\\\)|\\\\\\]|\\$/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;\n        return NodeFilter.FILTER_ACCEPT;\n      }\n    });\n    var nodes=[], n;\n    while ((n=tw.nextNode())) nodes.push(n);\n    nodes.forEach(function(t){\n      matcher.lastIndex=0;\n      t.nodeValue=t.nodeValue.replace(matcher,function(full,prefix,left,operator,right,unit){\n        return prefix+left+'\\u00a0'+operator+'\\u00a0'+right+(unit?'\\u00a0'+unit:'');\n      });\n    });\n  }\n  function init(){\n    fix(document.body);\n    var observer=new MutationObserver(function(records){\n      records.forEach(function(record){\n        record.addedNodes.forEach(function(node){\n          if(node.nodeType===1) fix(node);\n        });\n      });\n    });\n    observer.observe(document.body,{childList:true,subtree:true});\n  }\n  window.ogeKeepMathHTML = function(raw) {\n    if (typeof raw !== 'string' || !/[=<>≤≥]/.test(raw)) return raw;\n    var holder=document.createElement('div');\n    holder.innerHTML=raw;\n    fix(holder);\n    return holder.innerHTML;\n  };\n  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});\n  else init();\n})();";
+    async function downloadBlobSafely(blob, filename) {
+        // One shared typographic rule for print, interactive tasks, all games and presentations.
+        if (blob && /^text\/html/i.test(blob.type || '')) {
+            try {
+                const htmlSource = await blob.text();
+                if (/<\/head>/i.test(htmlSource) && !htmlSource.includes('__ogeNoSplitMath')) {
+                    const helper = '<script>' + OGE_MATH_NO_SPLIT_SCRIPT + '<\/script>';
+                    blob = new Blob([htmlSource.replace(/<\/head>/i, helper + '</head>')], {type: blob.type});
+                }
+            } catch(e) { console.warn('No-split math export:',e); }
+        }
+
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -5494,7 +5566,8 @@ body.auth-locked > *:not(#passwordGate) {
             tasks.forEach(task=>{
                 let prefix='';
                 if(task.num<=19&&!part1Done){
-                    prefix='<div class="oge-exam-part1">Часть 1</div>';
+                    prefix=(complete ? '<div class="oge-exam-first-variant">Вариант №'+(i+1)+'</div>' : '')
+                        +'<div class="oge-exam-part1">Часть 1</div>';
                     part1Done=true;
                 }
                 if(task.num>=20&&!part2Done){
@@ -5946,6 +6019,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-wide-page .oge-exam-columns{grid-template-columns:minmax(0,1fr);}
 .oge-exam-wide-page .oge-exam-column+ .oge-exam-column{display:none;}
 .oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Georgia,"Times New Roman",serif;color:#777;display:flex;align-items:end;justify-content:space-between;gap:5mm;border-top:.25pt solid #ddd;padding-top:.8mm;} .oge-exam-footer .brand{font-style:italic;font-size:8.1pt;color:#757575}.oge-exam-footer a{color:#626d80;text-decoration:none;border-bottom:.25pt solid #a3a3a3;}
+.oge-exam-first-variant{font:700 12pt "Times New Roman",serif;text-align:center;margin:0 0 .6mm;color:#111;}
 .oge-exam-part1{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:0 0 2mm;}
 .oge-exam-part2{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:2mm 0 3mm;}
 .oge-exam-intro{margin:0 0 1.5mm 0;font:400 var(--oge-print-font,11pt)/1.30 "Times New Roman",Times,serif;color:#111;}
