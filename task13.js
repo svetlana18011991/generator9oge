@@ -3,7 +3,6 @@
     window.database = window.database || {};
 
     const AXIS = '#111827';
-    const SOL = '#f59e0b';
     const MUTED = '#475569';
 
     function fmtLabel(v) {
@@ -40,7 +39,16 @@
         (spec.segments || []).forEach(seg => {
             const x1 = Number.isFinite(seg.from) ? X(seg.from) : padL;
             const x2 = Number.isFinite(seg.to) ? X(seg.to) : width-padR;
-            s += `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${SOL}" stroke-width="6" stroke-linecap="round"/>`;
+            // Чёрная штриховка вместо цветной полосы: стандартная запись промежутка.
+            // Положение границ и открытость/закрытость точек остаются прежними.
+            const left = Math.max(padL, Math.min(x1, x2));
+            const right = Math.min(width-padR, Math.max(x1, x2));
+            if (right <= left) return;
+            s += `<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="${AXIS}" stroke-width="2.1"/>`;
+            const hatchEnd = right === width-padR ? right-10 : right-5;
+            for (let h = left+6; h <= hatchEnd; h += 10) {
+                s += `<path d="M${(h-3).toFixed(1)},${y+5} l6,-10" fill="none" stroke="${AXIS}" stroke-width="1.3"/>`;
+            }
         });
         const points = spec.points || [];
         points.forEach(p => {
