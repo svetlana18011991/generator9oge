@@ -2936,6 +2936,12 @@ body.auth-locked > *:not(#passwordGate) {
                             const standaloneText = makeOgePracticeStandalone(theme.title, scenario, setNumber, taskNumber, chosen);
                             const scenarioGameText = makeOgeScenarioGameStatement(theme.title, scenario, setNumber, taskNumber, chosen);
                             const useDraftDiagram = taskNumber !== 5;
+                            // Только в сюжете «Печь» у задания №5 есть свой,
+                            // необходимый для решения чертёж кожуха. Во всех остальных
+                            // комплектах 1–5 действуют прежние правила: общий план
+                            // не повторяется возле пятого задания.
+                            const stoveTask5Diagram = taskNumber === 5 && state.themeId === 'stove'
+                                ? (chosen.imageHTML || '') : '';
                             scenarioTasks.push({
                                 examNumber: taskNumber,
                                 __ogeScenarioMeta: {
@@ -2947,13 +2953,11 @@ body.auth-locked > *:not(#passwordGate) {
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
                                 displaySvg: '',
-                                // Сюжеты 1–5: общий план показываем один раз, однако
-                                // собственный рисунок конкретной задачи №5 (например, кожух печи)
-                                // необходим для решения и не должен пропадать в PDF.
+                                // В печати дополнительные изображения у задания №5
+                                // допустимы только для печи. Общий план сюжета не дублируем.
                                 printSvg: useDraftDiagram
                                     ? (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML)
-                                    : (chosen.printSvg || chosen.imageHTML || chosen.svg_code || '')
-                                        .replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
+                                    : stoveTask5Diagram.replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
                                 standaloneSvg: chosen.standaloneSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
