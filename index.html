@@ -2947,7 +2947,13 @@ body.auth-locked > *:not(#passwordGate) {
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
                                 displaySvg: '',
-                                printSvg: useDraftDiagram ? (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '',
+                                // Сюжеты 1–5: общий план показываем один раз, однако
+                                // собственный рисунок конкретной задачи №5 (например, кожух печи)
+                                // необходим для решения и не должен пропадать в PDF.
+                                printSvg: useDraftDiagram
+                                    ? (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML)
+                                    : (chosen.printSvg || chosen.imageHTML || chosen.svg_code || '')
+                                        .replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
                                 standaloneSvg: chosen.standaloneSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
@@ -5471,7 +5477,9 @@ body.auth-locked > *:not(#passwordGate) {
         // Готовая задача второй части иногда имеет собственную обёртку с номером.
         content=content.replace(/^\s*<b[^>]*>\s*\d+\.?\s*<\/b>\s*/i,'');
         const containsVisual=/<(?:svg|img|picture)\b/i.test(content);
-        if(suppressDiagram) artwork='';
+        // Подавляем только повтор общего плана сюжета, но не отдельный
+        // чертёж конкретной задачи (в частности, печи в задании №5).
+        if(suppressDiagram && !/data-oge-own-diagram=["']1["']/.test(artwork)) artwork='';
         if(containsVisual) artwork='';
         let body=content.trim();
         // В сюжетах 1–5 сохраняем полноценные пустые клетки таблицы ответа.
@@ -5495,7 +5503,7 @@ body.auth-locked > *:not(#passwordGate) {
             body += '<table class="oge-match11-print" aria-label="Таблица ответа для задания 11"><thead><tr><th>А</th><th>Б</th><th>В</th></tr></thead><tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>';
         }
         if(!body && !artwork)return '';
-        const graph=artwork?'<div class="oge-exam-diagram">'+artwork+'</div>':'';
+        const graph=artwork?'<div class="oge-exam-diagram'+(/data-oge-own-diagram=["']1["']/.test(artwork)?' oge-exam-local-diagram':'')+'">'+artwork+'</div>':'';
         const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
         return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
            +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
@@ -6074,6 +6082,8 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-statement mjx-container svg{max-width:100%;height:auto;}
 .oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
 .oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
+/* Отдельные рисунки заданий 1–5 должны оставаться читаемыми при печати. */
+.oge-exam-local-diagram img,.oge-exam-local-diagram svg{display:block;margin:auto;max-height:60mm;object-fit:contain;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
