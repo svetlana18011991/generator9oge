@@ -5440,7 +5440,7 @@ body.auth-locked > *:not(#passwordGate) {
             const children=Array.from(node.childNodes).filter(child=>child.nodeType!==Node.TEXT_NODE||child.textContent.trim());
             const blockWrapper=children.length && children.every(child=>child.nodeType===Node.ELEMENT_NODE
                 && /^(P|DIV|TABLE|UL|OL|SECTION|ARTICLE|BLOCKQUOTE)$/.test(child.tagName));
-            if(node.tagName==='DIV' && blockWrapper && !node.querySelector('img,svg,canvas')
+            if(node.tagName==='DIV' && blockWrapper
                 && !/display\s*:\s*(grid|flex)|position\s*:\s*(absolute|relative)/i.test(layout)) {
                 Array.from(node.childNodes).forEach(collect);
             } else if(node.textContent.trim() || node.querySelector('img,svg') || node.matches('img,svg')) {
@@ -5510,7 +5510,7 @@ body.auth-locked > *:not(#passwordGate) {
                     // Заголовок остаётся с началом условия, последний абзац — с первой задачей.
                     blocks.forEach((block,index)=>{
                         const intro='<div class="oge-exam-intro">'+(index===0?label:'')+block+'</div>';
-                        if(index===blocks.length-1)prefix+=intro;
+                        if(index===blocks.length-1 && !/<(?:img|svg|table)\b/i.test(block))prefix+=intro;
                         else {units.push(unit(prefix+intro));prefix='';}
                     });
                     introDone=true;
@@ -5933,6 +5933,11 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task-name{display:block;font-weight:700;white-space:nowrap;margin-bottom:.8mm;}
 .oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;font-weight:400;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
+/* Текст условия — обычный. Жирность сохраняем только у b/strong и названия задания. */
+.oge-print-exam .oge-exam-statement :is(div,p,span,section,article,li),
+.oge-print-exam .oge-exam-intro :is(div,p,span,section,article,li){font-weight:400!important;}
+.oge-print-exam .oge-exam-statement :is(b,strong,th),
+.oge-print-exam .oge-exam-intro :is(b,strong,th){font-weight:700!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
 .oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:fixed;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(7.4pt,.78em);line-height:1.16;}
 .oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:.45mm .8mm;vertical-align:top;overflow-wrap:anywhere;word-break:break-word;hyphens:auto;}
@@ -5949,7 +5954,9 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
 .oge-exam-geometry .oge-exam-diagram img,.oge-exam-geometry .oge-exam-diagram svg{max-height:30mm;}
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
-.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%;max-height:50mm;margin:2mm auto;}
+.oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%!important;max-height:var(--oge-intro-image-max,42mm)!important;width:auto!important;height:auto!important;margin:1mm auto!important;object-fit:contain;}
+.oge-exam-intro .practice-figure-card{margin:1mm 0!important;padding:0!important;}
+.oge-exam-intro .oge-exam-diagram img,.oge-exam-intro .oge-exam-diagram svg{max-height:var(--oge-intro-image-max,42mm)!important;}
 .oge-exam-intro *{max-width:100%;}
 .oge-exam-statement .common-table{font-size:max(7.4pt,.78em);margin:1.6mm 0;}
 .oge-exam-statement .common-table th,.oge-exam-statement .common-table td{padding:.4mm .7mm;}
@@ -6002,12 +6009,17 @@ function paginateCollections(){
    if(fixedPages){
      // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
      // Ни одна колонка и ни одно отдельное задание не уменьшаются независимо от остальных.
-     for(var quarterPoints=46;quarterPoints>=36;quarterPoints--){
-       start.style.setProperty('--oge-print-font',(quarterPoints/4)+'pt');
-       ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
-       if(ranges)break;
+     var maxImageHeights=[42,38,34,30,26];
+     for(var im=0;im<maxImageHeights.length&&!ranges;im++){
+       start.style.setProperty('--oge-intro-image-max',maxImageHeights[im]+'mm');
+       for(var quarterPoints=46;quarterPoints>=34;quarterPoints--){
+         start.style.setProperty('--oge-print-font',(quarterPoints/4)+'pt');
+         // Высоту измеряем после сжатия изображений и текста: все шесть колонок одного формата.
+         ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
+         if(ranges)break;
+       }
      }
-     if(!ranges)throw new Error('Не удалось разместить полный вариант на трёх листах');
+     if(!ranges)throw new Error('Содержание варианта не помещается на три листа даже без стикеров');
    }
    units.forEach(function(el){el.remove()});
    var template=start.cloneNode(true);
