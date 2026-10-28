@@ -1230,15 +1230,15 @@ body.auth-locked > *:not(#passwordGate) {
     padding: 24px;
     box-sizing: border-box;
     background:
-        radial-gradient(circle at top, rgba(255, 196, 75, 0.18), transparent 42%),
-        radial-gradient(circle at bottom, rgba(255, 166, 64, 0.12), transparent 36%),
-        #121212;
+        radial-gradient(circle at 20% 12%, rgba(30, 120, 160, 0.24), transparent 43%),
+        radial-gradient(circle at 85% 85%, rgba(20, 184, 166, 0.12), transparent 43%),
+        linear-gradient(160deg, #102b42 0%, #0b2236 55%, #081c2e 100%);
     font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
     color: #f5f5f5;
 }
 .password-gate-card {
     width: min(470px, 100%);
-    background: linear-gradient(180deg, rgba(42,42,42,0.98), rgba(24,24,24,0.96));
+    background: linear-gradient(180deg, rgba(27, 62, 81, 0.98), rgba(15, 40, 61, 0.98));
     border: 1px solid rgba(255, 140, 0, 0.65);
     border-radius: 18px;
     padding: 30px 26px;
@@ -1437,7 +1437,7 @@ body.auth-locked > *:not(#passwordGate) {
 
 <div id="passwordGate" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
     <form id="passwordGateForm" class="password-gate-card" autocomplete="off">
-        <h2 id="passwordGateTitle" class="password-gate-title">Доступ к генератору</h2>
+        <h2 id="passwordGateTitle" class="password-gate-title">Доступ к генератору ОГЭ</h2>
         <p class="password-gate-text">Введите пароль из письма, чтобы открыть генератор.</p>
         <div class="password-gate-field-wrap">
             <div class="password-gate-inputbox">
@@ -5510,35 +5510,38 @@ body.auth-locked > *:not(#passwordGate) {
             +'</main>';
     }
     function ogeManualPrintCSS() {
+        // Separate, natural-flow print layout for individually selected tasks.
+        // Do not override the original formatting of the task statement / mathematics.
         return `
-@page { size: A4 portrait; margin: 14mm 13mm 17mm; }
-html,body{background:#fff!important;color:#151515!important;font-family:Georgia,"Times New Roman",serif!important;margin:0!important;padding:0!important;}
-.oge-manual-document{width:100%;max-width:184mm;margin:0 auto;font-size:11.5pt;line-height:1.38;overflow:visible;}
-.oge-manual-head{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:2mm;margin-bottom:4mm;border-bottom:1px solid #555;font-size:12pt;}
-.oge-manual-head span{font-size:11pt;font-weight:600;}
-.oge-manual-collection h3{font-size:12.5pt!important;line-height:1.25!important;color:#222!important;background:#f5f5f5!important;padding:2mm 3mm!important;border-left:2px solid #888!important;border-radius:0!important;margin:5mm 0 3mm!important;break-after:avoid;page-break-after:avoid;}
-.oge-manual-collection h4{font-size:11.5pt!important;line-height:1.25!important;margin:3.5mm 0 2mm!important;break-after:avoid;page-break-after:avoid;}
-.oge-manual-collection .task-print-block,.oge-manual-collection .task20-part2-item{position:relative;display:block!important;max-width:100%!important;padding:2.6mm 0 3.2mm!important;margin:0 0 2.5mm!important;border:0!important;border-bottom:0.3pt solid #dadada!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;break-inside:avoid;page-break-inside:avoid;}
-.oge-manual-collection .task-print-flex{display:flex!important;align-items:flex-start!important;gap:3mm!important;max-width:100%;min-width:0;break-inside:avoid;page-break-inside:avoid;}
-.oge-manual-collection .task-print-num{flex:0 0 8mm!important;width:8mm!important;min-width:8mm!important;font:bold 11pt Georgia,serif!important;color:#222!important;background:none!important;border:0!important;padding:0!important;margin:0!important;display:block!important;height:auto!important;line-height:1.3!important;}
+@page{size:A4 portrait;margin:14mm 15mm 16mm;}
+html,body{margin:0!important;padding:0!important;background:#fff!important;color:#171717!important;}
+.oge-manual-document{width:100%;max-width:180mm;margin:0 auto;font:normal 11pt/1.38 "Times New Roman",Times,serif;color:#171717;}
+.oge-manual-head{display:flex;justify-content:space-between;align-items:center;border-bottom:.5pt solid #777;padding-bottom:2.5mm;margin:0 0 4mm;font-size:11pt;}
+.oge-manual-head strong{font-weight:700;}.oge-manual-head span{font-weight:400;}
+.oge-manual-collection{width:100%;}
+.oge-manual-collection h3,.oge-manual-collection h4{font-family:inherit;background:none!important;color:#171717!important;border:none!important;border-bottom:.4pt solid #ccc!important;padding:1mm 0 1.6mm!important;margin:4mm 0 2mm!important;font-size:11pt!important;line-height:1.3!important;font-weight:700!important;break-after:avoid-page;page-break-after:avoid;}
+.oge-manual-collection h4{font-size:10.5pt!important;margin-top:3mm!important;}
+.oge-manual-collection .task-print-block,.oge-manual-collection .task20-part2-item{display:block!important;position:relative;max-width:100%!important;background:#fff!important;color:#171717!important;border:0!important;border-bottom:.35pt solid #ddd!important;border-radius:0!important;box-shadow:none!important;padding:2mm 0 2.5mm!important;margin:0 0 2mm!important;break-inside:avoid-page;page-break-inside:avoid;}
+.oge-manual-collection .task-print-flex{display:flex!important;align-items:flex-start!important;gap:2.5mm!important;min-width:0;max-width:100%;}
+.oge-manual-collection .task-print-num{flex:0 0 7mm!important;width:7mm!important;height:auto!important;min-width:7mm!important;display:block!important;padding:0!important;margin:0!important;border:0!important;background:none!important;color:inherit!important;font:bold 11pt/1.35 "Times New Roman",Times,serif!important;}
 .oge-manual-collection .task-print-num::after{content:".";}
-.oge-manual-collection .task-print-text{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;font:11.5pt/1.38 Georgia,"Times New Roman",serif!important;overflow-wrap:break-word;}
-.oge-manual-collection .task-print-text p{margin:0 0 1.5mm!important;}
-.oge-manual-collection .task-print-answer{margin-top:3mm!important;font-size:10.5pt!important;}
-.oge-manual-collection .task-print-img{flex:0 1 53mm!important;max-width:53mm!important;min-width:0!important;width:auto!important;overflow:visible!important;}
-.oge-manual-collection .task-print-img svg,.oge-manual-collection .task-print-img img{max-width:53mm!important;max-height:56mm!important;width:100%!important;height:auto!important;object-fit:contain!important;}
+.oge-manual-collection .task-print-text{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;overflow-wrap:break-word;font:normal 11pt/1.38 "Times New Roman",Times,serif!important;}
+.oge-manual-collection .task-print-text p{margin:0 0 1.4mm;}
+.oge-manual-collection .task-print-answer{margin:2mm 0 0!important;font:normal 10.5pt/1.25 "Times New Roman",Times,serif!important;}
+.oge-manual-collection .task-print-img{flex:0 1 48mm!important;width:auto!important;min-width:0!important;max-width:48mm!important;overflow:visible!important;}
+.oge-manual-collection .task-print-img svg,.oge-manual-collection .task-print-img img{display:block;max-width:100%!important;max-height:56mm!important;width:auto!important;height:auto!important;object-fit:contain!important;}
 .oge-manual-collection img,.oge-manual-collection svg{max-width:100%;height:auto;}
-.oge-manual-collection .sticker-print{flex:0 0 23mm!important;width:23mm!important;max-width:23mm!important;min-width:0!important;margin:0 0 0 2mm!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;position:static!important;transform:none!important;break-inside:avoid;page-break-inside:avoid;}
-.oge-manual-collection .sticker-print img{max-width:21mm!important;max-height:21mm!important;width:auto!important;height:auto!important;object-fit:contain!important;margin:0 auto!important;}
-.oge-manual-collection .sticker-print div{font-size:8pt!important;line-height:1.15!important;width:100%!important;max-width:23mm!important;word-wrap:break-word!important;text-align:center!important;transform:none!important;color:#444!important;}
-.oge-manual-collection .oge-practice-common,.oge-manual-collection .oge-practice-sticky{max-width:100%!important;min-width:0!important;overflow:visible!important;background:#fff!important;border:none!important;box-shadow:none!important;padding:0!important;}
-.oge-manual-collection table{border-collapse:collapse!important;table-layout:fixed!important;width:100%!important;max-width:100%!important;margin:2mm 0!important;font-size:9pt!important;line-height:1.2!important;}
-.oge-manual-collection table td,.oge-manual-collection table th{border:0.5pt solid #777!important;padding:1mm!important;overflow-wrap:anywhere!important;word-break:break-word!important;hyphens:auto;}
-.oge-manual-collection .task-print-text svg,.oge-manual-collection .oge-practice-common svg{max-width:100%!important;max-height:90mm!important;}
-.oge-manual-foot{padding-top:2mm;margin-top:5mm;border-top:0.3pt solid #bbb;font:9pt Georgia,serif;color:#777;}
+.oge-manual-collection .sticker-print{flex:0 0 22mm!important;width:22mm!important;max-width:22mm!important;margin:0 0 0 1mm!important;position:static!important;transform:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;break-inside:avoid!important;}
+.oge-manual-collection .sticker-print img{width:auto!important;height:auto!important;max-width:20mm!important;max-height:20mm!important;object-fit:contain!important;}
+.oge-manual-collection .sticker-print div{width:100%!important;max-width:22mm!important;font:normal 7.5pt/1.16 "Times New Roman",Times,serif!important;color:#444!important;text-align:center!important;overflow-wrap:break-word!important;}
+.oge-manual-collection .oge-practice-common,.oge-manual-collection .oge-practice-sticky{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;max-width:100%!important;min-width:0!important;}
+.oge-manual-collection table{max-width:100%!important;width:100%!important;table-layout:fixed;border-collapse:collapse;margin:2mm 0;line-height:1.2;}
+.oge-manual-collection th,.oge-manual-collection td{border:.4pt solid #777;padding:.7mm;overflow-wrap:anywhere;vertical-align:top;}
+.oge-manual-collection mjx-container{max-width:100%;}
+.oge-manual-collection svg{shape-rendering:geometricPrecision;text-rendering:geometricPrecision;}
 .oge-manual-collection .tropinki-print-pack-2-4{break-inside:auto!important;page-break-inside:auto!important;}
-@media print{.oge-manual-document{max-width:none!important;}.oge-manual-collection h3,.oge-manual-collection h4{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
-@media screen{body{background:#ececec!important;padding:20px 0!important;}.oge-manual-document{background:white;padding:15mm 13mm;box-shadow:0 3px 16px #0002;}}
+@media print{.oge-manual-document{max-width:none!important;}.oge-manual-collection .task-print-block:has(table),.oge-manual-collection .task-print-block:has(.oge-practice-common){break-inside:auto;page-break-inside:auto;}.oge-manual-collection tr{break-inside:avoid;page-break-inside:avoid;}}
+@media screen{body{background:#e9e9e9!important;padding:15px 0!important;}.oge-manual-document{background:#fff;padding:14mm 15mm;box-shadow:0 3px 12px #0002;}}
 `;
     }
     function downloadPrintPDF() {
