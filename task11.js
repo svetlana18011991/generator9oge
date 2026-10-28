@@ -169,7 +169,7 @@
 
     function make11_1(ans, tweak=0) {
         const order=invertLetterAnswer(ans);
-        const graphs=order.map((cat,i)=>{ const g=linearCats[cat](); if (tweak<=5){g.k *= (1+0.06*((tweak+i)%3)); g.b += ((tweak+i)%2?0.35:-0.25);} else {g.k *= (1+0.035*tweak); g.b += ((tweak+i)%2?0.1:-0.1)+0.04*tweak;} return g; });
+        const graphs=order.map((cat,i)=>{ const g=linearCats[cat](); g.k *= (1+0.06*((tweak+i)%3)); g.b += ((tweak+i)%2?0.35:-0.25); return g; });
         return {
             text: beforeDiagram('На рисунках изображены графики функций вида \\(y=kx+b\\). Установите соответствие между знаками коэффициентов \\(k\\) и \\(b\\) и графиками функций.', {
                 heading:'КОЭФФИЦИЕНТЫ',
@@ -180,7 +180,7 @@
     }
 
     function make11_2(ans,tweak=0) {
-        const graphs=[...ans].map((d,i)=>{const g=linearCats2[d](); if (tweak<=5){g.k *= 1+0.05*((tweak+i)%3); g.b += ((tweak+i)%2?0.3:-0.2);} else {g.k *= 1+0.035*tweak; g.b += ((tweak+i)%2?0.1:-0.1)+0.04*tweak;} return g;});
+        const graphs=[...ans].map((d,i)=>{const g=linearCats2[d](); g.k *= 1+0.05*((tweak+i)%3); g.b += ((tweak+i)%2?0.3:-0.2); return g;});
         return {
             text: beforeDiagram('На рисунках изображены графики функций вида \\(y=kx+b\\). Установите соответствие между графиками функций и знаками коэффициентов \\(k\\) и \\(b\\).') + afterDiagram('КОЭФФИЦИЕНТЫ',[
                 itm('1) \\(k\\lt0,\\ b\\lt0\\)'),itm('2) \\(k\\lt0,\\ b\\gt0\\)'),itm('3) \\(k\\gt0,\\ b\\gt0\\)')
@@ -190,9 +190,9 @@
     }
 
     function linearFormulaSet(t=0) {
-        const c=[-2,-3,2,-4,3,3.5,-3.5,1,-1,2.5][(t<=5?t%5:(t-6)%5+5)];
-        const m=[1,2,0.5,1.5,0.75,1.25,2.25,0.4,1.75,0.6][(t<=5?t%5:(t-6)%5+5)];
-        const p=[-2,-3,3,-1.5,2.5,-0.75,1.25,-2.25,3.5,-1.75][(t<=5?t%5:(t-6)%5+5)];
+        const c=[-2,-3,2,-4,3][t%5];
+        const m=[1,2,0.5,1.5,0.75][t%5];
+        const p=[-2,-3,3,-1.5,2.5][t%5];
         return [
             {latex:`\\(y=${String(c).replace('.',',')}\\)`, graph:{type:'line',k:0,b:c}},
             {latex:`\\(y=${m===1?'':String(m).replace('.',',')}x${c>=0?'+':''}${String(c).replace('.',',')}\\)`, graph:{type:'line',k:m,b:c}},
@@ -206,7 +206,7 @@
     }
 
     function formulaLetterSet(t=0) {
-        const s=[1.2,1.5,2,0.8,1.8,1.1,0.65,1.35,2.3,0.9][(t<=5?t%5:(t-6)%5+5)], b=[3,2,4,1,3,1.5,2.5,3.5,1.8,4.2][(t<=5?t%5:(t-6)%5+5)];
+        const s=[1.2,1.5,2,0.8,1.8][t%5], b=[3,2,4,1,3][t%5];
         return [
             {latex:`\\(y=-${String(s).replace('.',',')}x-${b}\\)`,graph:{type:'line',k:-s,b:-b}},
             {latex:`\\(y=-${String(s).replace('.',',')}x+${b}\\)`,graph:{type:'line',k:-s,b:b}},
@@ -221,17 +221,17 @@
 
     function make11_5(ans,t=0){
         const order=invertLetterAnswer(ans);
-        const graphs=order.map((cat,i)=>{const g=quadCats[cat](); if(t<=5){g.a*=1+0.06*((t+i)%3);g.c+=((t+i)%2?0.25:-0.15);}else{if(t<=5){g.a*=1+0.05*((t+i)%3);g.c+=((t+i)%2?0.2:-0.15);}else{g.a*=1+0.025*t;g.c+=((t+i)%2?0.1:-0.1)+0.015*t;}} return g;});
+        const graphs=order.map((cat,i)=>{const g=quadCats[cat](); g.a*=1+0.06*((t+i)%3); g.c += ((t+i)%2?0.25:-0.15); return g;});
         return {text:beforeDiagram('На рисунках изображены графики функций вида \\(y=ax^2+bx+c\\). Установите соответствие между знаками коэффициентов \\(a\\) и \\(c\\) и графиками функций.',{heading:'КОЭФФИЦИЕНТЫ',items:[itm('А) \\(a\\gt0,\\ c\\gt0\\)'),itm('Б) \\(a\\lt0,\\ c\\gt0\\)'),itm('В) \\(a\\gt0,\\ c\\lt0\\)')]})+afterDiagram('',[], 'В таблице под каждой буквой укажите соответствующий номер.'),svg_code:tripleSvg(graphs,['1)','2)','3)']),answer:ans,layout:'stacked11'};
     }
 
     function make11_6(ans,t=0){
-        const graphs=[...ans].map((d,i)=>{const g=quadCats2[d]();if(t<=5){g.a*=1+0.05*((t+i)%3);g.c+=((t+i)%2?0.2:-0.15);}else{g.a*=1+0.025*t;g.c+=((t+i)%2?0.1:-0.1)+0.015*t;}return g;});
+        const graphs=[...ans].map((d,i)=>{const g=quadCats2[d]();g.a*=1+0.05*((t+i)%3);g.c+=((t+i)%2?0.2:-0.15);return g;});
         return {text:beforeDiagram('На рисунках изображены графики функций вида \\(y=ax^2+bx+c\\). Установите соответствие между графиками функций и знаками коэффициентов \\(a\\) и \\(c\\).')+afterDiagram('КОЭФФИЦИЕНТЫ',[itm('1) \\(a\\gt0,\\ c\\lt0\\)'),itm('2) \\(a\\lt0,\\ c\\gt0\\)'),itm('3) \\(a\\gt0,\\ c\\gt0\\)')]),svg_code:tripleSvg(graphs,['А)','Б)','В)']),answer:ans,layout:'stacked11'};
     }
 
     function mixedSet7(t=0){
-        const hk=[4,6,8,3,5,7,9,2,10,1][(t<=5?t%5:(t-6)%5+5)], lk=[-1.2,-1.5,-0.8,-2,-1,-1.7,-1.3,-0.65,-2.25,-1.85][(t<=5?t%5:(t-6)%5+5)], lb=[3,4,2,3,4,2.5,1.5,3.5,4.5,1.8][(t<=5?t%5:(t-6)%5+5)], qa=[-0.35,-0.45,-0.3,-0.5,-0.4,-0.25,-0.6,-0.28,-0.55,-0.33][(t<=5?t%5:(t-6)%5+5)];
+        const hk=[4,6,8,3,5][t%5], lk=[-1.2,-1.5,-0.8,-2,-1][t%5], lb=[3,4,2,3,4][t%5], qa=[-0.35,-0.45,-0.3,-0.5,-0.4][t%5];
         return [
             {latex:`\\(y=\\frac{${hk}}{x}\\)`,graph:{type:'hyperbola',k:hk}},
             {latex:`\\(y=${String(lk).replace('.',',')}x+${lb}\\)`,graph:{type:'line',k:lk,b:lb}},
@@ -241,8 +241,8 @@
     function make11_7(ans,t=0){const fs=mixedSet7(t),graphs=[...ans].map(d=>fs[Number(d)-1].graph);return{text:beforeDiagram('Установите соответствие между графиками функций и формулами, которые их задают.')+afterDiagram('ФОРМУЛЫ',fs.map((f,i)=>itm(`${i+1}) ${f.latex}`))),svg_code:tripleSvg(graphs,['А)','Б)','В)']),answer:ans,layout:'stacked11'};}
 
     function mixedSet8(t=0){
-        const a=[-0.45,-0.35,-0.5,-0.4,-0.3,-0.25,-0.6,-0.28,-0.55,-0.33][(t<=5?t%5:(t-6)%5+5)], bx=[-2,-1.5,-2.5,-1,-2,-1.25,-2.25,-1.8,-2.7,-1.1][(t<=5?t%5:(t-6)%5+5)], c=[-1,-2,-1.5,-2.5,-1,-1.8,-2.8,-3,-0.8,-3.5][(t<=5?t%5:(t-6)%5+5)];
-        const hk=[-4,-6,-3,-5,-8,-2,-7,-9,-10,-1][(t<=5?t%5:(t-6)%5+5)], lk=[-0.5,-0.75,-0.4,-1,-0.6,-0.55,-0.85,-1.1,-0.65,-0.95][(t<=5?t%5:(t-6)%5+5)], lb=[-3,-2,-4,-3,-2,-2.5,-3.5,-1.5,-4.5,-2.8][(t<=5?t%5:(t-6)%5+5)];
+        const a=[-0.45,-0.35,-0.5,-0.4,-0.3][t%5], bx=[-2,-1.5,-2.5,-1,-2][t%5], c=[-1,-2,-1.5,-2.5,-1][t%5];
+        const hk=[-4,-6,-3,-5,-8][t%5], lk=[-0.5,-0.75,-0.4,-1,-0.6][t%5], lb=[-3,-2,-4,-3,-2][t%5];
         return [
             {latex:`\\(y=${String(a).replace('.',',')}x^2${bx<0?'':'+'}${String(bx).replace('.',',')}x${c<0?'':'+'}${String(c).replace('.',',')}\\)`,graph:{type:'parabola',a:a,b:bx,c:c}},
             {latex:`\\(y=\\frac{${hk}}{x}\\)`,graph:{type:'hyperbola',k:hk}},
@@ -252,7 +252,7 @@
     function make11_8(ans,t=0){const fs=mixedSet8(t),order=invertLetterAnswer(ans),map={A:fs[0].graph,B:fs[1].graph,C:fs[2].graph},graphs=order.map(x=>map[x]);return{text:beforeDiagram('Установите соответствие между формулами, задающими функции, и графиками этих функций.',{heading:'ФОРМУЛЫ',items:[itm(`А) ${fs[0].latex}`),itm(`Б) ${fs[1].latex}`),itm(`В) ${fs[2].latex}`)]})+afterDiagram('',[], 'В таблице под каждой буквой укажите соответствующий номер.'),svg_code:tripleSvg(graphs,['1)','2)','3)']),answer:ans,layout:'stacked11'};}
 
     function mixedSet9(t=0){
-        const lk=[0.5,1,0.75,1.5,0.4,0.8,1.25,1.6,0.3,1.1][(t<=5?t%5:(t-6)%5+5)], qc=[2,3,1.5,2.5,1,3.5,4,1.8,2.8,4.5][(t<=5?t%5:(t-6)%5+5)], qa=[-0.45,-0.35,-0.5,-0.4,-0.3,-0.25,-0.6,-0.28,-0.55,-0.33][(t<=5?t%5:(t-6)%5+5)], rs=[1,1.2,0.8,1.4,1,1.6,0.65,1.1,1.35,0.9][(t<=5?t%5:(t-6)%5+5)];
+        const lk=[0.5,1,0.75,1.5,0.4][t%5], qc=[2,3,1.5,2.5,1][t%5], qa=[-0.45,-0.35,-0.5,-0.4,-0.3][t%5], rs=[1,1.2,0.8,1.4,1][t%5];
         return [
             {latex:`\\(y=${String(lk).replace('.',',')}x\\)`,graph:{type:'line',k:lk,b:0}},
             {latex:`\\(y=${String(qc).replace('.',',')}${qa<0?'-':'+'}${String(Math.abs(qa)).replace('.',',')}x^2\\)`,graph:{type:'parabola',a:qa,b:0,c:qc}},
@@ -378,16 +378,6 @@
         ]
     };
 
-    // Добавлены новые проверяемые соответствия: рисунки строятся теми же
-    // функциями, что и исходные, а ключ вычисляется из перестановки графиков.
-    const permutations11 = ['123','231','312','213','321'];
-    const makers11 = [make11_1,make11_2,make11_3,make11_4,make11_5,make11_6,make11_7,make11_8,make11_9];
-    makers11.forEach((maker, i) => {
-        for (let j=0; j<5; j++) {
-            const answer=permutations11[(j+i)%5];
-            task11Data.prototypes[i].tasks.push(maker(answer,j+6));
-        }
-    });
     window.database[11] = task11Data;
     window.database["task11"] = task11Data;
 })();
