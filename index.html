@@ -5472,6 +5472,22 @@ body.auth-locked > *:not(#passwordGate) {
         if(suppressDiagram) artwork='';
         if(containsVisual) artwork='';
         let body=content.trim();
+        // В сюжетах 1–5 сохраняем полноценные пустые клетки таблицы ответа.
+        // Компактная таблица «A2 A3 A4 A6» — не таблица исходных чисел:
+        // при печати её пустая строка раньше схлопывалась до тонкой полоски.
+        if(num>=1 && num<=5 && /<table\b/i.test(body)) {
+            const tableHost=document.createElement('div');
+            tableHost.innerHTML=body;
+            tableHost.querySelectorAll('table').forEach(table=>{
+                const rows=Array.from(table.rows||[]);
+                if(rows.length!==2 || rows[0].cells.length!==4 || rows[1].cells.length!==4)return;
+                const headers=Array.from(rows[0].cells).map(cell=>(cell.textContent||'').trim());
+                const blanks=Array.from(rows[1].cells).every(cell=>!(cell.textContent||'').trim());
+                if(blanks && headers.every(value=>/^[AА]\s*\d{1,2}$/i.test(value)))
+                    table.classList.add('oge-exam-answer-grid');
+            });
+            body=tableHost.innerHTML;
+        }
         // Задание 11: таблица соответствия обязательна даже при ином типе прототипа.
         if(num===11 && !/oge-match11-print/.test(body)) {
             body += '<table class="oge-match11-print" aria-label="Таблица ответа для задания 11"><thead><tr><th>А</th><th>Б</th><th>В</th></tr></thead><tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>';
@@ -5583,8 +5599,11 @@ body.auth-locked > *:not(#passwordGate) {
                     // Заголовок остаётся с началом условия, последний абзац — с первой задачей.
                     blocks.forEach((block,index)=>{
                         const intro='<div class="oge-exam-intro">'+(index===0?label:'')+block+'</div>';
-                        if(index===blocks.length-1 && !/<(?:img|svg|table)\b/i.test(block))prefix+=intro;
-                        else {units.push(unit(prefix+intro));prefix='';}
+                        // Общее условие печатаем отдельными смысловыми блоками.
+                        // Не приклеиваем последний абзац к задаче 1 с таблицами:
+                        // большой неделимый фрагмент оставлял пустую левую колонку.
+                        units.push(unit(prefix+intro));
+                        prefix='';
                     });
                     introDone=true;
                 }
@@ -6040,6 +6059,11 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-statement p{margin:0 0 1.1mm;}
 .oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:fixed;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(7.4pt,.78em);line-height:1.16;}
 .oge-exam-statement th,.oge-exam-statement td,.oge-exam-intro th,.oge-exam-intro td{border:.4pt solid #777;padding:.45mm .8mm;vertical-align:top;overflow-wrap:anywhere;word-break:break-word;hyphens:auto;}
+/* Таблица для вписывания последовательности цифр: реальные клетки, а не тонкая полоска. */
+.oge-exam-statement table.oge-exam-answer-grid{width:82mm!important;max-width:100%!important;min-width:0!important;table-layout:fixed!important;margin:1.3mm 0 2mm!important;font-size:8.4pt!important;}
+.oge-exam-statement table.oge-exam-answer-grid th{padding:.6mm .8mm!important;text-align:center;}
+.oge-exam-statement table.oge-exam-answer-grid tr:last-child td{height:6.2mm!important;min-height:6.2mm!important;}
+.oge-exam-statement .common-table-wrap:has(table.oge-exam-answer-grid){max-width:100%!important;width:fit-content!important;overflow:visible!important;margin:1mm 0!important;}
 .oge-exam-task table{font-size:max(7.4pt,.78em);}
 .oge-match11-print{margin:2.2mm 0!important;max-width:54mm!important;table-layout:fixed!important;text-align:center;border:1px solid #888;}
 .oge-match11-print th,.oge-match11-print td{width:33.33%;padding:1.1mm 4mm!important;text-align:center;border:1px solid #777;}
