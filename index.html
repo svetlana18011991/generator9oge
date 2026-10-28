@@ -2370,7 +2370,7 @@ body.auth-locked > *:not(#passwordGate) {
                     <div class="count-stepper" onclick="event.stopPropagation();">
                         <span style="font-size:13px; color:#8fd49b; margin-right:5px;">комплектов:</span>
                         <button type="button" class="count-btn" onclick="adjustTaskCount('practice-scenarios', -1, event)" title="Уменьшить количество комплектов">−</button>
-                        <input type="number" id="count-practice-scenarios" min="0" value="0" oninput="updateTaskTotal()" onchange="updateTaskTotal()" title="Количество полных комплектов по пять заданий">
+                        <input type="number" id="count-practice-scenarios" min="0" value="0" oninput="ogeHandleScenarioCountInput()" onchange="ogeHandleScenarioCountInput()" title="Количество полных комплектов по пять заданий">
                         <button type="button" class="count-btn" onclick="adjustTaskCount('practice-scenarios', 1, event)" title="Увеличить количество комплектов">+</button>
                     </div>
                 </div>
@@ -2451,12 +2451,32 @@ body.auth-locked > *:not(#passwordGate) {
         if (status) status.textContent = `Выбрано сюжетов: ${checkedCount} из ${boxes.length}`;
     }
 
+    // A user who opens filters can narrow the random pool deliberately.
+    // Otherwise the first "+" on the scenario counter must enable the whole pool.
+    window.ogeScenarioFiltersCustomized = false;
+    function ogeSelectEveryScenarioFilter() {
+        document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"], [data-practice-scenario-checkbox="1"], [data-practice-scenario-number]')
+            .forEach(box => { if (box.type === 'checkbox') { box.checked = true; box.indeterminate = false; } });
+        document.querySelectorAll('input[id^="practice-scenario-all-"]').forEach(box => {
+            box.checked = true; box.indeterminate = false;
+        });
+        const master = document.getElementById('practice-scenario-theme-all');
+        if (master) { master.checked = true; master.indeterminate = false; }
+        getOgeScenarioThemeIds().forEach(id => {
+            const theme = window.ogePracticeDatabase?.[id];
+            (theme?.scenarios || []).forEach((_, i) => updatePracticeScenarioSummary(id, i));
+            updatePracticeThemeScenarioStatus(id);
+        });
+    }
+
     function handlePracticeScenarioCheckboxChange(themeId) {
+        window.ogeScenarioFiltersCustomized = true;
         updatePracticeThemeScenarioStatus(themeId);
         updateTaskTotal();
     }
 
     function toggleAllPracticeScenarioThemes(checked) {
+        window.ogeScenarioFiltersCustomized = true;
         document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]').forEach(cb => cb.checked = checked);
         const master = document.getElementById('practice-scenario-theme-all');
         if (master) { master.checked = checked; master.indeterminate = false; }
@@ -2466,6 +2486,7 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
     function handlePracticeScenarioThemeChange() {
+        window.ogeScenarioFiltersCustomized = true;
         const boxes = [...document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]')];
         const master = document.getElementById('practice-scenario-theme-all');
         if (master && boxes.length) {
@@ -2475,6 +2496,15 @@ body.auth-locked > *:not(#passwordGate) {
         }
         getOgeScenarioThemeIds().forEach(updatePracticeThemeScenarioStatus);
         syncPracticeScenarioCount();
+        updateTaskTotal();
+    }
+
+    function ogeHandleScenarioCountInput() {
+        const input = document.getElementById('count-practice-scenarios');
+        if (input && Number(input.value) > 0 && !window.ogeScenarioFiltersCustomized) {
+            const hasTheme = [...document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]')].some(cb => cb.checked);
+            if (!hasTheme) ogeSelectEveryScenarioFilter();
+        }
         updateTaskTotal();
     }
 
@@ -2506,6 +2536,7 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
     function handlePracticeScenarioTaskToggle(checkbox, themeId, scenarioIndex, taskNumber) {
+        window.ogeScenarioFiltersCustomized = true;
         const boxes = getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber);
         const checkedCount = boxes.filter(cb => cb.checked).length;
         if (checkedCount === 0) {
@@ -2518,6 +2549,7 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
     function toggleAllPracticeScenarioNumber(themeId, scenarioIndex, taskNumber, checked) {
+        window.ogeScenarioFiltersCustomized = true;
         const boxes = getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber);
         const master = document.getElementById(`practice-scenario-all-${themeId}-${scenarioIndex}-${taskNumber}`);
         if (!checked) {
@@ -2595,6 +2627,19 @@ body.auth-locked > *:not(#passwordGate) {
             <h3 style="margin-bottom:8px;">Практический комплект ${setNumber}. ${themeTitle}</h3>
             <div class="oge-practice-common-body" style="font-size:0.82em; line-height:1.28;">${introDiagramHTML}${stickyText}<div style="clear:both;"></div></div>
             <div style="margin-top:7px; color:#526273; font-size:0.86em;">Задания 1–5 относятся к этому условию.</div>
+        </div>`;
+    }
+
+    function makeOgeScenarioGameStatement(themeTitle, scenario, setNumber, taskNumber, task) {
+        const common = stripDiagramsFromHTML(scenario.common || '');
+        // The common diagram is supplied separately as svg and drawn on top of
+        // the writable canvas by every game/presentation template.
+        return `<div class="oge-scenario-complete-prompt" style="text-align:left;color:#15202b;font-size:clamp(14px,1.2vw,18px);line-height:1.4;max-width:100%;">
+          <details open class="oge-scenario-context" style="background:#f6fbff;border:1px solid #c4d9e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;max-width:100%;">
+            <summary style="font-weight:700;color:#164667;cursor:pointer;">Общее условие 1–5 · ${themeTitle}</summary>
+            <div style="max-height:34vh;overflow:auto;padding:7px 2px 2px;">${common}</div>
+          </details>
+          <div class="oge-scenario-specific" style="font-weight:400;text-align:left;"><b>Задание ${taskNumber}.</b> ${task.text || ''}</div>
         </div>`;
     }
 
@@ -2738,8 +2783,7 @@ body.auth-locked > *:not(#passwordGate) {
                 return cb && cb.checked;
             });
             if (selectedScenarioThemes.length === 0) {
-                infoBoard.innerHTML += '<div><b>Комплекты по сюжетам:</b> выберите хотя бы одну тему.</div>';
-                infoBoard.style.display = 'block';
+                throw new Error('Для комплекта заданий №1–5 не выбрана ни одна тема. Нажмите «Все темы» в настройках или восстановите выбор через «+».');
             } else {
                 const selectedScenariosByTheme = new Map();
                 selectedScenarioThemes.forEach(themeId => {
@@ -2766,8 +2810,7 @@ body.auth-locked > *:not(#passwordGate) {
 
                 const availableThemeIds = selectedScenarioThemes.filter(themeId => selectedScenariosByTheme.has(themeId));
                 if (availableThemeIds.length === 0) {
-                    infoBoard.innerHTML += '<div><b>Комплекты по сюжетам:</b> нет полностью настроенного выбранного сюжета.</div>';
-                    infoBoard.style.display = 'block';
+                    throw new Error('Для заданий №1–5 нет подходящего полного сюжета: проверьте галочки сюжетов и вариантов задач 1–5.');
                 } else {
                     const usage = new Map();
                     let themePool = [];
@@ -2862,6 +2905,7 @@ body.auth-locked > *:not(#passwordGate) {
                             const key = `${state.themeId}:${state.scenarioIndex}:${taskNumber}:${chosenPair.originalIndex}`;
                             usage.set(key, (usage.get(key) || 0) + 1);
                             const standaloneText = makeOgePracticeStandalone(theme.title, scenario, setNumber, taskNumber, chosen);
+                            const scenarioGameText = makeOgeScenarioGameStatement(theme.title, scenario, setNumber, taskNumber, chosen);
                             const useDraftDiagram = taskNumber !== 5;
                             scenarioTasks.push({
                                 examNumber: taskNumber,
@@ -2878,10 +2922,12 @@ body.auth-locked > *:not(#passwordGate) {
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
                                 standaloneSvg: chosen.standaloneSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
-                                gameText: standaloneText,
-                                gameSvg: useDraftDiagram ? (chosen.gameSvg || chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '',
-                                presentationText: taskNumber === 5 && /<table\b/i.test(String(chosen.text || '')) ? (chosen.text || '') : standaloneText,
-                                presentationHasTable: taskNumber === 5 && /<table\b/i.test(String(chosen.text || '')),
+                                gameText: scenarioGameText,
+                                // The diagram is part of the common condition for EVERY question 1–5.
+                                // Include it even for a table question: it must be writable in drafts.
+                                gameSvg: chosen.gameSvg || chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
+                                presentationText: scenarioGameText,
+                                presentationHasTable: /<table\b/i.test(String(chosen.text || '')),
                                 answer: String(chosen.answer ?? ''),
                                 accepts: Array.isArray(chosen.accepts) && chosen.accepts.length ? chosen.accepts.map(String) : [String(chosen.answer ?? '')],
                                 forceDraftDiagram: useDraftDiagram && Boolean(diagramHTML || chosen.svg_code || chosen.imageHTML),
@@ -3273,9 +3319,13 @@ body.auth-locked > *:not(#passwordGate) {
         let value = parseInt(input.value, 10);
         if (isNaN(value)) value = 0;
 
+        const oldValue = value;
         value += delta;
         if (value < 0) value = 0;
 
+        if (tid === 'practice-scenarios' && oldValue === 0 && value > 0 && !window.ogeScenarioFiltersCustomized) {
+            ogeSelectEveryScenarioFilter();
+        }
         input.value = value;
         updateTaskTotal();
         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3552,6 +3602,7 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
     function resetTaskCounts() {
+        window.ogeScenarioFiltersCustomized = false;
         // Сбрасываем сразу ОБА режима: счётчик полных вариантов и ручной набор.
         const fullCount = document.getElementById('oge-variant-count');
         if (fullCount) fullCount.value = '1';
@@ -4267,7 +4318,7 @@ body.auth-locked > *:not(#passwordGate) {
                         </div>`;
                 }
 
-                window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck });
+                window.currentGeneratedTasks.push({ text: item.gameText !== undefined ? item.gameText : standaloneText, draftText: item.gameText !== undefined ? item.gameText : renderText, presentationText: item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck, taskNumber: Number(item.examNumber || item.__ogeScenarioMeta?.taskNumber || String(tid || '').replace(/\D/g, '')) || 0, scenarioGroupId: item.__ogeScenarioMeta?.groupId || '' });
                 
                 let stickerHTMLInteractive = "";
                 let stickerHTMLPrint = "";
@@ -5879,7 +5930,7 @@ ${window.SCRIPT_END}
 <style>
 @page{size:A4 landscape;margin:9mm 10mm 9mm 10mm;}
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Times New Roman",serif;}
+html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New Roman",Times,serif;font-weight:400;}
 .oge-exam-page{width:277mm;height:190mm;max-height:190mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
 .oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
 .oge-exam-flow-unit{display:flow-root;break-inside:avoid;page-break-inside:avoid;}
@@ -5896,14 +5947,14 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:Georgia,"Tim
 .oge-exam-footer{flex:0 0 5mm;height:5mm;font:8pt Georgia,"Times New Roman",serif;color:#777;display:flex;align-items:end;justify-content:space-between;gap:5mm;border-top:.25pt solid #ddd;padding-top:.8mm;} .oge-exam-footer .brand{font-style:italic;font-size:8.1pt;color:#757575}.oge-exam-footer a{color:#626d80;text-decoration:none;border-bottom:.25pt solid #a3a3a3;}
 .oge-exam-part1{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:0 0 2mm;}
 .oge-exam-part2{font:bold 11.5pt Georgia,"Times New Roman",serif;text-align:center;padding:2mm 0 3mm;}
-.oge-exam-intro{margin:0 0 1.5mm 0;font:var(--oge-print-font,11pt)/1.30 Georgia,"Times New Roman",serif;color:#111;}
+.oge-exam-intro{margin:0 0 1.5mm 0;font:400 var(--oge-print-font,11pt)/1.30 "Times New Roman",Times,serif;color:#111;}
 .oge-exam-intro-label{text-align:left;font-weight:600;margin:0 0 2mm;}
 .oge-exam-intro .oge-practice-common{margin:0;padding:0;border:none;box-shadow:none;background:transparent;}
 .oge-exam-intro h3,.oge-exam-intro h4{font-size:9pt;margin:0 0 1mm;}
 .oge-exam-intro div,.oge-exam-intro p{line-height:1.30;margin:0 0 1.2mm;}
-.oge-exam-task{font:var(--oge-print-font,11pt)/1.30 Georgia,"Times New Roman",serif;color:#111;margin:0 0 2mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
+.oge-exam-task{font:400 var(--oge-print-font,11pt)/1.30 "Times New Roman",Times,serif;color:#111;margin:0 0 2mm 0;break-inside:avoid;page-break-inside:avoid;overflow-wrap:break-word;}
 .oge-exam-task-name{display:block;font-weight:700;white-space:nowrap;margin-bottom:.8mm;}
-.oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;}
+.oge-exam-statement,.oge-exam-statement>div{color:#111;min-width:0;font-size:inherit!important;line-height:inherit!important;font-weight:400;}
 .oge-exam-statement>div>div{font-size:inherit!important;line-height:inherit!important;}
 .oge-exam-statement p{margin:0 0 1.1mm;}
 .oge-exam-statement table,.oge-exam-intro table{border-collapse:collapse;table-layout:fixed;max-width:100%;width:100%;margin:1.3mm auto;font-size:max(7.4pt,.78em);line-height:1.16;}
@@ -6237,6 +6288,24 @@ ${window.SCRIPT_END}
         document.getElementById('pres-modal').style.display='flex'; 
     }
 
+    function ogeImproveGameStatementLayout(html) {
+        // Only exported games are affected; original template source files are unchanged.
+        const css = `<style>
+            .oge-scenario-complete-prompt{max-width:100%!important;overflow-wrap:break-word!important}
+            .oge-scenario-complete-prompt table{max-width:100%!important;width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-size:clamp(11px,1vw,15px)!important}
+            .oge-scenario-complete-prompt th,.oge-scenario-complete-prompt td{border:1px solid #999!important;padding:3px!important;overflow-wrap:anywhere!important}
+            .oge-scenario-complete-prompt summary{user-select:none}
+            .oge-scenario-complete-prompt .oge-scenario-context>div{overflow-y:auto!important}
+            #towerDraftDiagram{max-width:68%!important;max-height:68%!important}
+            #towerDraftDiagram svg,#towerDraftDiagram img{max-width:100%!important;max-height:100%!important;object-fit:contain!important}
+            .canvasWrap{height:clamp(320px,48vh,530px)!important}
+            .draftDiagram svg,.draftDiagram img,#draftDiagram svg,#draftDiagram img{max-height:min(43vh,360px)!important;max-width:100%!important;object-fit:contain!important}
+            #draftTaskStatement .draft-figure-wrap{width:min(90%,510px)!important;max-width:100%!important}
+            #draftTaskStatement .draft-figure-wrap svg,#draftTaskStatement .draft-figure-wrap img{max-height:min(40vh,330px)!important;max-width:100%!important;object-fit:contain!important}
+            </style>`;
+        return String(html || '').replace('</head>', css + '</head>');
+    }
+
     function generateTowerGame() {
         try {
             const eligibleTowerTasks=getOgeGameEligibleTasks();
@@ -6305,7 +6374,8 @@ ${window.SCRIPT_END}
                 .replace('/*__CONFIG_DATA__*/', configScript)
                 .replace('<head>', '<head><base href="https://svetlana18011991.github.io/generator11prof/">');
 
-            finalHtml = window.injectReferenceHelpIntoHtml(finalHtml, 'game');
+            finalHtml = ogeImproveGameStatementLayout(finalHtml);
+        finalHtml = window.injectReferenceHelpIntoHtml(finalHtml, 'game');
             const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
             downloadBlobSafely(blob, 'Игра_Башня.html');
         } catch (error) {
@@ -6546,6 +6616,7 @@ ${window.SCRIPT_END}
             .replace("/*__CONFIG_DATA__*/", configScript)
             .replace("<head>", "<head>" + baseTag);
 
+        finalHtml = ogeImproveGameStatementLayout(finalHtml);
         finalHtml = window.injectReferenceHelpIntoHtml(finalHtml, 'game');
         const blob = new Blob([finalHtml], { type: "text/html;charset=utf-8" });
         downloadBlobSafely(blob, "Мотивационное_послание.html");
@@ -6599,6 +6670,7 @@ ${window.SCRIPT_END}
         let baseTag = '<base href="https://svetlana18011991.github.io/generator11prof/">';
         let finalHtml = BATTLE_TEMPLATE.replace("/*__CONFIG_DATA__*/", configScript).replace("<head>", "<head>" + baseTag);
 
+        finalHtml = ogeImproveGameStatementLayout(finalHtml);
         finalHtml = window.injectReferenceHelpIntoHtml(finalHtml, 'game');
         let blob = new Blob([finalHtml], { type: "text/html;charset=utf-8" });
         downloadBlobSafely(blob, "Игра_Баттл_ОГЭ.html");
