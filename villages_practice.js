@@ -239,3 +239,10 @@
         scenarios: [scenario]
     };
 })();
+
+/* Final workbook alignment: Antonovka appears in training variants 1 and 3. */
+(function(){const db=window.ogePracticeDatabase?.villages;if(!db)return;
+const corrections={'3.3':['29','От Антоновки до Богданово по прямой — 29 км.'],'4.3':['58','По прямой просёлочной дороге длиной 29 км при скорости 30 км/ч потребуется 29 / 30 · 60 = 58 минут.'],'5.1':['9,2','Приравниваем затраты топлива на двух маршрутах и составляем уравнение; искомый расход по просёлочным дорогам составляет 9,2 л/100 км.']};
+for(const t of db.catalog?.prototypes||[]){const c=corrections[t.id];if(c){t.answer=c[0];t.accepts=[c[0],c[0].replace(',','.')];t.solution='<p>'+c[1]+'</p><p><b>Ответ: '+c[0]+'</b></p>';}}
+const s=db.scenarios?.find(x=>x.id==='villages-plot-1');if(s){const ids={1:['1.1','1.3'],2:['2.1','2.3'],3:['3.1','3.3'],4:['4.1','4.3'],5:['5.1','5.3']};for(const n of [1,2,3,4,5])s.tasks[n]=ids[n].map(id=>db.catalog.prototypes.find(t=>t.id===id)).filter(Boolean);}
+})();
