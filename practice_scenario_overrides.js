@@ -69,3 +69,55 @@ if(!p){const a=[205,55,14],b=[165,65,14];p={id:'2.2-2',typeId:'2.2',examNumber:2
 if(sc)sc.tasks[2]=[p];
 const list=db.catalog?.prototypes;if(list&&!list.some(t=>t.id==='2.2'))list.push(p);
 })();
+
+
+/* 2026-10-29: full workbook alignment of training variants 1-5. */
+(function(){
+ const db=window.ogePracticeDatabase||{};
+ // The extra Maslovka script formerly picked db.plot instead of db.tropinki.
+ const tr=db.tropinki,pl=db.plot;
+ if(tr){
+  let mas=(tr.scenarios||[]).find(x=>x.id==='trails-plot-maslovka')||
+   (pl?.scenarios||[]).find(x=>x.id==='trails-plot-maslovka');
+  let yas=(tr.scenarios||[]).find(x=>x.id==='tropinki-plot-1');
+  let vas=(tr.scenarios||[]).find(x=>x.id==='tropinki-plot-2');
+  if(mas&&yas&&vas){
+   tr.scenarios=[mas,yas,vas];
+   if(pl)pl.scenarios=(pl.scenarios||[]).filter(x=>x.id!=='trails-plot-maslovka');
+   for(const ts of Object.values(mas.tasks||{}))for(const t of ts){
+    if(tr.catalog?.prototypes&&!tr.catalog.prototypes.some(a=>a.id===t.id))tr.catalog.prototypes.push(t);
+   }
+   for(const n of [1,2,3,4,5]){yas.tasks[n]=yas.tasks[n].slice(1,2);vas.tasks[n]=vas.tasks[n].slice(0,1);}
+  }
+ }
+ const st=db.stove;
+ if(st?.scenarios?.length){
+  const sc=st.scenarios[0],original={};for(const n of [1,2,3,4,5])original[n]=[...(sc.tasks[n]||[])];
+  // workbook: columns 1,2,3; third uses different prototype only in task 2
+  for(const n of [1,2,3,4,5]){const a=original[n];sc.tasks[n]=[a[0],a[n===2?2:1],a[n===2?0:0]].filter(Boolean);}
+ }
+ const sh=db.sheets;
+ if(sh?.scenarios?.length){
+  const sc=sh.scenarios[0],o={};for(const n of [1,2,3,4,5])o[n]=[...(sc.tasks[n]||[])];
+  for(const n of [1,2,3,4,5])sc.tasks[n]=[o[n][0],o[n][1],o[n][n===4?0:2]].filter(Boolean);
+ }
+ if(pl){
+  const changed={
+   'plot-s1-2.1':['9','Для всех дорожек и площадки понадобится 9 упаковок по 8 плиток.'],
+   'plot-s1-4.1':['29','Площадь всех строений составляет 29% площади участка после округления.'],
+   'plot-s2-2.2':['6','Для всех дорожек понадобится 6 упаковок по 5 плиток.'],
+   'plot-s2-3.2':['72','Площадь открытого грунта огорода вне теплицы равна 72 м².'],
+   'plot-s2-4.1':['14','После округления теплица занимает 14% площади всего огорода.']
+  };
+  for(const sc of pl.scenarios||[])for(const tasks of Object.values(sc.tasks||{}))for(const t of tasks){
+   const a=changed[t.id];if(a){t.answer=a[0];t.accepts=[a[0],a[0].replace(',','.')];t.solution='<p>'+a[1]+'</p><p><b>Ответ: '+a[0]+'</b></p>';}
+  }
+  const p1=pl.scenarios.find(x=>x.id==='plot-story-1-sosnovka');
+  const p2=pl.scenarios.find(x=>x.id==='plot-story-2-avdeevo');
+  const p3=pl.scenarios.find(x=>x.id==='plot-story-3-trainer');
+  if(p1&&p2&&p3){
+   for(const n of [1,2,3,4,5]){p1.tasks[n]=p1.tasks[n].slice(0,1);p2.tasks[n]=p2.tasks[n].slice(n===4?0:1,n===4?1:2);p3.tasks[n]=p3.tasks[n].slice(0,1);}
+   pl.scenarios=[p1,p2,p3];
+  }
+ }
+})();
