@@ -60,3 +60,12 @@ for(const arr of Object.values(scenario2.tasks))base.catalog.prototypes.push(...
     if(first){first.answer='4625';first.accepts=['4625'];first.solution=String(first.solution||'').replace(/4635/g,'4625');}
   }
 })();
+
+/* Ensure tires training variant 2 uses workbook radius comparison task 2.2. */
+(function(){const db=window.ogePracticeDatabase?.tires;if(!db)return;
+const sc=(db.scenarios||[]).find(s=>s.id==='tires-plot-2');
+let p=(db.radiusComparisonVariants||[]).find(t=>t.id==='2.2-2');
+if(!p){const a=[205,55,14],b=[165,65,14];p={id:'2.2-2',typeId:'2.2',examNumber:2,title:'Сравнение радиусов колёс',typeTitle:'2.2 — сравнение радиусов колёс',text:'На сколько миллиметров радиус колеса с шиной 205/55 R14 больше, чем радиус колеса с шиной 165/65 R14?',answer:'5,5',accepts:['5,5','5.5'],solution:'<p>Высоты боковин: 205 · 0,55 = 112,75 мм и 165 · 0,65 = 107,25 мм. Разность радиусов 112,75 − 107,25 = 5,5 мм.</p><p><b>Ответ: 5,5</b></p>'};}
+if(sc)sc.tasks[2]=[p];
+const list=db.catalog?.prototypes;if(list&&!list.some(t=>t.id==='2.2'))list.push(p);
+})();
