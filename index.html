@@ -10,11 +10,11 @@
     <script src="tower_template.js?v=47"></script>
     <script src="battle_template.js?v=47"></script>
     <script src="motivation_template.js?v=motivation-v43"></script>
-    <!-- Связанные практические комплекты ОГЭ 1–5: все 8 тем (восстановлено 27.10.2026) -->
+    <!-- Задания 1–5: каталоги и 24 комплекта по рабочей тетради Быковой С. (2026). -->
     <script src="oge_practice.js?v=20261027-8themes"></script>
     <script src="tariff_plot_base64.js?v=20261027-8themes"></script>
-    <script src="tariff_practice.js?v=20261027-8themes"></script>
-    <script src="apartment_practice.js?v=20261027-8themes"></script>
+    <script src="tariff_practice.js?v=20261029-workbook"></script>
+    <script src="apartment_practice.js?v=20261029-workbook"></script>
     <script src="tires_practice.js?v=20261027-8themes"></script>
     <script src="tires_2_2_addon.js?v=20261028"></script>
     <script src="stove_practice.js?v=20261027-8themes"></script>
@@ -22,9 +22,12 @@
     <script src="plot_plan_base64.js?v=20261027-8themes"></script>
     <script src="plot_practice.js?v=20261027-8themes"></script>
     <script src="trails_maslovka_scenario.js?v=20261029-maslovka"></script>
-    <script src="villages_practice.js?v=20261027-8themes"></script>
+    <script src="villages_practice.js?v=20261029-workbook"></script>
     <script src="villages_three_new_scenarios.js?v=20261029-4plots-checked-v2"></script>
     <script src="practice_scenario_overrides.js?v=20261027-8themes"></script>
+    <script src="workbook_trails_villages.js?v=20261029-workbook"></script>
+    <script src="workbook_tariff_apartment_tires.js?v=20261029-workbook"></script>
+    <script src="workbook_stove_sheets_plot.js?v=20261029-workbook"></script>
     <script src="task6.js"></script>
     <script src="task6_extra.js?v=20260816-2"></script>
     <script src="task7.js?v=20260821-theorydrawings2"></script>
@@ -2405,7 +2408,7 @@ body.auth-locked > *:not(#passwordGate) {
                         <button type="button" class="count-btn" onclick="adjustTaskCount('practice-scenarios', 1, event)" title="Увеличить количество комплектов">+</button>
                     </div>
                 </div>
-                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> Все темы, сюжеты и варианты изначально выбраны. Настройки нужны только для сужения выбора.</div>
+                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> 8 тем, по 3 варианта из рабочей тетради — 24 комплекта. Каждый комплект содержит пять связанных заданий. Все темы и сюжеты изначально выбраны.</div>
                 <div id="protos-practice-scenarios" class="proto-list practice-settings-list">${settingsHTML}</div>
             </div>`;
     }
