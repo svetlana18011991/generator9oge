@@ -94,7 +94,7 @@ const list=db.catalog?.prototypes;if(list&&!list.some(t=>t.id==='2.2'))list.push
  if(st?.scenarios?.length){
   const sc=st.scenarios[0],original={};for(const n of [1,2,3,4,5])original[n]=[...(sc.tasks[n]||[])];
   // workbook: columns 1,2,3; third uses different prototype only in task 2
-  for(const n of [1,2,3,4,5]){const a=original[n];sc.tasks[n]=[a[0],a[n===2?2:1],a[n===2?0:0]].filter(Boolean);}
+  for(const n of [1,2,3,4,5]){const a=original[n];sc.tasks[n]=[a[0],a[n===2?2:1],a[n===2?2:0]].filter(Boolean);}
  }
  const sh=db.sheets;
  if(sh?.scenarios?.length){
