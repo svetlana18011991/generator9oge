@@ -102,3 +102,15 @@
         scenarios: [scenario]
     };
 })();
+
+/* Final workbook alignment for apartment prototype answers and training variants. */
+(function(){const db=window.ogePracticeDatabase?.apartment;if(!db)return;
+const corrections={
+'2.2':['32','Площадь коридора 20 м². Одна упаковка из 8 досок размером 20 × 40 см покрывает 8 · 0,2 · 0,4 = 0,64 м². Нужно округлить 20 / 0,64 = 31,25 до 32 упаковок.'],
+'3.2':['4,8','Санузел занимает 30 клеток по 0,16 м². Площадь: 30 · 0,16 = 4,8 м².'],
+'3.3':['20','Коридор занимает 125 клеток по 0,16 м². Площадь: 125 · 0,16 = 20 м².'],
+'4.1':['680','Гостиная занимает 156 клеток, кладовая — 20. Увеличение: (156 − 20) / 20 · 100% = 680%.'],
+'4.2':['200','Кухня занимает 90 клеток, санузел — 30. Увеличение: (90 − 30) / 30 · 100% = 200%.']};
+for(const t of db.catalog?.prototypes||[]){const c=corrections[t.id];if(c){t.answer=c[0];t.accepts=[c[0],c[0].replace(',','.')];t.solution='<p>'+c[1]+'</p><p><b>Ответ: '+c[0]+'</b></p>';}}
+const s=db.scenarios?.[0];if(s)for(const n of [1,2,3,4,5])s.tasks[n]=(db.catalog.prototypes||[]).filter(t=>Number(t.examNumber)===n).slice(0,3);
+})();
