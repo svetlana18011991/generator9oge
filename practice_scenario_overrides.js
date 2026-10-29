@@ -48,3 +48,14 @@ for(const arr of Object.values(scenario2.tasks))base.catalog.prototypes.push(...
   }
 })();
 
+
+/* Final PDF key correction — villages training variant 1, task 1. */
+(function(){
+  const theme=window.ogePracticeDatabase&&window.ogePracticeDatabase.villages;
+  if(!theme)return;
+  for(const sc of (theme.scenarios||[])){
+    if(sc.id!=='villages-plot-1')continue;
+    const first=sc.tasks&&sc.tasks[1]&&sc.tasks[1][0];
+    if(first){first.answer='4625';first.accepts=['4625'];first.solution=String(first.solution||'').replace(/4635/g,'4625');}
+  }
+})();
