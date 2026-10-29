@@ -55,6 +55,15 @@
             variant('tropinki', 2, yasnaya, ['1.2', '2.2', '3.2', '4.2', '5.2'], 'Ясная — Майское'),
             variant('tropinki', 3, vasilkovo, ['1.1', '2.1', '3.1', '4.1', '5.1'], 'Васильково — Иваново')
         ];
+        const maslovkaVariant = trails.scenarios[0];
+        const emphasizePlaces = html => String(html || '').split(/(<[^>]+>)/g)
+            .map((part, index) => index % 2 ? part : part.replace(/Масловка|Захарово|Вёсенка|Полянка/g, '<b>$&</b>'))
+            .join('');
+        maslovkaVariant.common = emphasizePlaces(maslovkaVariant.common);
+        Object.values(maslovkaVariant.tasks).flat().forEach(task => {
+            task.common = maslovkaVariant.common;
+            task.text = emphasizePlaces(task.text);
+        });
     }
 
     const villages = db.villages;
