@@ -2381,7 +2381,7 @@ body.auth-locked > *:not(#passwordGate) {
                 <div class="practice-theme-card practice-theme-level">
                     <div class="practice-theme-head">
                         <label class="practice-theme-check">
-                            <input type="checkbox" id="practice-scenario-theme-${themeId}" data-practice-scenario-theme-checkbox="1" checked onchange="handlePracticeScenarioThemeChange()">
+                            <input type="checkbox" id="practice-scenario-theme-${themeId}" data-practice-scenario-theme-checkbox="1" checked onchange="handlePracticeScenarioThemeChange('${themeId}')">
                             <span>${theme.title}<span class="practice-catalog-count">${scenarioCount} сюжет.</span></span>
                         </label>
                         <button type="button" class="btn-settings" onclick="togglePracticeScenarioThemeDetails('${themeId}'); event.stopPropagation();">Сюжеты</button>
@@ -2509,18 +2509,38 @@ body.auth-locked > *:not(#passwordGate) {
         updateTaskTotal();
     }
 
-    function toggleAllPracticeScenarioThemes(checked) {
-        window.ogeScenarioFiltersCustomized = true;
-        document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]').forEach(cb => cb.checked = checked);
-        const master = document.getElementById('practice-scenario-theme-all');
-        if (master) { master.checked = checked; master.indeterminate = false; }
-        getOgeScenarioThemeIds().forEach(updatePracticeThemeScenarioStatus);
-        syncPracticeScenarioCount();
-        updateTaskTotal();
+    // Выбор темы включает её полные комплекты, в том числе после сброса.
+    // Изменение количества комплектов не меняет выбранные вручную сюжеты.
+    function setPracticeScenarioThemeSelection(themeId, checked) {
+        const themeBox = document.getElementById(`practice-scenario-theme-${themeId}`);
+        if (themeBox) { themeBox.checked = checked; themeBox.indeterminate = false; }
+        const theme = window.ogePracticeDatabase?.[themeId];
+        (theme?.scenarios || []).forEach((_, scenarioIndex) => {
+            const scenarioBox = document.getElementById(`practice-scenario-${themeId}-${scenarioIndex}`);
+            if (scenarioBox) { scenarioBox.checked = checked; scenarioBox.indeterminate = false; }
+            if (checked) {
+                for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
+                    getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber).forEach(box => box.checked = true);
+                    syncPracticeScenarioNumberMaster(themeId, scenarioIndex, taskNumber);
+                }
+            }
+            updatePracticeScenarioSummary(themeId, scenarioIndex);
+        });
+        updatePracticeThemeScenarioStatus(themeId);
     }
 
-    function handlePracticeScenarioThemeChange() {
+    function toggleAllPracticeScenarioThemes(checked) {
         window.ogeScenarioFiltersCustomized = true;
+        getOgeScenarioThemeIds().forEach(themeId => setPracticeScenarioThemeSelection(themeId, checked));
+        handlePracticeScenarioThemeChange();
+    }
+
+    function handlePracticeScenarioThemeChange(themeId) {
+        window.ogeScenarioFiltersCustomized = true;
+        if (themeId) {
+            const themeBox = document.getElementById(`practice-scenario-theme-${themeId}`);
+            if (themeBox) setPracticeScenarioThemeSelection(themeId, themeBox.checked);
+        }
         const boxes = [...document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"]')];
         const master = document.getElementById('practice-scenario-theme-all');
         if (master && boxes.length) {
