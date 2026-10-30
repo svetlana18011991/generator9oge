@@ -1583,7 +1583,7 @@ body.auth-locked > *:not(#passwordGate) {
             <p>Вы сможете просмотреть полученные задания и при необходимости заменить отдельный аналог или тип задачи. Затем выберите нужную кнопку:</p>
             <ul>
                 <li><strong>«Интерактивный вариант»</strong> — ученик решает задания в браузере, вводит ответы, пользуется черновиком и получает результаты проверки. Удобно для самостоятельной работы и отдельных подборок.</li>
-                <li><strong>«Файл для печати (PDF)»</strong> — скачивается подготовленный <strong>HTML-файл для печати</strong>. Откройте его в браузере, нажмите <strong>Ctrl + P</strong> и выберите <strong>«Сохранить в формате PDF»</strong> или принтер. Полные варианты печатаются на альбомных листах, а выборочные подборки — как обычный текстовый документ А4 в книжной ориентации, со стикерами, если они выбраны.</li>
+                <li><strong>«Файл для печати (PDF)»</strong> — открывается документ и окно печати. Выберите <strong>«Сохранить в формате PDF»</strong> или принтер. Если окно печати не появилось, нажмите <strong>«Печать / сохранить PDF»</strong> над документом. Полные варианты печатаются на альбомных листах, а выборочные подборки — как обычный текстовый документ А4 в книжной ориентации, со стикерами, если они выбраны.</li>
                 <li><strong>«Ключи (Ответы)»</strong> — отдельный файл с правильными ответами. Для нескольких полных вариантов ключи содержат ответы ко всем созданным вариантам.</li>
                 <li><strong>«Создать презентацию»</strong> — показ заданий на экране; можно выбрать оформление презентации.</li>
                 <li><strong>«Создать игру»</strong> — задания в игровых форматах: «Башня знаний», «Битва с боссом» и «Мотивационное послание». Для последнего можно выбрать готовую картинку или загрузить свою. Некоторые игры требуют определённого количества заданий.</li>
@@ -5735,6 +5735,113 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 @media screen{body{background:#e9e9e9!important;padding:15px 0!important;}.oge-manual-document{background:#fff;padding:14mm 15mm;box-shadow:0 3px 12px #0002;}}
 `;
     }
+    function openOgePrintDocument(html, filename) {
+        // Preserve the same typography helper used by downloaded documents.
+        if (!html.includes('__ogeNoSplitMath')) {
+            const helper = '<script>' + OGE_MATH_NO_SPLIT_SCRIPT + '<\/script>';
+            html = html.replace(/<\/head>/i, helper + '</head>');
+        }
+        const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+        // Keep this synchronous with the user's click so browsers allow the tab.
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            downloadBlobSafely(blob, filename);
+            alert('Браузер заблокировал вкладку печати. После закрытия этого сообщения скачается файл для печати: откройте его и нажмите «Печать / сохранить PDF». Можно также разрешить всплывающие окна для генератора.');
+            return;
+        }
+        const url = URL.createObjectURL(blob);
+        printWindow.opener = null;
+        printWindow.location.replace(url);
+        // Keep the URL alive for «Повторить подготовку», which reloads this tab.
+        const cleanup = setInterval(function(){
+            if (printWindow.closed) {
+                clearInterval(cleanup);
+                URL.revokeObjectURL(url);
+            }
+        }, 10000);
+    }
+    function ogePrintToolsHTML() {
+        return `<style>
+@media screen {
+ #oge-print-tools{position:sticky;top:0;z-index:10000;box-sizing:border-box;width:100%;padding:14px 20px;margin:0 auto 20px;background:#fff;border:1px solid #ccd8e7;border-radius:8px;color:#18304e;font:16px/1.4 Arial,sans-serif;box-shadow:0 2px 12px #0002;}
+ #oge-print-tools button{font:inherit;padding:9px 16px;margin:0 10px 8px 0;border:0;border-radius:6px;background:#003399;color:white;cursor:pointer;}
+ #oge-print-tools button:disabled{opacity:.5;cursor:wait;}
+ #oge-print-status{margin:0;}
+ #oge-print-status[data-error]{color:#a32518;}
+}
+@media print{#oge-print-tools{display:none!important;}}
+</style><aside id="oge-print-tools" aria-label="Печать документа">
+<button id="oge-print-button" type="button" disabled>Печать / сохранить PDF</button>
+<button id="oge-print-retry" type="button" hidden>Повторить подготовку</button>
+<p id="oge-print-status" role="status">Подготавливаем формулы и рисунки для печати…</p>
+</aside>`;
+    }
+    // Serialized into both printable documents; keep it independent of the app.
+    function ogePreparePrint(paginate) {
+        const button = document.getElementById('oge-print-button');
+        const retry = document.getElementById('oge-print-retry');
+        const status = document.getElementById('oge-print-status');
+        function limit(promise, message) {
+            return new Promise(function(resolve, reject) {
+                const timer = setTimeout(function(){ reject(new Error(message)); }, 30000);
+                Promise.resolve(promise).then(function(value){
+                    clearTimeout(timer); resolve(value);
+                }, function(error){ clearTimeout(timer); reject(error); });
+            });
+        }
+        function fail(message, error) {
+            console.error('Подготовка печати', error);
+            status.textContent = message;
+            status.setAttribute('data-error', '');
+            retry.hidden = false;
+        }
+        function print() {
+            try { window.focus(); window.print(); }
+            catch (error) {
+                status.textContent = 'Окно печати не открылось. Нажмите Ctrl + P и выберите сохранение в PDF.';
+            }
+        }
+        button.addEventListener('click', print);
+        retry.addEventListener('click', function(){ window.location.reload(); });
+        async function prepare() {
+            try {
+                if (!window.MathJax || !window.MathJax.startup) {
+                    const script = document.getElementById('oge-print-mathjax');
+                    await limit(new Promise(function(resolve, reject) {
+                        if (!script) { reject(new Error('MathJax не загрузился')); return; }
+                        script.addEventListener('load', resolve, {once:true});
+                        script.addEventListener('error', function(){ reject(new Error('MathJax не загрузился')); }, {once:true});
+                    }), 'Формулы загружаются слишком долго');
+                }
+                if (!window.MathJax || !window.MathJax.startup) throw new Error('MathJax не загрузился');
+                await limit(window.MathJax.startup.promise, 'Формулы загружаются слишком долго');
+                await limit(window.MathJax.typesetPromise(), 'Не удалось отобразить формулы');
+                if (document.querySelector('mjx-merror, [data-mjx-error]')) throw new Error('Ошибка в формуле');
+                await limit(Promise.all(Array.from(document.images).map(function(image) {
+                    image.loading = 'eager';
+                    if (image.complete) return image.naturalWidth > 0 ? Promise.resolve() : Promise.reject(new Error('Не загрузился рисунок'));
+                    return new Promise(function(resolve, reject) {
+                        image.addEventListener('load', resolve, {once:true});
+                        image.addEventListener('error', function(){ reject(new Error('Не загрузился рисунок')); }, {once:true});
+                    });
+                })), 'Рисунки загружаются слишком долго');
+                if (document.fonts) await limit(document.fonts.ready, 'Шрифты загружаются слишком долго');
+            } catch (error) {
+                fail('Не удалось загрузить формулы или рисунки. Проверьте подключение к интернету и нажмите «Повторить подготовку».', error);
+                return;
+            }
+            try { if (paginate) paginate(); }
+            catch (error) {
+                fail('Не удалось разместить задания на листах. Вернитесь в генератор и попробуйте заменить задание или уменьшить подборку.', error);
+                return;
+            }
+            button.disabled = false;
+            status.textContent = 'Документ готов. В окне печати выберите «Сохранить в формате PDF». Если окно не появилось, нажмите кнопку выше.';
+            setTimeout(print, 420);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', prepare, {once:true});
+        else prepare();
+    }
     // The selective print layout intentionally follows generator11prof's
     // actual HTML print template. Full OGE variants keep their own three-page layout.
     function ogeDownloadManualPrintLikeEGE() {
@@ -5768,7 +5875,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 <base href="https://svetlana18011991.github.io/generator9oge/">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <script>window.MathJax=${JSON.stringify(config)};${window.SCRIPT_END}
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
+<script id="oge-print-mathjax" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
 <style>
         :root { --blue:#003399; --orange:#ff8c00; --line:#d8e5f3; --soft:#f4f8ff; }
         * { box-sizing: border-box; }
@@ -6025,28 +6132,16 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         }
 
 </style></head>
-<body><div id="print-footer-fixed">Шкатулка математических интерактивов</div>
+<body>${ogePrintToolsHTML()}<div id="print-footer-fixed">Шкатулка математических интерактивов</div>
 <main class="print-page"><header class="print-header">
 <h1 class="print-title">Подборка заданий</h1>
 <div class="print-subtitle">ОГЭ · математика · тренировочный набор</div>
 ${signature}</header>${original}</main>
 <script>
-(function(){
-  // Wait for formula and image rendering before invoking the browser print dialog.
-  function afterImages(){
-    return Promise.all(Array.from(document.images).map(function(im){
-      if(im.complete)return Promise.resolve();
-      return new Promise(function(done){im.addEventListener('load',done,{once:true});im.addEventListener('error',done,{once:true});});
-    }));
-  }
-  const mj=window.MathJax?.startup?.promise || Promise.resolve();
-  Promise.resolve(mj).catch(function(){}).then(afterImages).then(function(){
-    if(document.fonts?.ready)return document.fonts.ready;
-  }).then(function(){window.print();});
-})();
+(${ogePreparePrint.toString()})();
 ${window.SCRIPT_END}
 </body></html>`;
-        downloadBlobSafely(new Blob([html],{type:'text/html;charset=utf-8'}),
+        openOgePrintDocument(html,
             'ОГЭ_Подборка_для_печати_A4_книжная.html');
     }
     function downloadPrintPDF() {
@@ -6171,7 +6266,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 @media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:277mm;}}
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 ${manualCSS}
-</style></head><body class="${isManual ? 'oge-print-manual' : 'oge-print-exam'}">${pages}
+</style></head><body class="${isManual ? 'oge-print-manual' : 'oge-print-exam'}">${ogePrintToolsHTML()}${pages}
 <script>
 (function(){
 function solvePrintColumns(heights,count,available){
@@ -6276,40 +6371,11 @@ function paginateCollections(){
  });
 }
 
-async function fitAndPrint(){
- try{
-  if(window.MathJax&&MathJax.startup) await MathJax.startup.promise;
-  if(!window.MathJax||!MathJax.typesetPromise) throw new Error('MathJax не загрузился');
-  await MathJax.typesetPromise();
-  if(document.querySelector('mjx-container [data-mjx-error]')) throw new Error('Ошибка в формуле');
-  await Promise.all(Array.from(document.images).map(function(im){
-    if(im.complete)return im.naturalWidth===0?Promise.reject(new Error('Не загрузился рисунок')):Promise.resolve();
-    return new Promise(function(ok,fail){
-      var timer=setTimeout(function(){fail(new Error('Рисунок загружается слишком долго'))},15000);
-      im.onload=function(){clearTimeout(timer);ok()};
-      im.onerror=function(){clearTimeout(timer);fail(new Error('Не загрузился рисунок'))};
-    });
-  }));
-  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
- }catch(err){
-  console.error('Подготовка печати',err);
-  alert('Не удалось подготовить формулы или рисунки для печати. Проверьте подключение к интернету и откройте скачанный файл ещё раз.');
-  return;
- }
- try{if(!document.body.classList.contains('oge-print-manual'))paginateCollections();}
- catch(err){
-   console.error('Подготовка страниц',err);
-   alert('Не удалось разместить одно из заданий на листе. Попробуйте заменить это задание и скачать файл ещё раз.');
-   return;
- }
- setTimeout(function(){window.print()},420);
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fitAndPrint);else fitAndPrint();
+(${ogePreparePrint.toString()})(paginateCollections);
 })();
 ${window.SCRIPT_END}
 </body></html>`;
-        const blob=new Blob([printHtml],{type:'text/html;charset=utf-8'});
-        downloadBlobSafely(blob,isManual ? 'ОГЭ_Подборка_для_печати_A4_книжная.html' : 'ОГЭ_Варианты_для_печати_A4_альбомная.html');
+        openOgePrintDocument(printHtml,isManual ? 'ОГЭ_Подборка_для_печати_A4_книжная.html' : 'ОГЭ_Варианты_для_печати_A4_альбомная.html');
     }
 
     function ogeKeyTaskEntries(snapshot) {

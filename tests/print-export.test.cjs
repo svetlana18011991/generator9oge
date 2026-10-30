@@ -16,9 +16,11 @@ async function exportedScripts() {
         window: { ogePrintableGroups: {}, SCRIPT_END: '</script>' },
         Blob,
         buildOgeBatchPrintHTML: () => '<article>Test variant</article>',
-        downloadBlobSafely: blob => { download = blob; }
+        downloadBlobSafely: blob => { download = blob; },
+        openOgePrintDocument: html => { download = new Blob([html]); }
     });
-    vm.runInContext(`${exportSource}\ndownloadPrintPDF();`, context);
+    const runtime = source.slice(source.indexOf('function ogePrintToolsHTML()'),source.indexOf('// The selective print layout'));
+    vm.runInContext(`${runtime}\n${exportSource}\ndownloadPrintPDF();`, context);
     assert.ok(download, 'The export must create a downloadable document');
     const html = await download.text();
     return Array.from(html.matchAll(/<script>([\s\S]*?)<\/script>/g), match => match[1]);
@@ -33,23 +35,36 @@ function deferred() {
 const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
 function runPrintScript(script, mathJax, options = {}) {
-    const events = [];
+    const events = [], timers = new Map();
+    let nextTimer = 0;
+    const controls = Object.fromEntries(['oge-print-button','oge-print-retry','oge-print-status','oge-print-mathjax'].map(id => [id, {
+        disabled:true,hidden:true,textContent:'',listeners:{},
+        addEventListener(type,listener) { this.listeners[type] = listener; },
+        setAttribute(name) { if (name === 'data-error') events.push('error'); }
+    }]));
+    Object.defineProperty(events,'controls',{value:controls});
     const context = vm.createContext({
-        window: { MathJax: mathJax, print: () => events.push('print') },
-        MathJax: mathJax,
+        window: { MathJax:mathJax,focus() {},print:() => events.push('print'),location:{reload:() => events.push('reload')} },
+        MathJax:mathJax,
         document: {
-            readyState: 'complete',
-            images: options.images || [],
-            fonts: { ready: Promise.resolve() },
-            querySelector: () => options.formulaError ? {} : null,
-            querySelectorAll: () => []
+            readyState:'complete',images:options.images || [],
+            fonts:{ready:options.fontsReady || Promise.resolve()},
+            getElementById:id => controls[id],
+            querySelector:() => options.formulaError ? {} : null,
+            querySelectorAll:() => []
         },
-        alert: () => events.push('alert'),
-        console: { error: () => {} },
-        setTimeout: options.setTimeout || (callback => { callback(); }),
-        clearTimeout: () => {}
+        console:{error() {}},
+        setTimeout(callback,delay) {
+            const id = ++nextTimer;
+            timers.set(id,callback);
+            const run = () => { if (timers.has(id)) {timers.delete(id);callback();} };
+            if (options.setTimeout) options.setTimeout(run,delay);
+            else if (delay === 420) run();
+            return id;
+        },
+        clearTimeout:id => timers.delete(id)
     });
-    vm.runInContext(script, context);
+    vm.runInContext(script,context);
     return events;
 }
 
@@ -60,7 +75,7 @@ test('downloaded MathJax configuration preserves TeX delimiters', async () => {
     assert.deepEqual(JSON.parse(JSON.stringify(context.window.MathJax.tex.inlineMath)), [
         ['$', '$'], ['\\(', '\\)']
     ]);
-    assert.equal(context.window.MathJax.svg.fontCache, 'local');
+    assert.equal(context.window.MathJax.chtml.adaptiveCSS,false);
 });
 
 test('printing waits for MathJax startup and completed typesetting', async () => {
@@ -91,7 +106,7 @@ test('failed MathJax preparation does not open printing', async () => {
     const events = runPrintScript(scripts.at(-1), { startup: { promise: startup.promise } });
     startup.reject(new Error('MathJax failed to load'));
     await flushPromises();
-    assert.deepEqual(events, ['alert']);
+    assert.deepEqual(events, ['error']);
 });
 
 test('invalid formulas stop automatic printing', async () => {
@@ -101,7 +116,7 @@ test('invalid formulas stop automatic printing', async () => {
         typesetPromise: () => Promise.resolve()
     }, { formulaError: true });
     await flushPromises();
-    assert.deepEqual(events, ['alert']);
+    assert.deepEqual(events, ['error']);
 });
 
 test('offscreen lazy diagrams load before the print layout is measured', async () => {
@@ -110,9 +125,11 @@ test('offscreen lazy diagrams load before the print layout is measured', async (
     const image = {
         loading: 'lazy', complete: false,
         removeAttribute() {}, matches: () => false, hasAttribute: () => false,
+        addEventListener(type,listener) {this['on'+type]=listener;},
         finishRequest() {
             if (this.loading !== 'eager') return;
             this.complete = true;
+            this.naturalWidth = 10;
             this.onload();
         }
     };
@@ -139,6 +156,38 @@ test('offscreen lazy diagrams load before the print layout is measured', async (
     await flushPromises();
     pendingTimers.forEach(callback => callback());
     assert.deepEqual(events, ['print'], 'Loaded diagrams must allow printing to proceed');
+});
+
+test('font readiness also gates printing and the ready button can print again', async () => {
+    const scripts = await exportedScripts();
+    const fonts = deferred();
+    const events = runPrintScript(scripts.at(-1), {
+        startup:{promise:Promise.resolve()},typesetPromise:() => Promise.resolve()
+    },{fontsReady:fonts.promise});
+    await flushPromises();
+    assert.deepEqual(events,[]);
+    fonts.resolve();
+    await flushPromises();
+    assert.deepEqual(events,['print']);
+    assert.equal(events.controls['oge-print-button'].disabled,false);
+    events.controls['oge-print-button'].listeners.click();
+    assert.deepEqual(events,['print','print']);
+});
+
+test('a preparation timeout exposes a retry instead of waiting forever', async () => {
+    const scripts = await exportedScripts();
+    const startup = deferred(),timers = [];
+    const events = runPrintScript(scripts.at(-1), {
+        startup:{promise:startup.promise},typesetPromise:() => Promise.resolve()
+    },{setTimeout:(callback,delay) => timers.push({callback,delay})});
+    timers.find(timer => timer.delay === 30000).callback();
+    await flushPromises();
+    assert.deepEqual(events,['error']);
+    assert.equal(events.controls['oge-print-button'].disabled,true);
+    assert.equal(events.controls['oge-print-retry'].hidden,false);
+    assert.match(events.controls['oge-print-status'].textContent,/Повторить подготовку/);
+    events.controls['oge-print-retry'].listeners.click();
+    assert.deepEqual(events,['error','reload']);
 });
 
 function buildPrintPages(variants) {
@@ -197,12 +246,12 @@ test('a broken diagram prevents printing instead of changing the measured layout
         startup: { promise: Promise.resolve() }, typesetPromise: () => Promise.resolve()
     }, { images: [{ complete: true, naturalWidth: 0 }] });
     await flushPromises();
-    assert.deepEqual(events, ['alert']);
+    assert.deepEqual(events, ['error']);
 });
 
 test('a diagram that fails while loading prevents printing', async () => {
     const scripts = await exportedScripts();
-    const image = { complete: false };
+    const image = { complete:false,addEventListener(type,listener) {this['on'+type]=listener;} };
     const events = runPrintScript(scripts.at(-1), {
         startup: { promise: Promise.resolve() }, typesetPromise: () => Promise.resolve()
     }, { images: [image], setTimeout: () => {} });
@@ -210,7 +259,7 @@ test('a diagram that fails while loading prevents printing', async () => {
     assert.deepEqual(events, []);
     image.onerror();
     await flushPromises();
-    assert.deepEqual(events, ['alert']);
+    assert.deepEqual(events, ['error']);
 });
 
 
