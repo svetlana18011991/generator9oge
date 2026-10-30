@@ -65,7 +65,7 @@
     <script src="task18_extra.js?v=20261026-circle-grid-fix"></script>
     <script src="task19.js?v=20261026-19-single-boolean-v3"></script>
     <script src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
-    <script src="task20.js?v=20261027-25-prototipov"></script>
+    <script src="task20.js?v=20261030-method-order"></script>
     <script src="task21.js?v=20261027-typed-text-v2"></script>
     <script src="task22.js?v=20261027-typed-text-v2"></script>
     <script src="task23.js?v=20261027-typed-text-v2"></script>
@@ -3088,8 +3088,9 @@ body.auth-locked > *:not(#passwordGate) {
                 </label>`;
         let currentExtraTopic = '';
         data.prototypes.forEach((p, idx) => {
-            // Только для расширенных блоков, в которых заполнено поле topic.
-            if (kind === 'extra' && p.topic && p.topic !== currentExtraTopic) {
+            // Тематические группы — в задании 20 и в расширенных блоках.
+            const showTopicHeaders = kind === 'extra' || (kind === 'main' && String(tid).replace(/\D/g, '') === '20');
+            if (showTopicHeaders && p.topic && p.topic !== currentExtraTopic) {
                 currentExtraTopic = p.topic;
                 listHTML += `<div class="proto-topic-header">${p.topic}</div>`;
             }
@@ -4111,8 +4112,19 @@ body.auth-locked > *:not(#passwordGate) {
                     if (!selectedIdsByProto[key]) selectedIdsByProto[key] = new Set();
                     selectedIdsByProto[key].add(String(t.id ?? t.text ?? ''));
                 });
+                let lastPart2TopicInVariant = '';
                 finalTasks.forEach((item,itemIndex) => {
                     const printOffset = currentPrintHTML.length;
+                    if (orderedTasks && part2TaskNum === 20) {
+                        const topic = item.theory && item.theory.topic ? String(item.theory.topic) : '';
+                        if (topic && topic !== lastPart2TopicInVariant) {
+                            const heading = `<h4 class="task20-topic-variant-header" style="color:#9a560f;background:#fff7e9;padding:8px 12px;border-left:3px solid #f59e0b;margin:16px 0 12px;font-size:16px;break-after:avoid;page-break-after:avoid;">${topic}</h4>`;
+                            currentInteractiveHTML += heading;
+                            currentPrintHTML += heading;
+                            currentAnswersHTML += `<h4>${topic}</h4>`;
+                        }
+                        lastPart2TopicInVariant = topic;
+                    }
                     taskCounter++;
                     const replacementControl = ogeReplacementButton(blockSnapshotIndex,itemIndex,item,kind);
                     const part2Answer = String(item.answer || '').trim();
