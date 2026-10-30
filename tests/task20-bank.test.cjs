@@ -26,17 +26,13 @@ function checkedAnswer(value) {
     return value.map(item => Array.isArray(item) ? `(${item.join(';')})` : item).join(';');
 }
 
-test('task 20 keeps all prototypes grouped in the reviewed method order', () => {
-    const expected = [
-        '20.8','20.3','20.2','20.4','20.17','20.5','20.9','20.7','20.6','20.18',
-        '20.11','20.10','20.12','20.13',
-        '20.16','20.19','20.20','20.21','20.14','20.15','20.24','20.23','20.22','20.25',
-        '20.1'
-    ];
+test('task 20 follows prototype numbers 1–25 in the uploaded PDF', () => {
+    const expected = sourceExamples.filter(row => row.variant === 1)
+        .sort((a,b) => a.number - b.number).map(row => row.prototypeCode);
     assert.deepEqual(Array.from(bank.prototypes, p => p.code), expected);
     assert.deepEqual(Array.from(bank.prototypes, p => p.topic), [
-        ...Array(10).fill('Уравнения'), ...Array(4).fill('Системы уравнений'),
-        ...Array(10).fill('Неравенства'), 'Выражения'
+        'Выражения', ...Array(10).fill('Уравнения'), ...Array(4).fill('Системы уравнений'),
+        ...Array(10).fill('Неравенства')
     ]);
     const tasks = Array.from(bank.prototypes).flatMap(p => Array.from(p.tasks));
     assert.equal(tasks.length,136);

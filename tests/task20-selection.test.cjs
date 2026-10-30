@@ -10,8 +10,8 @@ const bankContext = vm.createContext({window:{database:{}}});
 vm.runInContext(fs.readFileSync(path.join(root, 'task20.js'), 'utf8'), bankContext);
 const prototypes = bankContext.window.database.task20.prototypes;
 const codes = Array.from(prototypes, proto => proto.code);
-const topics = ['Уравнения','Системы уравнений','Неравенства','Выражения'];
-const groupCounts = [10,4,10,1];
+const topics = ['Выражения','Уравнения','Системы уравнений','Неравенства'];
+const groupCounts = [1,10,4,10];
 const origin = 'http://task20.test';
 const sessionKey = html.match(/var SESSION_STORAGE_KEY = '([^']+)';/)[1];
 const passwordHash = html.match(/var PASSWORD_HASH = (\d+);/)[1];
@@ -104,7 +104,7 @@ test('task 20 groups preserve selection and ordered variant/export behavior', {
             const row = page.locator('.task-row').filter({has:page.locator('#count-task20')});
             await row.locator('.row-header .btn-settings').first().click();
             await page.locator('#proto-all-task20').uncheck();
-            const selected = [0,10,14,24];
+            const selected = [0,1,11,15];
             for (const index of selected) await page.locator(`#proto-task20-${index}`).check();
             await page.locator('#count-task20').fill('4');
             const output = await generate();
@@ -133,7 +133,7 @@ test('task 20 groups preserve selection and ordered variant/export behavior', {
         await t.test('disabling ordered mode keeps random selection available without grouped headings',async () => {
             await page.locator('#toggle-ordered-tasks').uncheck();
             const output = await generate();
-            assert.deepEqual(output.codes.slice().sort(),[0,10,14,24].map(index => codes[index]).sort());
+            assert.deepEqual(output.codes.slice().sort(),[0,1,11,15].map(index => codes[index]).sort());
             assert.deepEqual(output.headings,[]);
             assert.deepEqual(output.printHeadings,[]);
             assert.deepEqual(output.answerHeadings,[]);
