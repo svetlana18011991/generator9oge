@@ -11,9 +11,9 @@
     <script src="battle_template.js?v=47"></script>
     <script src="motivation_template.js?v=motivation-v43"></script>
     <!-- Задания 1–5: каталоги и 24 комплекта по рабочей тетради Быковой С. (2026). -->
-    <script src="oge_practice.js?v=20261027-8themes"></script>
+    <script src="oge_practice.js?v=20261030-workbook-revision"></script>
     <script src="tariff_plot_base64.js?v=20261027-8themes"></script>
-    <script src="tariff_practice.js?v=20261029-workbook"></script>
+    <script src="tariff_practice.js?v=20261030-workbook-revision"></script>
     <script src="apartment_practice.js?v=20261029-workbook"></script>
     <script src="tires_practice.js?v=20261027-8themes"></script>
     <script src="tires_2_2_addon.js?v=20261028"></script>
@@ -21,12 +21,12 @@
     <script src="sheets_practice.js?v=20261027-8themes"></script>
     <script src="plot_plan_base64.js?v=20261027-8themes"></script>
     <script src="plot_practice.js?v=20261027-8themes"></script>
-    <script src="trails_maslovka_scenario.js?v=20261029-maslovka"></script>
+    <script src="trails_maslovka_scenario.js?v=20261030-workbook-revision"></script>
     <script src="villages_practice.js?v=20261029-workbook"></script>
     <script src="villages_three_new_scenarios.js?v=20261029-4plots-checked-v2"></script>
-    <script src="practice_scenario_overrides.js?v=20261027-8themes"></script>
-    <script src="workbook_trails_villages.js?v=20261029-place-emphasis"></script>
-    <script src="workbook_tariff_apartment_tires.js?v=20261029-workbook"></script>
+    <script src="practice_scenario_overrides.js?v=20261030-workbook-revision"></script>
+    <script src="workbook_trails_villages.js?v=20261030-workbook-revision"></script>
+    <script src="workbook_tariff_apartment_tires.js?v=20261030-workbook-revision"></script>
     <script src="workbook_stove_sheets_plot.js?v=20261029-workbook"></script>
     <script src="task6.js"></script>
     <script src="task6_extra.js?v=20260816-2"></script>
@@ -2276,9 +2276,13 @@ body.auth-locked > *:not(#passwordGate) {
         const scenarios = Array.isArray(theme.scenarios) ? theme.scenarios : [];
         return scenarios.map((scenario, scenarioIndex) => {
             let groups = '';
+            const summaryParts = [];
             const totalVariants = [1,2,3,4,5].reduce((sum, n) => sum + ((scenario.tasks && Array.isArray(scenario.tasks[n])) ? scenario.tasks[n].length : 0), 0);
             for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
                 const tasks = scenario.tasks && Array.isArray(scenario.tasks[taskNumber]) ? scenario.tasks[taskNumber] : [];
+                const defaultIndexes = getScenarioDefaultTaskIndexes(scenario, taskNumber);
+                const defaultCount = defaultIndexes.length;
+                summaryParts.push(`№${taskNumber}: ${defaultCount > 0 && defaultCount === tasks.length ? 'все' : defaultCount}`);
                 const options = tasks.map((task, taskIndex) => `
                     <label class="practice-type-item" onmouseenter="showPracticeScenarioTooltip('${themeId}', ${scenarioIndex}, ${taskNumber}, ${taskIndex}, event)" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
                         <input type="checkbox"
@@ -2286,18 +2290,18 @@ body.auth-locked > *:not(#passwordGate) {
                             data-practice-scenario-index="${scenarioIndex}"
                             data-practice-scenario-number="${taskNumber}"
                             data-practice-scenario-task-index="${taskIndex}"
-                            checked
+                            ${defaultIndexes.includes(taskIndex) ? 'checked' : ''}
                             onchange="handlePracticeScenarioTaskToggle(this, '${themeId}', ${scenarioIndex}, ${taskNumber});">
-                        <span>${task.typeTitle || `${taskNumber}.${taskIndex + 1}`} 👁️</span>
+                        <span>${task.typeTitle || `${taskNumber}.${taskIndex + 1}`} 👁️${task.workbookDefault === true ? ' <small style="color:#0f766e;">Из тетради</small>' : task.workbookDefault === false ? ' <small style="color:#a16207;">Дополнительное</small>' : ''}</span>
                     </label>`).join('');
                 groups += `
                     <div class="practice-number-group">
                         <div class="practice-number-head">
                             <div class="practice-number-title">Задание ${taskNumber}</div>
-                            <span class="practice-number-status" id="practice-scenario-count-${themeId}-${scenarioIndex}-${taskNumber}">Выбрано: ${tasks.length} из ${tasks.length}</span>
+                            <span class="practice-number-status" id="practice-scenario-count-${themeId}-${scenarioIndex}-${taskNumber}">Выбрано: ${defaultCount} из ${tasks.length}</span>
                         </div>
                         <label class="practice-type-all">
-                            <input type="checkbox" id="practice-scenario-all-${themeId}-${scenarioIndex}-${taskNumber}" checked onchange="toggleAllPracticeScenarioNumber('${themeId}', ${scenarioIndex}, ${taskNumber}, this.checked)">
+                            <input type="checkbox" id="practice-scenario-all-${themeId}-${scenarioIndex}-${taskNumber}" ${defaultCount > 0 && defaultCount === tasks.length ? 'checked' : ''} onchange="toggleAllPracticeScenarioNumber('${themeId}', ${scenarioIndex}, ${taskNumber}, this.checked)">
                             Все варианты задания ${taskNumber}
                         </label>
                         <div class="practice-type-grid">${options || '<span style="color:#b91c1c;">Варианты пока не добавлены.</span>'}</div>
@@ -2312,7 +2316,7 @@ body.auth-locked > *:not(#passwordGate) {
                         </label>
                         <button type="button" class="btn-settings" onclick="togglePracticeScenarioDetails('${themeId}', ${scenarioIndex}); event.stopPropagation();">Задания</button>
                     </div>
-                    <div class="practice-scenario-status" id="practice-scenario-summary-${themeId}-${scenarioIndex}">№1: все · №2: все · №3: все · №4: все · №5: все</div>
+                    <div class="practice-scenario-status" id="practice-scenario-summary-${themeId}-${scenarioIndex}">${summaryParts.join(' · ')}</div>
                     <div id="practice-scenario-details-${themeId}-${scenarioIndex}" class="practice-theme-details">
                         <div class="practice-level-caption">Шаг 3. Оставьте допустимые варианты каждого номера</div>
                         ${groups}
@@ -2408,7 +2412,7 @@ body.auth-locked > *:not(#passwordGate) {
                         <button type="button" class="count-btn" onclick="adjustTaskCount('practice-scenarios', 1, event)" title="Увеличить количество комплектов">+</button>
                     </div>
                 </div>
-                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> 8 тем, по 3 варианта из рабочей тетради — 24 комплекта. Каждый комплект содержит пять связанных заданий. Все темы и сюжеты изначально выбраны.</div>
+                <div class="practice-row-note"><b>Число справа — количество комплектов.</b> 8 тем, по 3 варианта из рабочей тетради — 24 комплекта. Каждый комплект содержит пять связанных заданий. Все темы и сюжеты изначально выбраны. Варианты из тетради выбраны сразу; дополнительные можно включить в настройках заданий.</div>
                 <div id="protos-practice-scenarios" class="proto-list practice-settings-list">${settingsHTML}</div>
             </div>`;
     }
@@ -2471,8 +2475,9 @@ body.auth-locked > *:not(#passwordGate) {
         for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
             const boxes = getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber);
             const checkedCount = boxes.filter(cb => cb.checked).length;
-            parts.push(`№${taskNumber}: ${checkedCount === boxes.length ? 'все' : checkedCount}`);
+            parts.push(`№${taskNumber}: ${checkedCount > 0 && checkedCount === boxes.length ? 'все' : checkedCount}`);
             updatePracticeScenarioNumberStatus(themeId, scenarioIndex, taskNumber);
+            syncPracticeScenarioNumberMaster(themeId, scenarioIndex, taskNumber);
         }
         const summary = document.getElementById(`practice-scenario-summary-${themeId}-${scenarioIndex}`);
         if (summary) summary.textContent = parts.join(' · ');
@@ -2485,22 +2490,13 @@ body.auth-locked > *:not(#passwordGate) {
         if (status) status.textContent = `Выбрано сюжетов: ${checkedCount} из ${boxes.length}`;
     }
 
-    // A user who opens filters can narrow the random pool deliberately.
-    // Otherwise the first "+" on the scenario counter must enable the whole pool.
+    // Ручные фильтры сохраняются при изменении количества комплектов.
+    // Первый «+» после сброса восстанавливает темы и варианты из тетради.
     window.ogeScenarioFiltersCustomized = false;
     function ogeSelectEveryScenarioFilter() {
-        document.querySelectorAll('[data-practice-scenario-theme-checkbox="1"], [data-practice-scenario-checkbox="1"], [data-practice-scenario-number]')
-            .forEach(box => { if (box.type === 'checkbox') { box.checked = true; box.indeterminate = false; } });
-        document.querySelectorAll('input[id^="practice-scenario-all-"]').forEach(box => {
-            box.checked = true; box.indeterminate = false;
-        });
+        getOgeScenarioThemeIds().forEach(themeId => setPracticeScenarioThemeSelection(themeId, true));
         const master = document.getElementById('practice-scenario-theme-all');
         if (master) { master.checked = true; master.indeterminate = false; }
-        getOgeScenarioThemeIds().forEach(id => {
-            const theme = window.ogePracticeDatabase?.[id];
-            (theme?.scenarios || []).forEach((_, i) => updatePracticeScenarioSummary(id, i));
-            updatePracticeThemeScenarioStatus(id);
-        });
     }
 
     function handlePracticeScenarioCheckboxChange(themeId) {
@@ -2509,7 +2505,7 @@ body.auth-locked > *:not(#passwordGate) {
         updateTaskTotal();
     }
 
-    // Выбор темы включает её полные комплекты, в том числе после сброса.
+    // Выбор темы включает её полные комплекты с вариантами из тетради.
     // Изменение количества комплектов не меняет выбранные вручную сюжеты.
     function setPracticeScenarioThemeSelection(themeId, checked) {
         const themeBox = document.getElementById(`practice-scenario-theme-${themeId}`);
@@ -2518,12 +2514,7 @@ body.auth-locked > *:not(#passwordGate) {
         (theme?.scenarios || []).forEach((_, scenarioIndex) => {
             const scenarioBox = document.getElementById(`practice-scenario-${themeId}-${scenarioIndex}`);
             if (scenarioBox) { scenarioBox.checked = checked; scenarioBox.indeterminate = false; }
-            if (checked) {
-                for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
-                    getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber).forEach(box => box.checked = true);
-                    syncPracticeScenarioNumberMaster(themeId, scenarioIndex, taskNumber);
-                }
-            }
+            if (checked) applyPracticeScenarioDefaultSelection(themeId, scenarioIndex);
             updatePracticeScenarioSummary(themeId, scenarioIndex);
         });
         updatePracticeThemeScenarioStatus(themeId);
@@ -2548,7 +2539,10 @@ body.auth-locked > *:not(#passwordGate) {
             master.checked = checkedCount === boxes.length;
             master.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
         }
-        getOgeScenarioThemeIds().forEach(updatePracticeThemeScenarioStatus);
+        getOgeScenarioThemeIds().forEach(id => {
+            (window.ogePracticeDatabase?.[id]?.scenarios || []).forEach((_, index) => updatePracticeScenarioSummary(id, index));
+            updatePracticeThemeScenarioStatus(id);
+        });
         syncPracticeScenarioCount();
         updateTaskTotal();
     }
@@ -2647,8 +2641,33 @@ body.auth-locked > *:not(#passwordGate) {
         return [...theme.catalog.prototypes];
     }
 
+    function getScenarioDefaultTaskIndexes(scenario, taskNumber) {
+        const tasks = scenario && Array.isArray(scenario.tasks?.[taskNumber]) ? scenario.tasks[taskNumber] : [];
+        // Старые темы без этой отметки сохраняют все свои варианты.
+        return tasks.map((task, index) => task.workbookDefault !== false ? index : -1).filter(index => index >= 0);
+    }
+
+    function getDefaultScenarioTaskIndexes(themeId, scenarioIndex, taskNumber) {
+        const scenario = window.ogePracticeDatabase?.[themeId]?.scenarios?.[scenarioIndex];
+        return getScenarioDefaultTaskIndexes(scenario, taskNumber);
+    }
+
+    function applyPracticeScenarioDefaultSelection(themeId, scenarioIndex) {
+        for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
+            const defaults = getDefaultScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
+            getPracticeScenarioNumberBoxes(themeId, scenarioIndex, taskNumber).forEach(box => {
+                box.checked = defaults.includes(parseInt(box.dataset.practiceScenarioTaskIndex, 10));
+                box.indeterminate = false;
+            });
+            syncPracticeScenarioNumberMaster(themeId, scenarioIndex, taskNumber);
+        }
+    }
+
     function getSelectedScenarioTaskIndexes(themeId, scenarioIndex, taskNumber) {
-        return [...document.querySelectorAll(`[data-practice-scenario-theme="${themeId}"][data-practice-scenario-index="${scenarioIndex}"][data-practice-scenario-number="${taskNumber}"]:checked`)]
+        const boxes = typeof document !== 'undefined' && document.querySelectorAll
+            ? [...document.querySelectorAll(`[data-practice-scenario-theme="${themeId}"][data-practice-scenario-index="${scenarioIndex}"][data-practice-scenario-number="${taskNumber}"][data-practice-scenario-task-index]`)] : [];
+        if (boxes.length === 0) return getDefaultScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
+        return boxes.filter(cb => cb.checked)
             .map(cb => parseInt(cb.dataset.practiceScenarioTaskIndex, 10))
             .filter(Number.isInteger);
     }
@@ -2850,7 +2869,7 @@ body.auth-locked > *:not(#passwordGate) {
                         const selectedByNumber = {};
                         let complete = true;
                         for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
-                            const indexes = autoFull ? (Array.isArray(scenario.tasks?.[taskNumber]) ? scenario.tasks[taskNumber].map((_,i)=>i) : []) : getSelectedScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
+                            const indexes = autoFull ? getScenarioDefaultTaskIndexes(scenario, taskNumber) : getSelectedScenarioTaskIndexes(themeId, scenarioIndex, taskNumber);
                             selectedByNumber[taskNumber] = indexes;
                             if (indexes.length === 0) complete = false;
                         }
@@ -3680,17 +3699,17 @@ body.auth-locked > *:not(#passwordGate) {
             const master=document.getElementById(id);
             if(master){master.checked=false;master.indeterminate=false;}
         });
-        // Внутренние фильтры прототипов возвращаем к состоянию по умолчанию
-        // (все доступны), чтобы новая выборочная сборка не осталась без типов.
+        // В тренажёре по-прежнему доступны все прототипы.
+        // Сюжетные комплекты возвращаем к вариантам из тетради.
         document.querySelectorAll('input[id^="proto-"], input[id^="topic19-extra-"]').forEach(box => {
-            if(box.type==='checkbox'){box.checked=true;box.indeterminate=false;}
-        });
-        document.querySelectorAll('[data-practice-scenario-number]').forEach(box => {
             if(box.type==='checkbox'){box.checked=true;box.indeterminate=false;}
         });
         getOgeScenarioThemeIds().forEach(themeId => {
             const theme=window.ogePracticeDatabase && window.ogePracticeDatabase[themeId];
-            (theme?.scenarios || []).forEach((_,index) => updatePracticeScenarioSummary(themeId,index));
+            (theme?.scenarios || []).forEach((_,index) => {
+                applyPracticeScenarioDefaultSelection(themeId,index);
+                updatePracticeScenarioSummary(themeId,index);
+            });
             updatePracticeThemeScenarioStatus(themeId);
         });
         updatePracticeTrainerSelectedCount();

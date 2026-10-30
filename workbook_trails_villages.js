@@ -2,8 +2,9 @@
     'use strict';
 
     // Задания из «Задания 1–5», раздел «Тренажёр», стр. 50–52 и 77–79.
-    // Каталог содержит прототипы раздела 1; комплекты повторяют пять заданий
-    // каждого варианта тетради и не смешивают задания разных вариантов.
+    // Каталог содержит прототипы раздела 1. В сюжетах «Тропинок» первой идёт
+    // тетрадная пятёрка; остальные исходные вопросы доступны как альтернативы
+    // своего номера и не смешиваются с другими сюжетами.
     const db = window.ogePracticeDatabase;
     if (!db) return;
 
@@ -11,7 +12,7 @@
         return `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:620px;height:auto;margin:10px auto;border:1px solid #cbd5e1;border-radius:7px;background:#fff;">`;
     }
 
-    function variant(themeId, number, source, picks, title, imageHTML) {
+    function variant(themeId, number, source, picks, title, imageHTML, includeAlternatives = false) {
         if (!source) throw new Error(`Не найден сюжет тетради: ${themeId}, вариант ${number}`);
         const common = String(source.common || '').replace(/<img\b[^>]*>/gi, '');
         const image = imageHTML || source.imageHTML;
@@ -21,16 +22,24 @@
             const code = picks[examNumber - 1];
             const original = code === null ? group[0] : group.find(task => String(task.id || task.typeId) === code);
             if (!original) throw new Error(`Не найдено задание тетради: ${themeId}, ${number}, ${examNumber}`);
-            tasks[examNumber] = [{
-                ...original,
-                id: `${themeId}-workbook-${number}-${examNumber}`,
-                typeId: String(original.typeId || original.id),
+            const selected = includeAlternatives
+                ? [original, ...group.filter(task => task !== original)]
+                : [original];
+            tasks[examNumber] = selected.map((task, index) => ({
+                ...task,
+                id: `${themeId}-workbook-${number}-${examNumber}${index ? `-extra-${index}` : ''}`,
+                typeId: String(task.typeId || task.id),
+                ...(includeAlternatives ? {
+                    sourcePrototypeId: String(task.sourcePrototypeId || task.typeId || task.id),
+                    sourceScenarioId: source.id,
+                    workbookDefault: index === 0
+                } : {}),
                 examNumber,
                 common,
                 imageHTML: image,
                 theoryImageHTML: image,
                 showImageInTask: false
-            }];
+            }));
         }
         return {
             id: `${themeId}-workbook-${number}`,
@@ -51,19 +60,10 @@
         const vasilkovo = scenarios.find(s => s.id === 'tropinki-plot-2');
         trails.catalog.prototypes = trails.catalog.prototypes.filter(task => /^\d+\.\d+$/.test(String(task.id || task.typeId)));
         trails.scenarios = [
-            variant('tropinki', 1, maslovka, [null, null, null, null, null], 'Масловка — Захарово', plan('workbook_trails_maslovka.png', 'План из тетради: Масловка — Захарово')),
-            variant('tropinki', 2, yasnaya, ['1.2', '2.2', '3.2', '4.2', '5.2'], 'Ясная — Майское'),
-            variant('tropinki', 3, vasilkovo, ['1.1', '2.1', '3.1', '4.1', '5.1'], 'Васильково — Иваново')
+            variant('tropinki', 1, maslovka, [null, null, null, null, null], 'Масловка — Захарово', plan('workbook_trails_maslovka.png', 'План из тетради: Масловка — Захарово'), true),
+            variant('tropinki', 2, yasnaya, ['1.2', '2.2', '3.2', '4.2', '5.2'], 'Ясная — Майское', undefined, true),
+            variant('tropinki', 3, vasilkovo, ['1.1', '2.1', '3.1', '4.1', '5.1'], 'Васильково — Иваново', undefined, true)
         ];
-        const maslovkaVariant = trails.scenarios[0];
-        const emphasizePlaces = html => String(html || '').split(/(<[^>]+>)/g)
-            .map((part, index) => index % 2 ? part : part.replace(/Масловка|Захарово|Вёсенка|Полянка/g, '<b>$&</b>'))
-            .join('');
-        maslovkaVariant.common = emphasizePlaces(maslovkaVariant.common);
-        Object.values(maslovkaVariant.tasks).flat().forEach(task => {
-            task.common = maslovkaVariant.common;
-            task.text = emphasizePlaces(task.text);
-        });
     }
 
     const villages = db.villages;

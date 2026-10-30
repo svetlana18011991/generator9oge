@@ -1,7 +1,7 @@
 /* Задания 1–5 по рабочей тетради «Задания 1-5.pdf», издание 2026.
  * Подключать после practice_scenario_overrides.js и practice_solution_overrides.js.
- * Каталог сохраняет все разобранные прототипы, комплекты — ровно три варианта
- * тренажёра, по одному заданию каждого номера в каждом варианте.
+ * Каталог сохраняет все разобранные прототипы. В тарифных комплектах пять
+ * вопросов тетради выбраны по умолчанию, остальные доступны по своему номеру.
  */
 (function () {
     'use strict';
@@ -18,13 +18,18 @@
                 if (!source || Number(source.examNumber) !== offset + 1) {
                     throw new Error(`Нет прототипа ${themeId}/${id} для варианта тетради ${index + 1}`);
                 }
-                tasks[offset + 1] = [{
-                    ...source,
-                    typeId: source.typeId || source.id,
-                    typeTitle: source.typeTitle || `${source.id} — ${source.title}`,
-                    sourcePrototypeId: source.id,
-                    accepts: (source.accepts || [source.answer]).slice()
-                }];
+                const candidates = themeId === 'tariff'
+                    ? [source, ...theme.catalog.prototypes.filter(task =>
+                        Number(task.examNumber) === offset + 1 && String(task.id) !== id)]
+                    : [source];
+                tasks[offset + 1] = candidates.map((task, taskIndex) => ({
+                    ...task,
+                    typeId: task.typeId || task.id,
+                    typeTitle: task.typeTitle || `${task.id} — ${task.title}`,
+                    sourcePrototypeId: task.id,
+                    ...(themeId === 'tariff' ? {workbookDefault: taskIndex === 0} : {}),
+                    accepts: (task.accepts || [task.answer]).slice()
+                }));
             });
             return {
                 id: `${themeId}-plot-${index + 1}`,
