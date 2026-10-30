@@ -320,7 +320,7 @@ function generatePresentation1() {
                         <option value="sphere">🔮 Сфера</option>
                     </select>
                     <input type="color" id="color-pres-${i}" value="#003399" style="cursor:pointer; height: 28px; width: 32px; flex:0 0 auto; border: none; background: transparent; padding: 0;">
-                    <input type="range" id="size-pres-${i}" min="1" max="15" value="3" style="cursor:pointer; width: 58px; flex:0 0 58px;">
+                    <input type="range" id="size-pres-${i}" min="1" max="15" step="0.1" value="1.8" style="cursor:pointer; width: 58px; flex:0 0 58px;">
                     <button onclick="window.setTool('pres-${i}', 'eraser')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Ластик">🧽</button>
                     <button onclick="window.clearCanvas('pres-${i}')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Очистить всё">🗑️</button>
                     <div style="flex-grow:1; min-width:0;"></div>
@@ -386,7 +386,7 @@ function generatePresentation2() {
                         <option value="sphere">🔮 Сфера</option>
                     </select>
                     <input type="color" id="color-pres-${i}" value="#d81b60" style="cursor:pointer; height: 28px; width: 32px; flex:0 0 auto; border: none; background: transparent; padding: 0;">
-                    <input type="range" id="size-pres-${i}" min="1" max="15" value="3" style="cursor:pointer; width: 58px; flex:0 0 58px;">
+                    <input type="range" id="size-pres-${i}" min="1" max="15" step="0.1" value="1.8" style="cursor:pointer; width: 58px; flex:0 0 58px;">
                     <button onclick="window.setTool('pres-${i}', 'eraser')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Ластик">🧽</button>
                     <button onclick="window.clearCanvas('pres-${i}')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Очистить всё">🗑️</button>
                     <div style="flex-grow:1; min-width:0;"></div>
@@ -452,7 +452,7 @@ function generatePresentation3() {
                         <option value="sphere">🔮 Сфера</option>
                     </select>
                     <input type="color" id="color-pres-${i}" value="#7b1fa2" style="cursor:pointer; height: 28px; width: 32px; flex:0 0 auto; border: none; background: transparent; padding: 0;">
-                    <input type="range" id="size-pres-${i}" min="1" max="15" value="3" style="cursor:pointer; width: 58px; flex:0 0 58px;">
+                    <input type="range" id="size-pres-${i}" min="1" max="15" step="0.1" value="1.8" style="cursor:pointer; width: 58px; flex:0 0 58px;">
                     <button onclick="window.setTool('pres-${i}', 'eraser')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Ластик">🧽</button>
                     <button onclick="window.clearCanvas('pres-${i}')" style="background:none; border:none; cursor:pointer; font-size:18px; padding:0 2px; flex:0 0 auto;" title="Очистить всё">🗑️</button>
                     <div style="flex-grow:1; min-width:0;"></div>
@@ -626,7 +626,7 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
                         <option value="" disabled selected hidden>🔺 Фигуры</option><option value="line">📏 Прямая</option><option value="vector">↗️ Вектор</option><option value="circle">⭕ Окружность</option><option value="triangle">🔺 Треугольник</option><option value="cylinder">🛢️ Цилиндр</option><option value="cone">🍦 Конус</option><option value="sphere">🔮 Сфера</option>
                     </select>
                     <input type="color" id="color-pres-${i}" value="${inputAccent}" style="cursor:pointer; height: 30px; width: 35px; border: none; background: transparent; padding: 0; flex:0 0 auto;">
-                    <input type="range" id="size-pres-${i}" min="1" max="15" value="3" style="cursor:pointer; width: 80px; flex:0 0 auto;">
+                    <input type="range" id="size-pres-${i}" min="1" max="15" step="0.1" value="1.8" style="cursor:pointer; width: 80px; flex:0 0 auto;">
                     <button onclick="window.setTool('pres-${i}', 'eraser')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Ластик">🧽</button>
                     <div style="flex-grow:1; min-width:8px;"></div>
                     <button onclick="window.clearCanvas('pres-${i}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
