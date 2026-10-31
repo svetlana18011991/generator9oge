@@ -5891,8 +5891,6 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                     color: rgba(0,0,0,0.55);
                 }
             }
-            /* Старый fixed-футер перекрывал ответы при печати. */
-            #print-footer-fixed { display: none !important; }
             body {
                 background:#fff !important;
                 margin:0 !important;
@@ -5901,21 +5899,6 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 font-family: "Times New Roman", serif;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-            }
-            #print-footer-fixed {
-                display:block !important;
-                position:fixed;
-                bottom:5mm;
-                left:0;
-                right:0;
-                text-align:center;
-                font-family:'Caveat', cursive;
-                font-size:15px;
-                color:rgba(0,0,0,0.42);
-                z-index:9999;
-                height:7mm;
-                line-height:7mm;
-                pointer-events:none;
             }
             .print-page {
                 width:100%;
@@ -6090,7 +6073,6 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         }
 
         @media screen {
-            #print-footer-fixed { display: none !important; }
             body {
                 background:#eef3f8;
                 font-family:"Times New Roman", serif;
@@ -6103,18 +6085,6 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 background:#fff;
                 padding:34px 46px 56px;
                 box-shadow:0 8px 28px rgba(0,0,0,.12);
-            }
-            #print-footer-fixed {
-                display:block !important;
-                position:fixed;
-                bottom:10mm;
-                left:0;
-                right:0;
-                text-align:center;
-                font-family:'Caveat', cursive;
-                font-size:20px;
-                color:rgba(0,0,0,0.5);
-                pointer-events:none;
             }
         }
 
@@ -6145,7 +6115,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         }
 
 </style></head>
-<body>${ogePrintToolsHTML()}<div id="print-footer-fixed">Шкатулка математических интерактивов</div>
+<body>${ogePrintToolsHTML()}
 <main class="print-page"><header class="print-header">
 <h1 class="print-title">Подборка заданий</h1>
 <div class="print-subtitle">ОГЭ · математика · тренировочный набор</div>
