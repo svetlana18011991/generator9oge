@@ -3007,11 +3007,12 @@ body.auth-locked > *:not(#passwordGate) {
                                 text: chosen.text || '',
                                 displayText: chosen.text || '',
                                 displaySvg: '',
-                                // В печати дополнительные изображения у задания №5
-                                // допустимы только для печи. Общий план сюжета не дублируем.
-                                // Общие планы 1–5 печатаются один раз в общем условии;
-                                // единственный индивидуальный чертёж — печь №5.
-                                printSvg: stoveTask5Diagram.replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
+                                // Большой план остаётся в общем условии; уменьшенный
+                                // чертёж возвращаем КАЖДОЙ задаче №1–5, кроме печи,
+                                // где собственный рисунок есть только у задания №5.
+                                printSvg: state.themeId === 'stove'
+                                    ? stoveTask5Diagram.replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"')
+                                    : (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML),
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
                                 standaloneSvg: chosen.standaloneSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
@@ -4703,7 +4704,7 @@ body.auth-locked > *:not(#passwordGate) {
                     const questionHTML = `<div class="oge-print-question" style="margin-bottom:${compactPrint ? 5 : 8}px; font-size:${compactPrint ? 14 : 16}px; line-height:1.25;"><b>${taskCounter}.</b> ${renderText}</div>`;
                     const questionInsideSolution = moveConditionBesidePicture ? questionHTML : '';
                     const questionAbove = moveConditionBesidePicture ? '' : questionHTML;
-                    currentPrintHTML += `${compactStyle}<div class="task-print-block oge-image-grid-print${printPictureClasses} ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;">${questionAbove}<div class="oge-image-grid-layout" style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img oge-image-grid-figure" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div class="oge-image-grid-solution" style="flex:1; min-width:0; display:block;">${questionInsideSolution}<div style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div class="oge-image-grid-paper" style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
+                    currentPrintHTML += `${compactStyle}<div class="task-print-block oge-image-grid-print${printPictureClasses} ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;">${questionAbove}<div class="oge-image-grid-layout" style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img oge-image-grid-figure" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div class="oge-image-grid-solution" style="flex:1; min-width:0; display:block;">${questionInsideSolution}<div class="oge-print-solution-label" style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div class="oge-image-grid-paper" style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 } else {
                     currentPrintHTML += `<div class="task-print-block"><div class="task-print-flex"><div class="task-print-num">${taskCounter}</div>${printSvg ? `<div class="task-print-img">${printSvg}</div>` : ""}<div class="task-print-text"><div>${renderText}</div><div class="task-print-answer">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 }
@@ -5579,7 +5580,7 @@ body.auth-locked > *:not(#passwordGate) {
         const containsVisual=/<(?:svg|img|picture)\b/i.test(content);
         // Подавляем только повтор общего плана сюжета, но не отдельный
         // чертёж конкретной задачи (в частности, печи в задании №5).
-        if(suppressDiagram && !/data-oge-own-diagram=["']1["']/.test(artwork)) artwork='';
+        // Миниатюры задач №1–5 сохраняем, даже когда общий план уже напечатан.
         if(containsVisual) artwork='';
         let body=content.trim();
         // В сюжетах 1–5 сохраняем полноценные пустые клетки таблицы ответа.
@@ -5605,9 +5606,11 @@ body.auth-locked > *:not(#passwordGate) {
         if(!body && !artwork)return '';
         const graph=artwork?'<div class="oge-exam-diagram'+(/data-oge-own-diagram=["']1["']/.test(artwork)?' oge-exam-local-diagram':'')+'">'+artwork+'</div>':'';
         const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
+        const writingArea='<div class="oge-exam-write-grid" aria-label="Поле для решения"></div>';
+        const answerLine='<div class="oge-exam-answer-line">Ответ: ________________________</div>';
         return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
            +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
-           +stickerHtml+body+'</div>'+graph+'</section>';
+           +stickerHtml+body+'</div>'+graph+writingArea+answerLine+'</section>';
     }
     function ogePrintArrayToEntries(group, startNum, trueNumbers) {
         const raw=Array.isArray(group)?group:[];
@@ -5616,7 +5619,7 @@ body.auth-locked > *:not(#passwordGate) {
         raw.forEach((fragment,i)=>{
             const num=Array.isArray(trueNumbers) && trueNumbers[i] >= 1 ? Number(trueNumbers[i]) : startNum+i;
             if(i===0){common=ogePrintCommonFromFragment(fragment);}
-            const rendered=ogePrintRenderTask(fragment,num,Boolean(common) && num>=2 && num<=5);
+            const rendered=ogePrintRenderTask(fragment,num,false);
             if(rendered){items.push({num,html:rendered});}
         });
         return {items,common};
@@ -5648,7 +5651,7 @@ body.auth-locked > *:not(#passwordGate) {
         Array.from(host.childNodes).forEach(collect);
         return blocks;
     }
-    function buildOgeBatchPrintHTML() {
+    function buildOgeBatchPrintHTML(withSolutions) {
         const batch=Array.isArray(window.ogeVariantBatch)&&window.ogeVariantBatch.length
             ?window.ogeVariantBatch:[{printGroups:window.ogePrintableGroups||{}}];
         const printBrand='<span class="brand">Шкатулка математических интерактивов · <a href="https://shkatulka.sistema-math.ru/">shkatulka.sistema-math.ru</a></span>';
@@ -5676,7 +5679,7 @@ body.auth-locked > *:not(#passwordGate) {
             if(p1.common && p1.items.length) {
                 const temp=document.createElement('div');temp.innerHTML=p1.items[0].html;
                 const diagram=temp.querySelector('.oge-exam-diagram');
-                if(diagram){sharedDiagram=diagram.outerHTML;diagram.remove();p1.items[0].html=temp.innerHTML;}
+                if(diagram && !/<(?:img|svg|picture)\b/i.test(p1.common)){sharedDiagram=diagram.outerHTML;}
             }
             const p1IsFull=[1,2,3,4,5].every(n=>p1.items.some(t=>t.num===n));
             const tasks=[...p1.items,...p2.items,...p3.items].sort((a,b)=>a.num-b.num);
@@ -5721,7 +5724,7 @@ body.auth-locked > *:not(#passwordGate) {
             });
             const firstColumn='<div class="oge-exam-column"><div class="oge-exam-column-content">'+units.join('')+'</div></div>';
             const secondColumn='<div class="oge-exam-column"><div class="oge-exam-column-content"></div></div>';
-            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-print-pages="'+(complete?3:0)+'" data-exam-page="'+(i+1)+'-1">'
+            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-print-pages="'+(complete && !withSolutions?3:0)+'" data-exam-page="'+(i+1)+'-1">'
                +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
                +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
         });
@@ -5822,6 +5825,25 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
     }
     // Serialized into both printable documents; keep it independent of the app.
     function ogePreparePrint(paginate) {
+        // Дополнительные клетки создаются только в скачанном файле,
+        // исходную вкладку и её DOM не меняем.
+        if(document.body.classList.contains('oge-print-with-solutions') || document.body.classList.contains('oge-print-without-solutions')) {
+            const withGrid=document.body.classList.contains('oge-print-with-solutions');
+            document.querySelectorAll('.oge-print-manual .task-print-block, .oge-print-manual .task20-part2-item, .print-page .task-print-block, .print-page .task20-part2-item').forEach(block=>{
+                const second=block.classList.contains('task20-part2-item');
+                if(withGrid && !block.querySelector('.oge-image-grid-paper,.oge-print-write-grid')) {
+                    const area=document.createElement('div'); area.className='oge-print-write-grid';
+                    const answer=block.querySelector('.task-print-answer');
+                    if(answer)answer.before(area);else block.appendChild(area);
+                }
+                if(second && !block.querySelector('.task-print-answer,.oge-part2-answer-line')) {
+                    const answer=document.createElement('div');answer.className='oge-part2-answer-line';
+                    answer.textContent='Ответ: ________________________';
+                    answer.style.cssText='margin:2mm 0;font:11pt Times New Roman,serif;';
+                    block.appendChild(answer);
+                }
+            });
+        }
         const button = document.getElementById('oge-print-button');
         const retry = document.getElementById('oge-print-retry');
         const status = document.getElementById('oge-print-status');
@@ -5889,7 +5911,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
     }
     // The selective print layout intentionally follows generator11prof's
     // actual HTML print template. Full OGE variants keep their own three-page layout.
-    function ogeDownloadManualPrintLikeEGE() {
+    function ogeDownloadManualPrintLikeEGE(withSolutions) {
         const entry=Array.isArray(window.ogeVariantBatch) && window.ogeVariantBatch.length
             ? window.ogeVariantBatch[0] : null;
         let original=currentPrintHTML || entry?.printHTML || '';
@@ -6282,8 +6304,19 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
             .print-page .task-print-flex > .task-print-text { overflow-wrap:break-word; }
         }
 
+
+/* Печатные режимы: задания №1–19 — небольшое клетчатое поле, №20–25 — большое. */
+.oge-print-write-grid,.oge-image-grid-paper{box-sizing:border-box;border:1px solid #9fc2df!important;border-radius:3px;background-color:#fff!important;background-size:5mm 5mm!important;background-image:linear-gradient(to right,#d4e4f0 .3pt,transparent .3pt),linear-gradient(to bottom,#d4e4f0 .3pt,transparent .3pt)!important;}
+.oge-print-with-solutions .oge-image-grid-paper{height:24mm!important;min-height:24mm!important;}
+.oge-print-with-solutions .oge-print-write-grid{height:24mm;margin:2mm 0;}
+.oge-print-with-solutions .task20-part2-item .oge-print-write-grid{height:120mm;break-inside:avoid;page-break-inside:avoid;}
+.oge-print-with-solutions .task20-part2-item{break-inside:avoid;page-break-inside:avoid;}
+.oge-print-without-solutions .oge-image-grid-paper,.oge-print-without-solutions .oge-print-write-grid,.oge-print-without-solutions .oge-print-solution-label{display:none!important;}
+.oge-print-without-solutions .task20-part2-item [style*="height:66px"],.oge-print-without-solutions .task20-part2-item [style*="border-bottom:1px dotted"]{display:none!important;}
+.oge-print-without-solutions .oge-image-grid-layout{align-items:center!important;}
+.oge-print-without-solutions .oge-image-grid-solution{min-width:0!important;}
 </style></head>
-<body>${ogePrintToolsHTML()}
+<body class="${withSolutions ? 'oge-print-with-solutions' : 'oge-print-without-solutions'}">${ogePrintToolsHTML()}
 <main class="print-page"><header class="print-header">
 <h1 class="print-title">Подборка заданий</h1>
 <div class="print-subtitle">ОГЭ · математика · тренировочный набор</div>
@@ -6293,15 +6326,44 @@ ${signature}</header>${original}</main>
 ${window.SCRIPT_END}
 </body></html>`;
         openOgePrintDocument(html,
-            'ОГЭ_Подборка_для_печати_A4_книжная.html');
+            withSolutions ? 'ОГЭ_Подборка_С_полями_для_решения.html' : 'ОГЭ_Подборка_Без_полей_для_решения.html');
     }
-    function downloadPrintPDF() {
+    // Режим печати выбирается перед подготовкой файла, не при настройке генератора.
+    function ogeChoosePrintLayout() {
+        document.getElementById('oge-print-choose-overlay')?.remove();
+        const overlay=document.createElement('div');
+        overlay.id='oge-print-choose-overlay';
+        overlay.style.cssText='position:fixed;inset:0;z-index:2147482000;background:rgba(3,17,30,.67);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;';
+        overlay.innerHTML=`<div role="dialog" aria-modal="true" aria-labelledby="oge-print-choose-title" style="background:#fff;color:#142538;width:min(500px,96vw);padding:26px;border:2px solid #f0a729;border-radius:14px;box-shadow:0 15px 55px #0005;font:16px/1.48 Arial,sans-serif;">
+            <h2 id="oge-print-choose-title" style="font:700 23px Arial,sans-serif;margin:0 0 10px;color:#093d5d">Как подготовить задания к печати?</h2>
+            <p style="margin:0 0 20px;color:#526474">Выберите формат рабочей тетради. Условия, чертежи и строки для ответов сохраняются в обоих вариантах.</p>
+            <button type="button" data-oge-print-choice="with" style="display:block;width:100%;text-align:left;border:1px solid #80bbdb;border-radius:9px;background:#eaf6fd;padding:13px 15px;cursor:pointer;font:inherit;margin-bottom:10px"><b>С полями для решения</b><small style="display:block;color:#415970;margin-top:4px">Клетчатое поле для заданий первой части и большое поле для второй части.</small></button>
+            <button type="button" data-oge-print-choice="without" style="display:block;width:100%;text-align:left;border:1px solid #cdd9e2;border-radius:9px;background:#f8fafc;padding:13px 15px;cursor:pointer;font:inherit"><b>Без полей для решения</b><small style="display:block;color:#415970;margin-top:4px">Компактная распечатка: только условия, рисунки и строки для ответов.</small></button>
+            <div style="text-align:right;margin-top:18px"><button type="button" data-oge-print-cancel style="border:0;background:transparent;color:#516374;font:inherit;cursor:pointer;padding:6px">Отмена</button></div>
+        </div>`;
+        let onKey=null;
+        const close=()=>{if(onKey)document.removeEventListener('keydown',onKey);overlay.remove();};
+        onKey=(event)=>{if(event.key==='Escape')close();};
+        document.addEventListener('keydown',onKey);
+        overlay.addEventListener('click',event=>{if(event.target===overlay || event.target.closest('[data-oge-print-cancel]'))close();});
+        overlay.querySelectorAll('[data-oge-print-choice]').forEach(btn=>btn.addEventListener('click',()=>{
+            const mode=btn.dataset.ogePrintChoice;
+            close();
+            // Дать диалогу удалиться до тяжёлой сериализации печатного HTML.
+            requestAnimationFrame(()=>downloadPrintPDF(mode));
+        }));
+        document.body.appendChild(overlay);
+        overlay.querySelector('[data-oge-print-choice="with"]').focus();
+    }
+    function downloadPrintPDF(solutionMode) {
         const hasBatch=Array.isArray(window.ogeVariantBatch)&&window.ogeVariantBatch.length;
         if(!hasBatch && !window.ogePrintableGroups){alert('Сначала сгенерируйте вариант!');return;}
+        if(solutionMode!=='with' && solutionMode!=='without') { ogeChoosePrintLayout();return; }
+        const withSolutions=solutionMode==='with';
         const batchEntry=Array.isArray(window.ogeVariantBatch) && window.ogeVariantBatch.length ? window.ogeVariantBatch[0] : null;
         const isManual=(batchEntry ? batchEntry.mode : window.ogeGenerationMode)==='manual';
-        if(isManual){ ogeDownloadManualPrintLikeEGE(); return; }
-        const pages=isManual ? ogeBuildManualPrintHTML() : buildOgeBatchPrintHTML();
+        if(isManual){ ogeDownloadManualPrintLikeEGE(withSolutions); return; }
+        const pages=isManual ? ogeBuildManualPrintHTML() : buildOgeBatchPrintHTML(withSolutions);
         const manualCSS=isManual ? ogeManualPrintCSS() : '';
         // Сериализация сохраняет обратные слеши разделителей в скачанном HTML.
         const printMathJaxConfig = {
@@ -6389,8 +6451,18 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-statement mjx-container svg{max-width:100%;height:auto;}
 .oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
 .oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
-/* Отдельные рисунки заданий 1–5 должны оставаться читаемыми при печати. */
-.oge-exam-local-diagram img,.oge-exam-local-diagram svg{display:block;margin:auto;max-height:60mm;object-fit:contain;}
+/* Миниатюры у каждой задачи №1–5: рядом с условием, без дублирования крупного формата. */
+.oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
+.oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
+.oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
+.oge-exam-task[data-exam-task="4"] .oge-exam-diagram,
+.oge-exam-task[data-exam-task="5"] .oge-exam-diagram{float:right;width:30%;max-width:37mm;margin:0 0 1mm 2.5mm;}
+.oge-exam-task[data-exam-task="1"] .oge-exam-diagram :is(img,svg),
+.oge-exam-task[data-exam-task="2"] .oge-exam-diagram :is(img,svg),
+.oge-exam-task[data-exam-task="3"] .oge-exam-diagram :is(img,svg),
+.oge-exam-task[data-exam-task="4"] .oge-exam-diagram :is(img,svg),
+.oge-exam-task[data-exam-task="5"] .oge-exam-diagram :is(img,svg){width:100%;max-height:28mm;object-fit:contain;}
+.oge-exam-task:has(.oge-exam-diagram)::after{content:"";display:block;clear:both;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
@@ -6422,8 +6494,19 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-column-content .task-print-answer,.oge-exam-column-content .btn-settings{display:none!important;}
 @media screen {body{background:#e8eaed;padding:16px 0;}.oge-exam-page{background:#fff;margin:0 auto 22px;box-shadow:0 4px 18px #0002;padding:0;width:277mm;}}
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+
+/* Два режима печати ОГЭ. В полной работе с полями число листов определяется содержимым. */
+.oge-exam-write-grid{display:none;box-sizing:border-box;border:.5pt solid #a2c4df;border-radius:2px;background-color:white;background-image:linear-gradient(to right,#d6e6f1 .3pt,transparent .3pt),linear-gradient(to bottom,#d6e6f1 .3pt,transparent .3pt);background-size:5mm 5mm;margin:1.2mm 0 1.4mm;break-inside:avoid;page-break-inside:avoid;}
+.oge-print-with-solutions .oge-exam-write-grid{display:block;height:16mm;}
+.oge-print-with-solutions .oge-exam-task[data-exam-task="20"] .oge-exam-write-grid,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="21"] .oge-exam-write-grid,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="22"] .oge-exam-write-grid,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="23"] .oge-exam-write-grid,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="24"] .oge-exam-write-grid,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="25"] .oge-exam-write-grid{height:88mm;}
+.oge-exam-answer-line{margin:1mm 0 1.5mm;font-size:.92em;white-space:nowrap;}
 ${manualCSS}
-</style></head><body class="${isManual ? 'oge-print-manual' : 'oge-print-exam'}">${ogePrintToolsHTML()}${pages}
+</style></head><body class="${isManual ? 'oge-print-manual' : 'oge-print-exam'} ${withSolutions ? 'oge-print-with-solutions' : 'oge-print-without-solutions'}">${ogePrintToolsHTML()}${pages}
 <script>
 (function(){
 function solvePrintColumns(heights,count,available){
@@ -6532,7 +6615,7 @@ function paginateCollections(){
 })();
 ${window.SCRIPT_END}
 </body></html>`;
-        openOgePrintDocument(printHtml,isManual ? 'ОГЭ_Подборка_для_печати_A4_книжная.html' : 'ОГЭ_Варианты_для_печати_A4_альбомная.html');
+        openOgePrintDocument(printHtml, withSolutions ? 'ОГЭ_Вариант_С_полями_для_решения.html' : 'ОГЭ_Вариант_Без_полей_для_решения.html');
     }
 
     function ogeKeyTaskEntries(snapshot) {
