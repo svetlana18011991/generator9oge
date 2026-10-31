@@ -6641,6 +6641,8 @@ function paginateCollections(){
    var firstColumn=start.querySelector('.oge-exam-column');
    var units=Array.from(firstColumn.querySelector('.oge-exam-column-content').children);
    var fixedPages=Number(start.getAttribute('data-print-pages')||0),ranges=null;
+   var fullWithFields=!fixedPages && start.classList.contains('oge-exam-full-variant')
+     && document.body.classList.contains('oge-print-with-solutions');
    var available=firstColumn.clientHeight-3;
    if(fixedPages){
      // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
@@ -6688,8 +6690,12 @@ function paginateCollections(){
        .forEach(function(box,index){box.replaceChildren.apply(box,units.slice(ranges[index][0],ranges[index][1]))});
    }else{
      units.forEach(function(unit){
-       // Широкий лист можно заполнять следующими задачами, пока они помещаются.
-       // Иначе старый алгоритм добавлял новую страницу ДЛЯ КАЖДОЙ задачи.
+       // Полный вариант С полями: вторая часть начинается в свободной колонке,
+       // каждый номер 20–25 получает максимум пространства для решения.
+       // Для обычных подборок раскладка остаётся неизменной.
+       var secondPartTask=fullWithFields && unit.querySelector('.oge-exam-task[data-exam-task="20"],.oge-exam-task[data-exam-task="21"],.oge-exam-task[data-exam-task="22"],.oge-exam-task[data-exam-task="23"],.oge-exam-task[data-exam-task="24"],.oge-exam-task[data-exam-task="25"]');
+       if(secondPartTask && content().children.length)advance();
+       // Заполняем каждую колонку сверху вниз, без искусственных пустот.
        content().appendChild(unit);
        if(fits())return;
        if(content().children.length>1){
@@ -6703,7 +6709,10 @@ function paginateCollections(){
        content().appendChild(unit);
        if(!fits())throw new Error('Условие задания слишком велико для одного листа');
      });
-     if(!sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
+     // Только отдельные подборки уравновешиваем по колонкам.
+     // В полном варианте уравновешивание создаёт гигантские пустоты
+     // внизу первой страницы, хотя следующее задание поместилось бы.
+     if(!fullWithFields && !sheets.some(function(pg){return pg.classList.contains('oge-exam-wide-page')})){
        var cols=sheets.flatMap(function(pg){return Array.from(pg.querySelectorAll('.oge-exam-column'))});
        ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),
          Math.min(cols.length,units.length),Math.min.apply(null,cols.map(function(col){return col.clientHeight}))-3);
@@ -6731,6 +6740,29 @@ function paginateCollections(){
      for(var z=originalZoom-0.02;z>=0.73 && overflowing();z-=0.02){
        sheets.forEach(function(pg){pg.style.setProperty('--oge-print-zoom',String(z));});
      }
+   }
+   // Для ПОЛНОГО варианта с полями: задача второй части занимает свою колонку.
+   // Удлиняем сетку на оставшееся место ДО нижнего поля, не двигая условие
+   // и сохраняя строку «Ответ» внутри печатной области.
+   if(fullWithFields){
+     sheets.forEach(function(pg){
+       pg.querySelectorAll('.oge-exam-column').forEach(function(col){
+         if(!col.clientHeight) return;
+         var box=col.querySelector('.oge-exam-column-content');
+         var unitsHere=Array.from(box.children);
+         if(unitsHere.length!==1)return;
+         var exercise=unitsHere[0].querySelector('.oge-exam-task[data-exam-task]');
+         if(!exercise)return;
+         var number=Number(exercise.getAttribute('data-exam-task'));
+         if(number<20 || number>25)return;
+         var grid=exercise.querySelector('.oge-exam-write-grid');
+         if(!grid)return;
+         var remaining=col.getBoundingClientRect().bottom-box.getBoundingClientRect().bottom-8;
+         if(remaining>2){
+           grid.style.height=(grid.getBoundingClientRect().height+remaining)+'px';
+         }
+       });
+     });
    }
    var label=start.querySelector('.oge-exam-header strong').textContent;
    sheets.forEach(function(pg,i){
