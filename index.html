@@ -5758,29 +5758,31 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 `;
     }
     function openOgePrintDocument(html, filename) {
-        // Preserve the same typography helper used by downloaded documents.
+        // Печатная вкладка blob: работала в одном контексте сайта с генератором.
+        // Тяжёлая верстка MathJax и подготовка печати могли блокировать его
+        // при возврате из окна печати, особенно в Edge и при больших подборках.
+        // Файл скачивается независимо: генератор не открывает новую вкладку,
+        // не ждёт окно печати и сохраняет доступность своих кнопок.
+        // HTML изначально готов к печати, с встроенными чертежами и скриптами.
         if (!html.includes('__ogeNoSplitMath')) {
             const helper = '<script>' + OGE_MATH_NO_SPLIT_SCRIPT + '<\/script>';
             html = html.replace(/<\/head>/i, helper + '</head>');
         }
         const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-        // Keep this synchronous with the user's click so browsers allow the tab.
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            downloadBlobSafely(blob, filename);
-            alert('Браузер заблокировал вкладку печати. После закрытия этого сообщения скачается файл для печати: откройте его и нажмите «Печать / сохранить PDF». Можно также разрешить всплывающие окна для генератора.');
-            return;
-        }
         const url = URL.createObjectURL(blob);
-        printWindow.opener = null;
-        printWindow.location.replace(url);
-        // Keep the URL alive for «Повторить подготовку», which reloads this tab.
-        const cleanup = setInterval(function(){
-            if (printWindow.closed) {
-                clearInterval(cleanup);
-                URL.revokeObjectURL(url);
-            }
-        }, 10000);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        try {
+            link.click();
+        } finally {
+            link.remove();
+            // Не удалять blob URL до начала сохранения больших HTML-файлов.
+            // После загрузки он больше не нужен генератору.
+            setTimeout(() => URL.revokeObjectURL(url), 90000);
+        }
     }
     function ogePrintToolsHTML() {
         return `<style>
