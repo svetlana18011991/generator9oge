@@ -37,7 +37,7 @@
     <script src="task9.js?v=20260823-task9-1"></script>
     <script src="task9_extra.js?v=20260823-task9-1"></script>
     <!-- Задание 10 + дополнительные задачи 10 -->
-    <script src="task10.js?v=20261031-embedded-pdf-figures"></script>
+    <script src="task10.js?v=20261030-workbook-corrections"></script>
     <script src="task10_extra.js?v=20260914"></script>
     <!-- Задание 11: сначала изображения, затем база задания -->
     <script src="task11_images_1.js?v=20260914"></script>
@@ -3162,7 +3162,6 @@ body.auth-locked > *:not(#passwordGate) {
         const sortedTaskIds = getUniqueTaskIds();
         for (const tid of sortedTaskIds) {
             const data = window.database[tid];
-            const task10WorkbookPdf = String(tid).replace(/\D/g, '') === '10' ? 'workbooks/task-10.pdf' : '';
             if (String(tid).replace(/\D/g,'') === '20') {
                 container.innerHTML += `<div class="part2-heading" style="margin:26px 0 10px;padding:13px 16px;border-left:4px solid #f59e0b;background:#14343f;border-radius:8px;color:#ffd28e;font-weight:800;font-size:19px;">Часть 2 · Задания с развёрнутым ответом</div><div style="color:#a8cbd0;font-size:13px;margin-bottom:10px">Выберите количество и прототипы. Решения записываются самостоятельно; разборов и автоматической проверки здесь нет.</div>`;
             }
@@ -3205,7 +3204,6 @@ body.auth-locked > *:not(#passwordGate) {
                         <button type="button" class="count-btn" onclick="adjustTaskCount('${tid}', 1, event)" title="Увеличить количество">+</button>
                     </div>
                 </div>
-                ${task10WorkbookPdf ? `<div style="padding:6px 0 10px;font-size:0.9em;"><a href="${task10WorkbookPdf}" target="_blank" rel="noopener" style="color:#8dd9fa;text-decoration:underline">📘 Исправленная тетрадь №10 (PDF)</a></div>` : ''}
                 <div id="protos-${tid}" class="proto-list">${special19UI}${listHTML}</div>
                 ${extraHTML}
             </div>`;
