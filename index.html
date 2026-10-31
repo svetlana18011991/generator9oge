@@ -5880,7 +5880,19 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         :root { --blue:#003399; --orange:#ff8c00; --line:#d8e5f3; --soft:#f4f8ff; }
         * { box-sizing: border-box; }
         @media print {
-            @page { margin: 12mm 12mm 16mm 12mm; size: A4; }
+            /* Подпись в нижнем поле страницы, за пределами блока заданий. */
+            @page {
+                size: A4;
+                margin: 12mm 12mm 20mm 12mm;
+                @bottom-center {
+                    content: "Шкатулка математических интерактивов";
+                    font-family: 'Caveat', cursive;
+                    font-size: 15px;
+                    color: rgba(0,0,0,0.55);
+                }
+            }
+            /* Старый fixed-футер перекрывал ответы при печати. */
+            #print-footer-fixed { display: none !important; }
             body {
                 background:#fff !important;
                 margin:0 !important;
@@ -6078,6 +6090,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         }
 
         @media screen {
+            #print-footer-fixed { display: none !important; }
             body {
                 background:#eef3f8;
                 font-family:"Times New Roman", serif;
