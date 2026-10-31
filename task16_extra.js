@@ -31,7 +31,7 @@
           "answer": "24"
         }
       ],
-      "topic": "I. Хорды и геометрия окружности",
+      "topic": "I. Радиусы, хорды и расстояния",
       "source": "Ширяева, блок 2"
     },
     {
@@ -61,7 +61,7 @@
           "answer": "60"
         }
       ],
-      "topic": "I. Хорды и геометрия окружности",
+      "topic": "I. Радиусы, хорды и расстояния",
       "source": "Ширяева, блок 2"
     },
     {
@@ -91,7 +91,7 @@
           "answer": "116"
         }
       ],
-      "topic": "I. Хорды и геометрия окружности",
+      "topic": "I. Радиусы, хорды и расстояния",
       "source": "Ширяева, блок 2"
     },
     {
@@ -121,7 +121,7 @@
           "answer": "160"
         }
       ],
-      "topic": "I. Хорды и геометрия окружности",
+      "topic": "I. Радиусы, хорды и расстояния",
       "source": "Ширяева, блок 2"
     },
     {
@@ -151,7 +151,7 @@
           "answer": "27"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
@@ -181,131 +181,46 @@
           "answer": "76"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
       "desc": "16.Д7. Угол между хордой и касательной по градусной мере дуги",
-      "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"137\" cy=\"121\" r=\"72\"/><line x1=\"70\" y1=\"95\" x2=\"209\" y2=\"121\"/><line x1=\"209\" y1=\"35\" x2=\"209\" y2=\"205\"/><polyline points=\"199.0,121.0 199.0,111.0 209.0,111.0\"/><text x=\"129\" y=\"117\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">O</text><text x=\"53\" y=\"92\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"217\" y=\"137\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text><text x=\"215\" y=\"32\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">C</text></svg></div>",
+      "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"74.36\" y1=\"83.44\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 205.59 116.16\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"62\" y=\"74.87\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>",
       "theory_task": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 152°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
       "theory_sol": "Угол между касательной в точке B и хордой BA равен половине градусной меры заключённой в нём дуги AB. Поскольку угол ABC острый, берём меньшую дугу: \\(\\angle ABC=\\frac{152^\\circ}{2}=76^\\circ\\).<br><br><b>Ответ:</b> 76",
       "tasks": [
         {
           "text": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 168°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
-          "answer": "84"
+          "answer": "84",
+          "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"66.75\" y1=\"104.37\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 205.11 118.91\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"53.05\" y=\"99.46\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>"
         },
         {
           "text": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 66°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
-          "answer": "33"
+          "answer": "33",
+          "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"177.54\" y1=\"47.92\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 214.11 104.23\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"183.23\" y=\"33.13\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>"
         },
         {
           "text": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 50°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
-          "answer": "25"
+          "answer": "25",
+          "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"196.42\" y1=\"59.72\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 216.55 102.87\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"205.42\" y=\"46.99\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>"
         },
         {
           "text": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 118°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
-          "answer": "59"
+          "answer": "59",
+          "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"107.44\" y1=\"50.36\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 207.86 110.7\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"100.87\" y=\"36\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>"
         },
         {
           "text": "На окружности отмечены точки A и B так, что меньшая дуга AB равна 84°. Прямая BC касается окружности в точке B так, что угол ABC острый. Найдите угол ABC. Ответ дайте в градусах.",
-          "answer": "42"
+          "answer": "42",
+          "svg_code": "<div class=\"task16-extra-arc-diagram\" style=\"width:100%;max-width:295px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 300 238\" style=\"display:block;width:100%;height:auto\" role=\"img\" aria-label=\"Хорда AB и касательная BC к окружности в точке B\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"145\" cy=\"121\" r=\"80\"/><line x1=\"153.36\" y1=\"41.44\" x2=\"225\" y2=\"121\"/><line x1=\"225\" y1=\"26\" x2=\"225\" y2=\"218\"/><path d=\"M225 101 A20 20 0 0 0 211.62 106.14\" stroke-width=\"1.6\"/></g><g fill=\"#111827\" font-family=\"Cambria,Georgia,serif\" font-size=\"16\"><text x=\"154.83\" y=\"25.51\" text-anchor=\"middle\">A</text><text x=\"234\" y=\"138\">B</text><text x=\"234\" y=\"29\">C</text></g></svg></div>"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д8. Расстояние от точки пересечения двух касательных до центра",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"137\" cy=\"111\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"258.00\" y2=\"111.00\" stroke=\"#111827\" stroke-width=\"1.5\"/><text x=\"130\" y=\"111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"275\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"158.7520661157025\" y=\"49.89611759334178\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"158.7520661157025\" y=\"182.10388240665822\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text></svg></div>",
-      "theory_task": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 6. Найдите расстояние AO.",
-      "theory_sol": "Отрезок AO делит угол между касательными пополам. В прямоугольном треугольнике с катетом r напротив угла 30° гипотенуза AO вдвое больше радиуса: \\(AO=2r=12\\).<br><br><b>Ответ:</b> 12",
-      "tasks": [
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 8. Найдите расстояние AO.",
-          "answer": "16"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 10. Найдите расстояние AO.",
-          "answer": "20"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 12. Найдите расстояние AO.",
-          "answer": "24"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 15. Найдите расстояние AO.",
-          "answer": "30"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 21. Найдите расстояние AO.",
-          "answer": "42"
-        }
-      ],
-      "topic": "II. Касательные и дуги",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д9. Радиус по расстоянию до центра и углу между касательными",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"137\" cy=\"111\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"258.00\" y2=\"111.00\" stroke=\"#111827\" stroke-width=\"1.5\"/><text x=\"130\" y=\"111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"275\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"158.7520661157025\" y=\"49.89611759334178\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"158.7520661157025\" y=\"182.10388240665822\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text></svg></div>",
-      "theory_task": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 10. Найдите радиус окружности.",
-      "theory_sol": "В прямоугольном треугольнике угол при A равен половине 60°, то есть 30°. Радиус напротив него равен половине гипотенузы AO: \\(r=10/2=5\\).<br><br><b>Ответ:</b> 5",
-      "tasks": [
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 12. Найдите радиус окружности.",
-          "answer": "6"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 16. Найдите радиус окружности.",
-          "answer": "8"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 20. Найдите радиус окружности.",
-          "answer": "10"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 24. Найдите радиус окружности.",
-          "answer": "12"
-        },
-        {
-          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 34. Найдите радиус окружности.",
-          "answer": "17"
-        }
-      ],
-      "topic": "II. Касательные и дуги",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д10. Угол между касательной и прямой через центр по дуге",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"140\" cy=\"108\" r=\"65\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"75.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"140.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"137\" y=\"103\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"163.2962962962963\" y=\"39.03034282941111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"290\" y=\"121\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"66\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
-      "theory_task": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 130°. Найдите угол ACO.",
-      "theory_sol": "Центральный угол AOD равен 130°. Лучи OC и OD противоположны, поэтому \\(\\angle AOC=180^\\circ-130^\\circ=50^\\circ\\). Радиус OA перпендикулярен касательной AC, следовательно, \\(\\angle ACO=90^\\circ-50^\\circ=40^\\circ\\).<br><br><b>Ответ:</b> 40",
-      "tasks": [
-        {
-          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 140°. Найдите угол ACO.",
-          "answer": "50"
-        },
-        {
-          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 120°. Найдите угол ACO.",
-          "answer": "30"
-        },
-        {
-          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 100°. Найдите угол ACO.",
-          "answer": "10"
-        },
-        {
-          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 135°. Найдите угол ACO.",
-          "answer": "45"
-        },
-        {
-          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 150°. Найдите угол ACO.",
-          "answer": "60"
-        }
-      ],
-      "topic": "II. Касательные и дуги",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д11. Угол между радиусами к двум точкам касания вписанной в угол окружности",
+      "desc": "16.Д8. Угол между радиусами к двум точкам касания вписанной в угол окружности",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"137\" cy=\"111\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"258.00\" y2=\"111.00\" stroke=\"#111827\" stroke-width=\"1.5\"/><text x=\"130\" y=\"111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"275\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"158.7520661157025\" y=\"49.89611759334178\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"158.7520661157025\" y=\"182.10388240665822\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text></svg></div>",
       "theory_task": "В угол C величиной 79° вписана окружность, касающаяся сторон угла в точках A и B. O — центр окружности. Найдите угол AOB.",
       "theory_sol": "Радиусы OA и OB перпендикулярны сторонам угла C. Сумма углов четырёхугольника CAOB равна 360°. Значит, \\(\\angle AOB=180^\\circ-79^\\circ=101^\\circ\\).<br><br><b>Ответ:</b> 101",
@@ -331,71 +246,101 @@
           "answer": "138"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д12. Радиус по длине касательной и расстоянию от внешней точки до центра",
-      "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"117\" cy=\"117\" r=\"70\"/><line x1=\"117\" y1=\"117\" x2=\"267\" y2=\"117\"/><line x1=\"267\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><line x1=\"117\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><polyline points=\"145.0,63.9 153.8,68.6 158.5,59.8\"/><text x=\"105\" y=\"134\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">O</text><text x=\"274\" y=\"125\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"135.66666666666666\" y=\"47.08967058003253\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text></svg></div>",
-      "theory_task": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 24, AO = 26. Найдите радиус окружности.",
-      "theory_sol": "Радиус OB, проведённый к точке касания B, перпендикулярен AB. Поэтому треугольник ABO прямоугольный, AO — гипотенуза. По теореме Пифагора \\(OB=\\sqrt{26^2-24^2}=\\sqrt{100}=10\\).<br><br><b>Ответ:</b> 10",
+      "desc": "16.Д9. Угол между касательной и прямой через центр по дуге",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"140\" cy=\"108\" r=\"65\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"75.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"140.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"137\" y=\"103\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"163.2962962962963\" y=\"39.03034282941111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"290\" y=\"121\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"66\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
+      "theory_task": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 130°. Найдите угол ACO.",
+      "theory_sol": "Центральный угол AOD равен 130°. Лучи OC и OD противоположны, поэтому \\(\\angle AOC=180^\\circ-130^\\circ=50^\\circ\\). Радиус OA перпендикулярен касательной AC, следовательно, \\(\\angle ACO=90^\\circ-50^\\circ=40^\\circ\\).<br><br><b>Ответ:</b> 40",
       "tasks": [
         {
-          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 24, AO = 26. Найдите радиус окружности.",
+          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 140°. Найдите угол ACO.",
+          "answer": "50"
+        },
+        {
+          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 120°. Найдите угол ACO.",
+          "answer": "30"
+        },
+        {
+          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 100°. Найдите угол ACO.",
           "answer": "10"
         },
         {
-          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 40, AO = 85. Найдите радиус окружности.",
-          "answer": "75"
+          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 135°. Найдите угол ACO.",
+          "answer": "45"
         },
         {
-          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 21, AO = 75. Найдите радиус окружности.",
-          "answer": "72"
-        },
-        {
-          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 14, AO = 50. Найдите радиус окружности.",
-          "answer": "48"
-        },
-        {
-          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 15, AO = 17. Найдите радиус окружности.",
-          "answer": "8"
+          "text": "Луч CA касается окружности в точке A, луч CO проходит через центр O. Дуга AD внутри угла ACO равна 150°. Найдите угол ACO.",
+          "answer": "60"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д13. Расстояние от внешней точки до ближнего пересечения с окружностью",
-      "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"117\" cy=\"117\" r=\"70\"/><line x1=\"117\" y1=\"117\" x2=\"267\" y2=\"117\"/><line x1=\"267\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><line x1=\"117\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><polyline points=\"145.0,63.9 153.8,68.6 158.5,59.8\"/><text x=\"105\" y=\"134\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">O</text><text x=\"182\" y=\"135\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">D</text><text x=\"274\" y=\"125\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"135.66666666666666\" y=\"47.08967058003253\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text></svg></div>",
-      "theory_task": "Отрезок AB = 48 касается окружности радиуса 14 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
-      "theory_sol": "Радиус OB перпендикулярен касательной AB. Следовательно, треугольник ABO прямоугольный и \\(AO=\\sqrt{48^2+14^2}=50\\). Точка D лежит на отрезке AO и на окружности, поэтому \\(OD=14\\) и \\(AD=AO-OD=50-14=36\\).<br><br><b>Ответ:</b> 36",
+      "desc": "16.Д10. Расстояние от точки пересечения двух касательных до центра",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"137\" cy=\"111\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"258.00\" y2=\"111.00\" stroke=\"#111827\" stroke-width=\"1.5\"/><text x=\"130\" y=\"111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"275\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"158.7520661157025\" y=\"49.89611759334178\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"158.7520661157025\" y=\"182.10388240665822\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text></svg></div>",
+      "theory_task": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 6. Найдите расстояние AO.",
+      "theory_sol": "Отрезок AO делит угол между касательными пополам. В прямоугольном треугольнике с катетом r напротив угла 30° гипотенуза AO вдвое больше радиуса: \\(AO=2r=12\\).<br><br><b>Ответ:</b> 12",
       "tasks": [
         {
-          "text": "Отрезок AB = 48 касается окружности радиуса 14 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
-          "answer": "36"
-        },
-        {
-          "text": "Отрезок AB = 32 касается окружности радиуса 24 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 8. Найдите расстояние AO.",
           "answer": "16"
         },
         {
-          "text": "Отрезок AB = 51 касается окружности радиуса 68 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
-          "answer": "17"
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 10. Найдите расстояние AO.",
+          "answer": "20"
         },
         {
-          "text": "Отрезок AB = 20 касается окружности радиуса 21 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
-          "answer": "8"
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 12. Найдите расстояние AO.",
+          "answer": "24"
         },
         {
-          "text": "Отрезок AB = 12 касается окружности радиуса 5 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
-          "answer": "8"
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 15. Найдите расстояние AO.",
+          "answer": "30"
+        },
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между касательными равен 60°, радиус окружности равен 21. Найдите расстояние AO.",
+          "answer": "42"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д14. Длина касательной из точки за пределами окружности при известном радиусе",
+      "desc": "16.Д11. Радиус по расстоянию до центра и углу между касательными",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"137\" cy=\"111\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"258.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"58.90\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"166.75\" y2=\"163.10\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"137.00\" y1=\"111.00\" x2=\"258.00\" y2=\"111.00\" stroke=\"#111827\" stroke-width=\"1.5\"/><text x=\"130\" y=\"111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"275\" y=\"113\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"158.7520661157025\" y=\"49.89611759334178\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"158.7520661157025\" y=\"182.10388240665822\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text></svg></div>",
+      "theory_task": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 10. Найдите радиус окружности.",
+      "theory_sol": "В прямоугольном треугольнике угол при A равен половине 60°, то есть 30°. Радиус напротив него равен половине гипотенузы AO: \\(r=10/2=5\\).<br><br><b>Ответ:</b> 5",
+      "tasks": [
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 12. Найдите радиус окружности.",
+          "answer": "6"
+        },
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 16. Найдите радиус окружности.",
+          "answer": "8"
+        },
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 20. Найдите радиус окружности.",
+          "answer": "10"
+        },
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 24. Найдите радиус окружности.",
+          "answer": "12"
+        },
+        {
+          "text": "Из точки A к окружности с центром O проведены две касательные. Угол между ними равен 60°, AO = 34. Найдите радиус окружности.",
+          "answer": "17"
+        }
+      ],
+      "topic": "II. Касательные: углы, дуги и длины",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д12. Длина касательной из точки за пределами окружности при известном радиусе",
       "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"111\" cy=\"125\" r=\"70\"/><line x1=\"111\" y1=\"125\" x2=\"277\" y2=\"125\"/><line x1=\"111\" y1=\"125\" x2=\"140.51807228915663\" y2=\"61.52808961176508\"/><line x1=\"140.51807228915663\" y1=\"61.52808961176508\" x2=\"277\" y2=\"125\"/><polyline points=\"136.7,69.7 144.9,73.5 148.7,65.3\"/><text x=\"99\" y=\"144\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"177\" y=\"145\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">C</text><text x=\"282\" y=\"131\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text><text x=\"133.51807228915663\" y=\"52.52808961176508\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">K</text></svg></div>",
       "theory_task": "Точка C расположена на отрезке AB, AC = 6, BC = 4. Окружность с центром A проходит через C. Найдите длину касательной из B к окружности.",
       "theory_sol": "Из условия \\(AB=AC+CB=6+4=10\\), а радиус окружности \\(AC=6\\). Радиус AK, проведённый в точку касания K, перпендикулярен касательной BK. По теореме Пифагора \\(BK=\\sqrt{AB^2-AK^2}=\\sqrt{10^2-6^2}=8\\).<br><br><b>Ответ:</b> 8",
@@ -421,7 +366,67 @@
           "answer": "4"
         }
       ],
-      "topic": "II. Касательные и дуги",
+      "topic": "II. Касательные: углы, дуги и длины",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д13. Радиус по длине касательной и расстоянию от внешней точки до центра",
+      "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"117\" cy=\"117\" r=\"70\"/><line x1=\"117\" y1=\"117\" x2=\"267\" y2=\"117\"/><line x1=\"267\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><line x1=\"117\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><polyline points=\"145.0,63.9 153.8,68.6 158.5,59.8\"/><text x=\"105\" y=\"134\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">O</text><text x=\"274\" y=\"125\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"135.66666666666666\" y=\"47.08967058003253\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text></svg></div>",
+      "theory_task": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 24, AO = 26. Найдите радиус окружности.",
+      "theory_sol": "Радиус OB, проведённый к точке касания B, перпендикулярен AB. Поэтому треугольник ABO прямоугольный, AO — гипотенуза. По теореме Пифагора \\(OB=\\sqrt{26^2-24^2}=\\sqrt{100}=10\\).<br><br><b>Ответ:</b> 10",
+      "tasks": [
+        {
+          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 24, AO = 26. Найдите радиус окружности.",
+          "answer": "10"
+        },
+        {
+          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 40, AO = 85. Найдите радиус окружности.",
+          "answer": "75"
+        },
+        {
+          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 21, AO = 75. Найдите радиус окружности.",
+          "answer": "72"
+        },
+        {
+          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 14, AO = 50. Найдите радиус окружности.",
+          "answer": "48"
+        },
+        {
+          "text": "Из точки A проведена касательная AB к окружности с центром O. Известно, что AB = 15, AO = 17. Найдите радиус окружности.",
+          "answer": "8"
+        }
+      ],
+      "topic": "II. Касательные: углы, дуги и длины",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д14. Расстояние от внешней точки до ближнего пересечения с окружностью",
+      "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"display:block;width:100%;height:auto;overflow:visible\" stroke=\"#17202b\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\" fill=\"none\"><circle cx=\"117\" cy=\"117\" r=\"70\"/><line x1=\"117\" y1=\"117\" x2=\"267\" y2=\"117\"/><line x1=\"267\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><line x1=\"117\" y1=\"117\" x2=\"149.66666666666666\" y2=\"55.08967058003253\"/><polyline points=\"145.0,63.9 153.8,68.6 158.5,59.8\"/><text x=\"105\" y=\"134\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">O</text><text x=\"182\" y=\"135\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">D</text><text x=\"274\" y=\"125\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">A</text><text x=\"135.66666666666666\" y=\"47.08967058003253\" font-size=\"16\" stroke=\"none\" fill=\"#17202b\" font-family=\"Georgia,Times New Roman,serif\">B</text></svg></div>",
+      "theory_task": "Отрезок AB = 48 касается окружности радиуса 14 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+      "theory_sol": "Радиус OB перпендикулярен касательной AB. Следовательно, треугольник ABO прямоугольный и \\(AO=\\sqrt{48^2+14^2}=50\\). Точка D лежит на отрезке AO и на окружности, поэтому \\(OD=14\\) и \\(AD=AO-OD=50-14=36\\).<br><br><b>Ответ:</b> 36",
+      "tasks": [
+        {
+          "text": "Отрезок AB = 48 касается окружности радиуса 14 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "answer": "36"
+        },
+        {
+          "text": "Отрезок AB = 32 касается окружности радиуса 24 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "answer": "16"
+        },
+        {
+          "text": "Отрезок AB = 51 касается окружности радиуса 68 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "answer": "17"
+        },
+        {
+          "text": "Отрезок AB = 20 касается окружности радиуса 21 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "answer": "8"
+        },
+        {
+          "text": "Отрезок AB = 12 касается окружности радиуса 5 с центром O в точке B. Окружность пересекает отрезок AO в точке D. Найдите AD.",
+          "answer": "8"
+        }
+      ],
+      "topic": "II. Касательные: углы, дуги и длины",
       "source": "Ширяева, блок 2"
     },
     {
@@ -451,7 +456,7 @@
           "answer": "144"
         }
       ],
-      "topic": "III. Центральные и вписанные углы: дополнительные приёмы",
+      "topic": "III. Центральные и вписанные углы",
       "source": "Ширяева, блок 2"
     },
     {
@@ -481,7 +486,7 @@
           "answer": "73"
         }
       ],
-      "topic": "III. Центральные и вписанные углы: дополнительные приёмы",
+      "topic": "III. Центральные и вписанные углы",
       "source": "Ширяева, блок 2"
     },
     {
@@ -511,7 +516,7 @@
           "answer": "42"
         }
       ],
-      "topic": "III. Центральные и вписанные углы: дополнительные приёмы",
+      "topic": "III. Центральные и вписанные углы",
       "source": "Ширяева, блок 2; Решу ОГЭ, каталог №116"
     },
     {
@@ -541,7 +546,7 @@
           "answer": "64"
         }
       ],
-      "topic": "III. Центральные и вписанные углы: дополнительные приёмы",
+      "topic": "III. Центральные и вписанные углы",
       "source": "Ширяева, блок 2"
     },
     {
@@ -571,11 +576,41 @@
           "answer": "36"
         }
       ],
-      "topic": "III. Центральные и вписанные углы: дополнительные приёмы",
+      "topic": "III. Центральные и вписанные углы",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д20. Пересечение двух хорд: произведения отрезков",
+      "desc": "16.Д20. Центральный угол в равнобедренном треугольнике, вписанном в окружность",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"110\" r=\"78\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><polygon points=\"85.13008775700371,146.61878189729947 154.0,32.0 222.8699122429963,146.61878189729947\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"110.00\" x2=\"154.00\" y2=\"32.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"110.00\" x2=\"222.87\" y2=\"146.62\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"149\" y=\"117\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"74.13008775700371\" y=\"162.61878189729947\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"154.0\" y=\"21.0\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"233.8699122429963\" y=\"162.61878189729947\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text></svg></div>",
+      "theory_task": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 66°. Найдите угол BOC.",
+      "theory_sol": "Углы при основании равнобедренного треугольника по \\(\\frac{180^\\circ-66^\\circ}{2}=57^\\circ\\). Центральный угол BOC опирается на ту же дугу, что вписанный угол BAC: \\(\\angle BOC=2\\cdot57^\\circ=114^\\circ\\).<br><br><b>Ответ:</b> 114",
+      "tasks": [
+        {
+          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 66°. Найдите центральный угол BOC.",
+          "answer": "114"
+        },
+        {
+          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 32°. Найдите центральный угол BOC.",
+          "answer": "148"
+        },
+        {
+          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 123°. Найдите центральный угол BOC.",
+          "answer": "57"
+        },
+        {
+          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 107°. Найдите центральный угол BOC.",
+          "answer": "73"
+        },
+        {
+          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 40°. Найдите центральный угол BOC.",
+          "answer": "140"
+        }
+      ],
+      "topic": "III. Центральные и вписанные углы",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д21. Пересечение двух хорд: произведения отрезков",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"150\" cy=\"105\" r=\"75\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"76.14\" y1=\"118.02\" x2=\"222.44\" y2=\"85.59\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130.59\" y1=\"32.56\" x2=\"198.21\" y2=\"162.45\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"70.1394185240844\" y=\"132.02361332501977\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"126.58857161731095\" y=\"22.55556302831988\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"230.44443697168012\" y=\"91.58857161731095\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"207.20907072649044\" y=\"179.45333323392336\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><text x=\"178\" y=\"91\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">P</text></svg></div>",
       "theory_task": "Хорды AC и BD окружности пересекаются в точке P. BP = 15, CP = 6, DP = 10. Найдите AP.",
       "theory_sol": "По теореме о пересекающихся хордах \\(AP\\cdot CP=BP\\cdot DP\\). Значит, \\(AP=\\frac{15\\cdot10}{6}=25\\).<br><br><b>Ответ:</b> 25",
@@ -601,11 +636,11 @@
           "answer": "15"
         }
       ],
-      "topic": "IV. Пересекающиеся хорды, касательная и секущая",
+      "topic": "IV. Хорды, секущие и подобие",
       "source": "Ширяева, блок 2; Решу ОГЭ №356618"
     },
     {
-      "desc": "16.Д21. Касательная и секущая: известны внешний отрезок и вся секущая",
+      "desc": "16.Д22. Касательная и секущая: известны внешний отрезок и вся секущая",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"140\" cy=\"108\" r=\"65\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"75.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"171.30\" y1=\"51.03\" x2=\"140.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"293\" y=\"123\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"208\" y=\"129\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"66\" y=\"122\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"166.2962962962963\" y=\"41.03034282941111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"140\" y=\"101\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
       "theory_task": "Из точки A вне окружности проведены касательная AK и секущая, пересекающая окружность в точках B и C. AB = 2, AC = 8. Найдите AK.",
       "theory_sol": "Для касательной AK и секущей ABC выполняется \\(AK^2=AB\\cdot AC\\). Значит, \\(AK=\\sqrt{2\\cdot8}=4\\).<br><br><b>Ответ:</b> 4",
@@ -631,11 +666,11 @@
           "answer": "10"
         }
       ],
-      "topic": "IV. Пересекающиеся хорды, касательная и секущая",
+      "topic": "IV. Хорды, секущие и подобие",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д22. Касательная и секущая: внешний и внутренний отрезки",
+      "desc": "16.Д23. Касательная и секущая: внешний и внутренний отрезки",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"140\" cy=\"108\" r=\"65\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"75.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"275.00\" y1=\"108.00\" x2=\"171.30\" y2=\"51.03\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"171.30\" y1=\"51.03\" x2=\"140.00\" y2=\"108.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"293\" y=\"123\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"208\" y=\"129\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"66\" y=\"122\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"166.2962962962963\" y=\"41.03034282941111\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"140\" y=\"101\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
       "theory_task": "Через точку A вне окружности проведены касательная AK и секущая, пересекающая окружность в точках B и C, причём B — ближняя к A точка. AB = 5, BC = 15. Найдите AK.",
       "theory_sol": "Ближняя точка пересечения секущей с окружностью — B, поэтому \\(AC=AB+BC=5+15=20\\). По теореме о касательной и секущей \\(AK^2=AB\\cdot AC=5\\cdot20\\); следовательно, \\(AK=10\\).<br><br><b>Ответ:</b> 10",
@@ -661,67 +696,37 @@
           "answer": "15"
         }
       ],
-      "topic": "IV. Пересекающиеся хорды, касательная и секущая",
+      "topic": "IV. Хорды, секущие и подобие",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д23. Периметр параллелограмма, в который вписана окружность",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"51,113 153,45 255,113 153,181\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"51.00\" y1=\"113.00\" x2=\"255.00\" y2=\"113.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"153.00\" y1=\"45.00\" x2=\"153.00\" y2=\"181.00\" stroke=\"#111827\" stroke-width=\"2\"/><circle cx=\"153\" cy=\"113\" r=\"56.579\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><text x=\"34\" y=\"117\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"153\" y=\"39\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"273\" y=\"118\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"153\" y=\"201\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><text x=\"164\" y=\"108\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
-      "theory_task": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 8.",
-      "theory_sol": "У описанного четырёхугольника суммы противоположных сторон равны. У параллелограмма противоположные стороны и так равны. Поэтому все четыре стороны равны 8, периметр \\(P=4\\cdot8=32\\).<br><br><b>Ответ:</b> 32",
+      "desc": "16.Д24. Сторона вписанного четырёхугольника через точку пересечения продолжений",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"136\" cy=\"110\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"277.00\" y1=\"112.00\" x2=\"122.36\" y2=\"177.64\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"277.00\" y1=\"112.00\" x2=\"111.96\" y2=\"45.32\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"194.13\" y1=\"147.18\" x2=\"198.22\" y2=\"80.17\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"122.36\" y1=\"177.64\" x2=\"111.96\" y2=\"45.32\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"289\" y=\"116\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"109\" y=\"174\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"186\" y=\"154\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"191\" y=\"73\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"101\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
+      "theory_task": "Четырёхугольник ABCD вписан в окружность. Прямые AB и CD пересекаются в точке K вне окружности. BK = 7, DK = 14, BC = 10. Найдите AD.",
+      "theory_sol": "Треугольники KBC и KDA подобны: вписанные углы, опирающиеся на одинаковые дуги, равны, а угол K общий. Поэтому \\(\\frac{AD}{BC}=\\frac{KD}{KB}\\), откуда \\(AD=\\frac{14\\cdot10}{7}=20\\).<br><br><b>Ответ:</b> 20",
       "tasks": [
         {
-          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 8.",
+          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 7, DK = 14, BC = 10. Найдите AD.",
+          "answer": "20"
+        },
+        {
+          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 12, DK = 16, BC = 24. Найдите AD.",
           "answer": "32"
         },
         {
-          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 11.",
-          "answer": "44"
-        },
-        {
-          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 9.",
-          "answer": "36"
-        },
-        {
-          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 13.",
-          "answer": "52"
-        },
-        {
-          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 14.",
-          "answer": "56"
-        }
-      ],
-      "topic": "V. Вписанные и описанные многоугольники",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д24. Средняя линия трапеции, в которую вписана окружность",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"65,170 115,50 195,50 245,170\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><circle cx=\"155\" cy=\"110\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><text x=\"53\" y=\"182\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"110\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"201\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"257\" y=\"182\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
-      "theory_task": "В трапецию, сумма боковых сторон которой равна 30, вписана окружность. Найдите длину средней линии трапеции.",
-      "theory_sol": "В описанной трапеции сумма оснований равна сумме боковых сторон: 30. Средняя линия равна половине суммы оснований, поэтому \\(m=\\frac{30}{2}=15\\).<br><br><b>Ответ:</b> 15",
-      "tasks": [
-        {
-          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 30. Найдите длину её средней линии.",
+          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 14, DK = 10, BC = 21. Найдите AD.",
           "answer": "15"
         },
         {
-          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 20. Найдите длину её средней линии.",
-          "answer": "10"
+          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 20, DK = 15, BC = 12. Найдите AD.",
+          "answer": "9"
         },
         {
-          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 12. Найдите длину её средней линии.",
-          "answer": "6"
-        },
-        {
-          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 26. Найдите длину её средней линии.",
-          "answer": "13"
-        },
-        {
-          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 42. Найдите длину её средней линии.",
-          "answer": "21"
+          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 8, DK = 12, BC = 18. Найдите AD.",
+          "answer": "27"
         }
       ],
-      "topic": "V. Вписанные и описанные многоугольники",
+      "topic": "IV. Хорды, секущие и подобие",
       "source": "Ширяева, блок 2"
     },
     {
@@ -751,131 +756,11 @@
           "answer": "36"
         }
       ],
-      "topic": "V. Вписанные и описанные многоугольники",
+      "topic": "V. Окружности и многоугольники",
       "source": "Ширяева, блок 2"
     },
     {
-      "desc": "16.Д26. Центральный угол в равнобедренном треугольнике, вписанном в окружность",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"110\" r=\"78\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><polygon points=\"85.13008775700371,146.61878189729947 154.0,32.0 222.8699122429963,146.61878189729947\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"110.00\" x2=\"154.00\" y2=\"32.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"110.00\" x2=\"222.87\" y2=\"146.62\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"149\" y=\"117\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"74.13008775700371\" y=\"162.61878189729947\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"154.0\" y=\"21.0\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"233.8699122429963\" y=\"162.61878189729947\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text></svg></div>",
-      "theory_task": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 66°. Найдите угол BOC.",
-      "theory_sol": "Углы при основании равнобедренного треугольника по \\(\\frac{180^\\circ-66^\\circ}{2}=57^\\circ\\). Центральный угол BOC опирается на ту же дугу, что вписанный угол BAC: \\(\\angle BOC=2\\cdot57^\\circ=114^\\circ\\).<br><br><b>Ответ:</b> 114",
-      "tasks": [
-        {
-          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 66°. Найдите центральный угол BOC.",
-          "answer": "114"
-        },
-        {
-          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 32°. Найдите центральный угол BOC.",
-          "answer": "148"
-        },
-        {
-          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 123°. Найдите центральный угол BOC.",
-          "answer": "57"
-        },
-        {
-          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 107°. Найдите центральный угол BOC.",
-          "answer": "73"
-        },
-        {
-          "text": "Окружность с центром O описана около равнобедренного треугольника ABC, AB = BC, угол ABC равен 40°. Найдите центральный угол BOC.",
-          "answer": "140"
-        }
-      ],
-      "topic": "V. Вписанные и описанные многоугольники",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д27. Сторона вписанного четырёхугольника через точку пересечения продолжений",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"136\" cy=\"110\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"277.00\" y1=\"112.00\" x2=\"122.36\" y2=\"177.64\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"277.00\" y1=\"112.00\" x2=\"111.96\" y2=\"45.32\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"194.13\" y1=\"147.18\" x2=\"198.22\" y2=\"80.17\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"122.36\" y1=\"177.64\" x2=\"111.96\" y2=\"45.32\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"289\" y=\"116\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">K</text><text x=\"109\" y=\"174\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"186\" y=\"154\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"191\" y=\"73\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"101\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
-      "theory_task": "Четырёхугольник ABCD вписан в окружность. Прямые AB и CD пересекаются в точке K вне окружности. BK = 7, DK = 14, BC = 10. Найдите AD.",
-      "theory_sol": "Треугольники KBC и KDA подобны: вписанные углы, опирающиеся на одинаковые дуги, равны, а угол K общий. Поэтому \\(\\frac{AD}{BC}=\\frac{KD}{KB}\\), откуда \\(AD=\\frac{14\\cdot10}{7}=20\\).<br><br><b>Ответ:</b> 20",
-      "tasks": [
-        {
-          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 7, DK = 14, BC = 10. Найдите AD.",
-          "answer": "20"
-        },
-        {
-          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 12, DK = 16, BC = 24. Найдите AD.",
-          "answer": "32"
-        },
-        {
-          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 14, DK = 10, BC = 21. Найдите AD.",
-          "answer": "15"
-        },
-        {
-          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 20, DK = 15, BC = 12. Найдите AD.",
-          "answer": "9"
-        },
-        {
-          "text": "Вписанный в окружность четырёхугольник ABCD имеет продолжения сторон AB и CD, пересекающиеся в точке K вне окружности. BK = 8, DK = 12, BC = 18. Найдите AD.",
-          "answer": "27"
-        }
-      ],
-      "topic": "V. Вписанные и описанные многоугольники",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д28. Описанная около квадрата окружность по радиусу вписанной",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"79,35 231,35 231,187 79,187\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"72\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"240\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"242\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"71\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><circle cx=\"155\" cy=\"111\" r=\"76\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/></svg></div>",
-      "theory_task": "Радиус окружности, вписанной в квадрат, равен \\(7\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-      "theory_sol": "Сторона квадрата равна \\(a=2r\\); радиус описанной окружности \\(R=\\frac{a\\sqrt2}{2}=r\\sqrt2\\). При \\(r=7\\sqrt2\\) получаем \\(R=14\\).<br><br><b>Ответ:</b> 14",
-      "tasks": [
-        {
-          "text": "Радиус окружности, вписанной в квадрат, равен \\(7\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-          "answer": "14"
-        },
-        {
-          "text": "Радиус окружности, вписанной в квадрат, равен \\(10\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-          "answer": "20"
-        },
-        {
-          "text": "Радиус окружности, вписанной в квадрат, равен \\(16\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-          "answer": "32"
-        },
-        {
-          "text": "Радиус окружности, вписанной в квадрат, равен \\(22\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-          "answer": "44"
-        },
-        {
-          "text": "Радиус окружности, вписанной в квадрат, равен \\(9\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
-          "answer": "18"
-        }
-      ],
-      "topic": "V. Вписанные и описанные многоугольники",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д29. Вписанная в квадрат окружность по радиусу описанной",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"79,35 231,35 231,187 79,187\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"72\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"240\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"242\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"71\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><circle cx=\"155\" cy=\"111\" r=\"107.48023074035522\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"79.00\" y1=\"35.00\" x2=\"231.00\" y2=\"187.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"164\" y=\"116\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
-      "theory_task": "Радиус окружности, описанной около квадрата, равен \\(6\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-      "theory_sol": "Для квадрата \\(R=r\\sqrt2\\), поэтому \\(r=\\frac R{\\sqrt2}\\). При \\(R=6\\sqrt2\\) получаем \\(r=6\\).<br><br><b>Ответ:</b> 6",
-      "tasks": [
-        {
-          "text": "Радиус описанной около квадрата окружности равен \\(6\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-          "answer": "6"
-        },
-        {
-          "text": "Радиус описанной около квадрата окружности равен \\(42\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-          "answer": "42"
-        },
-        {
-          "text": "Радиус описанной около квадрата окружности равен \\(56\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-          "answer": "56"
-        },
-        {
-          "text": "Радиус описанной около квадрата окружности равен \\(64\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-          "answer": "64"
-        },
-        {
-          "text": "Радиус описанной около квадрата окружности равен \\(8\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
-          "answer": "8"
-        }
-      ],
-      "topic": "V. Вписанные и описанные многоугольники",
-      "source": "Ширяева, блок 2"
-    },
-    {
-      "desc": "16.Д30. Высота равностороннего треугольника по радиусу описанной окружности",
+      "desc": "16.Д26. Высота равностороннего треугольника по радиусу описанной окружности",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"48,154 153,35 257,154\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"33\" y=\"173\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"151\" y=\"29\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"272\" y=\"174\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><line x1=\"153.00\" y1=\"35.00\" x2=\"153.00\" y2=\"154.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"142.00\" y1=\"154.00\" x2=\"142.00\" y2=\"143.00\" stroke=\"#111827\" stroke-width=\"2.5\"/><line x1=\"142.00\" y1=\"143.00\" x2=\"153.00\" y2=\"143.00\" stroke=\"#111827\" stroke-width=\"2.5\"/><text x=\"155\" y=\"175\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">H</text></svg></div>",
       "theory_task": "Радиус окружности, описанной около равностороннего треугольника, равен 4. Найдите его высоту.",
       "theory_sol": "Центр описанной окружности равностороннего треугольника делит высоту в отношении 2:1. Значит, \\(h=\\frac{3R}{2}=6\\).<br><br><b>Ответ:</b> 6",
@@ -901,7 +786,127 @@
           "answer": "30"
         }
       ],
-      "topic": "V. Вписанные и описанные многоугольники",
+      "topic": "V. Окружности и многоугольники",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д27. Описанная около квадрата окружность по радиусу вписанной",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"79,35 231,35 231,187 79,187\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"72\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"240\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"242\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"71\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><circle cx=\"155\" cy=\"111\" r=\"76\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/></svg></div>",
+      "theory_task": "Радиус окружности, вписанной в квадрат, равен \\(7\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+      "theory_sol": "Сторона квадрата равна \\(a=2r\\); радиус описанной окружности \\(R=\\frac{a\\sqrt2}{2}=r\\sqrt2\\). При \\(r=7\\sqrt2\\) получаем \\(R=14\\).<br><br><b>Ответ:</b> 14",
+      "tasks": [
+        {
+          "text": "Радиус окружности, вписанной в квадрат, равен \\(7\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+          "answer": "14"
+        },
+        {
+          "text": "Радиус окружности, вписанной в квадрат, равен \\(10\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+          "answer": "20"
+        },
+        {
+          "text": "Радиус окружности, вписанной в квадрат, равен \\(16\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+          "answer": "32"
+        },
+        {
+          "text": "Радиус окружности, вписанной в квадрат, равен \\(22\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+          "answer": "44"
+        },
+        {
+          "text": "Радиус окружности, вписанной в квадрат, равен \\(9\\sqrt{2}\\). Найдите радиус окружности, описанной около квадрата.",
+          "answer": "18"
+        }
+      ],
+      "topic": "V. Окружности и многоугольники",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д28. Вписанная в квадрат окружность по радиусу описанной",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 220\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"79,35 231,35 231,187 79,187\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"72\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"240\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"242\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"71\" y=\"200\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><circle cx=\"155\" cy=\"111\" r=\"107.48023074035522\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"79.00\" y1=\"35.00\" x2=\"231.00\" y2=\"187.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"164\" y=\"116\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
+      "theory_task": "Радиус окружности, описанной около квадрата, равен \\(6\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+      "theory_sol": "Для квадрата \\(R=r\\sqrt2\\), поэтому \\(r=\\frac R{\\sqrt2}\\). При \\(R=6\\sqrt2\\) получаем \\(r=6\\).<br><br><b>Ответ:</b> 6",
+      "tasks": [
+        {
+          "text": "Радиус описанной около квадрата окружности равен \\(6\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+          "answer": "6"
+        },
+        {
+          "text": "Радиус описанной около квадрата окружности равен \\(42\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+          "answer": "42"
+        },
+        {
+          "text": "Радиус описанной около квадрата окружности равен \\(56\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+          "answer": "56"
+        },
+        {
+          "text": "Радиус описанной около квадрата окружности равен \\(64\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+          "answer": "64"
+        },
+        {
+          "text": "Радиус описанной около квадрата окружности равен \\(8\\sqrt{2}\\). Найдите радиус вписанной в этот квадрат окружности.",
+          "answer": "8"
+        }
+      ],
+      "topic": "V. Окружности и многоугольники",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д29. Периметр параллелограмма, в который вписана окружность",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"51,113 153,45 255,113 153,181\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"51.00\" y1=\"113.00\" x2=\"255.00\" y2=\"113.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"153.00\" y1=\"45.00\" x2=\"153.00\" y2=\"181.00\" stroke=\"#111827\" stroke-width=\"2\"/><circle cx=\"153\" cy=\"113\" r=\"56.579\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><text x=\"34\" y=\"117\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"153\" y=\"39\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"273\" y=\"118\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"153\" y=\"201\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text><text x=\"164\" y=\"108\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
+      "theory_task": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 8.",
+      "theory_sol": "У описанного четырёхугольника суммы противоположных сторон равны. У параллелограмма противоположные стороны и так равны. Поэтому все четыре стороны равны 8, периметр \\(P=4\\cdot8=32\\).<br><br><b>Ответ:</b> 32",
+      "tasks": [
+        {
+          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 8.",
+          "answer": "32"
+        },
+        {
+          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 11.",
+          "answer": "44"
+        },
+        {
+          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 9.",
+          "answer": "36"
+        },
+        {
+          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 13.",
+          "answer": "52"
+        },
+        {
+          "text": "В параллелограмм вписана окружность. Найдите его периметр, если одна из сторон равна 14.",
+          "answer": "56"
+        }
+      ],
+      "topic": "V. Окружности и многоугольники",
+      "source": "Ширяева, блок 2"
+    },
+    {
+      "desc": "16.Д30. Средняя линия трапеции, в которую вписана окружность",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><polygon points=\"65,170 115,50 195,50 245,170\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><circle cx=\"155\" cy=\"110\" r=\"60\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><text x=\"53\" y=\"182\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"110\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"201\" y=\"43\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"257\" y=\"182\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
+      "theory_task": "В трапецию, сумма боковых сторон которой равна 30, вписана окружность. Найдите длину средней линии трапеции.",
+      "theory_sol": "В описанной трапеции сумма оснований равна сумме боковых сторон: 30. Средняя линия равна половине суммы оснований, поэтому \\(m=\\frac{30}{2}=15\\).<br><br><b>Ответ:</b> 15",
+      "tasks": [
+        {
+          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 30. Найдите длину её средней линии.",
+          "answer": "15"
+        },
+        {
+          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 20. Найдите длину её средней линии.",
+          "answer": "10"
+        },
+        {
+          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 12. Найдите длину её средней линии.",
+          "answer": "6"
+        },
+        {
+          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 26. Найдите длину её средней линии.",
+          "answer": "13"
+        },
+        {
+          "text": "В трапецию вписана окружность. Сумма длин боковых сторон трапеции равна 42. Найдите длину её средней линии.",
+          "answer": "21"
+        }
+      ],
+      "topic": "V. Окружности и многоугольники",
       "source": "Ширяева, блок 2"
     },
     {
@@ -1081,7 +1086,7 @@
           "answer": "32"
         }
       ],
-      "topic": "VII. Комбинированные задачи на площадь и тригонометрию",
+      "topic": "VII. Комбинированные задачи",
       "source": "Решу ОГЭ, тип 16 № 352811, вариант 83269810"
     }
   ],
