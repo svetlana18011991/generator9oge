@@ -4670,6 +4670,14 @@ body.auth-locked > *:not(#passwordGate) {
                 } else if (item.printLayout === 'image-grid') {
                     const gridHeight = item.printGridHeight || 105;
                     const compactPrint = Boolean(item.printCompact);
+                    const isPracticePicture = kind === 'practice' && Boolean(item.__ogeScenarioMeta);
+                    const practiceName = String(item.__ogeScenarioMeta?.themeTitle || '');
+                    const isTropinkiPicture = isPracticePicture && /тропинк/i.test(practiceName);
+                    const isStovePicture = isPracticePicture && /печ(ь|к)/i.test(practiceName);
+                    const enlargePracticePicture = isPracticePicture && !isTropinkiPicture;
+                    const moveConditionBesidePicture = enlargePracticePicture && !isStovePicture && Boolean(printSvg);
+                    const printPictureClasses = (enlargePracticePicture ? ' oge-print-enlarged' : '')
+                        + (moveConditionBesidePicture ? ' oge-print-cond-side' : '');
                     if (item.printBreakBefore) {
                         currentPrintHTML += `<div style="page-break-before:always; break-before:page; height:0;"></div>`;
                     }
@@ -4680,7 +4688,13 @@ body.auth-locked > *:not(#passwordGate) {
                         .print-compact-task-${taskCounter} .common-table td { padding:3px 4px !important; line-height:1.12 !important; }
                         .print-compact-task-${taskCounter} p { margin:5px 0 !important; line-height:1.2 !important; }
                     </style>` : '';
-                    currentPrintHTML += `${compactStyle}<div class="task-print-block oge-image-grid-print ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;"><div style="margin-bottom:${compactPrint ? 5 : 8}px; font-size:${compactPrint ? 14 : 16}px; line-height:1.25;"><b>${taskCounter}.</b> ${renderText}</div><div class="oge-image-grid-layout" style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img oge-image-grid-figure" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div class="oge-image-grid-solution" style="flex:1; min-width:0; display:block;"><div style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div class="oge-image-grid-paper" style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
+                    // В «Тропинках» оригинальный размер плана; у «Печек»
+                    // оригинальное расположение условия. Остальные комплекты:
+                    // рисунок слева, условие и клетчатое поле справа.
+                    const questionHTML = `<div class="oge-print-question" style="margin-bottom:${compactPrint ? 5 : 8}px; font-size:${compactPrint ? 14 : 16}px; line-height:1.25;"><b>${taskCounter}.</b> ${renderText}</div>`;
+                    const questionInsideSolution = moveConditionBesidePicture ? questionHTML : '';
+                    const questionAbove = moveConditionBesidePicture ? '' : questionHTML;
+                    currentPrintHTML += `${compactStyle}<div class="task-print-block oge-image-grid-print${printPictureClasses} ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;">${questionAbove}<div class="oge-image-grid-layout" style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img oge-image-grid-figure" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div class="oge-image-grid-solution" style="flex:1; min-width:0; display:block;">${questionInsideSolution}<div style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div class="oge-image-grid-paper" style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 } else {
                     currentPrintHTML += `<div class="task-print-block"><div class="task-print-flex"><div class="task-print-num">${taskCounter}</div>${printSvg ? `<div class="task-print-img">${printSvg}</div>` : ""}<div class="task-print-text"><div>${renderText}</div><div class="task-print-answer">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 }
@@ -5758,29 +5772,28 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 `;
     }
     function openOgePrintDocument(html, filename) {
-        // Preserve the same typography helper used by downloaded documents.
+        // Файл для печати скачивается напрямую. Раньше window.open() открывал
+        // тяжёлую blob-страницу в том же процессе и после печати некоторые
+        // браузеры переставали обрабатывать клики в исходном генераторе.
+        // Отдельная вкладка и интервал проверки её закрытия больше не нужны.
         if (!html.includes('__ogeNoSplitMath')) {
             const helper = '<script>' + OGE_MATH_NO_SPLIT_SCRIPT + '<\/script>';
             html = html.replace(/<\/head>/i, helper + '</head>');
         }
         const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-        // Keep this synchronous with the user's click so browsers allow the tab.
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            downloadBlobSafely(blob, filename);
-            alert('Браузер заблокировал вкладку печати. После закрытия этого сообщения скачается файл для печати: откройте его и нажмите «Печать / сохранить PDF». Можно также разрешить всплывающие окна для генератора.');
-            return;
-        }
         const url = URL.createObjectURL(blob);
-        printWindow.opener = null;
-        printWindow.location.replace(url);
-        // Keep the URL alive for «Повторить подготовку», which reloads this tab.
-        const cleanup = setInterval(function(){
-            if (printWindow.closed) {
-                clearInterval(cleanup);
-                URL.revokeObjectURL(url);
-            }
-        }, 10000);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        try { anchor.click(); }
+        finally {
+            anchor.remove();
+            // Не освобождать URL мгновенно: Edge/Chrome нужен запас
+            // времени для завершения загрузки большого файла.
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+        }
     }
     function ogePrintToolsHTML() {
         return `<style>
@@ -5872,17 +5885,16 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
             ? window.ogeVariantBatch[0] : null;
         let original=currentPrintHTML || entry?.printHTML || '';
         if(!original){ alert('Сначала сгенерируйте подборку!'); return; }
-        // SVG drawings without viewBox cannot scale reliably in a narrow EGE-style
-        // print column: their contents otherwise overflow into text and stickers.
-        const printRoot=document.createElement('div');
-        printRoot.innerHTML=original;
-        printRoot.querySelectorAll('svg:not([viewBox])').forEach(svg=>{
-            const w=Number.parseFloat(svg.getAttribute('width')||'');
-            const h=Number.parseFloat(svg.getAttribute('height')||'');
-            if(Number.isFinite(w)&&Number.isFinite(h)&&w>0&&h>0)
-                svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+        // Исправление viewBox без повторного разбора всей подборки в DOM.
+        // В комплектах 1–5 много встроенных планов (data:image), и создание
+        // их копии через innerHTML заставляло браузер расходовать лишнюю память.
+        original = original.replace(/<svg\b[^>]*>/gi, function(tag) {
+            if (/\bviewBox\s*=/i.test(tag)) return tag;
+            const width = tag.match(/\bwidth\s*=\s*["'](\d+(?:\.\d+)?)(?:px)?["']/i);
+            const height = tag.match(/\bheight\s*=\s*["'](\d+(?:\.\d+)?)(?:px)?["']/i);
+            if (!width || !height) return tag;
+            return tag.replace(/<svg\b/i, '<svg viewBox="0 0 ' + width[1] + ' ' + height[1] + '"');
         });
-        original=printRoot.innerHTML;
         const teacherName=String(document.getElementById('teacher-name')?.value || '').trim();
         const signatureEnabled=Boolean(document.getElementById('toggle-signature')?.checked);
         const gender=document.getElementById('teacher-gender')?.value;
@@ -6115,6 +6127,35 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 flex-basis:51mm !important;
                 width:51mm !important;
                 max-width:51mm !important;
+            }
+
+            /* №1–5: рисунки +20% (кроме «Тропинок»), без искажения.
+               Не затрагивает задания 6–25 и общий план над пятёркой. */
+            .print-page .oge-image-grid-print.oge-print-enlarged .oge-image-grid-figure {
+                flex:0 0 70.8mm !important;
+                width:70.8mm !important;
+                max-width:70.8mm !important;
+            }
+            .print-page .oge-image-grid-print.oge-print-enlarged .oge-image-grid-figure img,
+            .print-page .oge-image-grid-print.oge-print-enlarged .oge-image-grid-figure svg {
+                max-height:62.4mm !important;
+            }
+            .print-page .oge-image-grid-print.oge-print-enlarged:has(.sticker-print) .oge-image-grid-figure {
+                flex-basis:61.2mm !important;
+                width:61.2mm !important;
+                max-width:61.2mm !important;
+            }
+            .print-page .oge-image-grid-print.oge-print-cond-side .oge-image-grid-layout {
+                align-items:flex-start !important;
+                gap:3mm !important;
+            }
+            .print-page .oge-image-grid-print.oge-print-cond-side .oge-image-grid-solution {
+                min-width:0 !important;
+            }
+            .print-page .oge-image-grid-print.oge-print-cond-side .oge-print-question {
+                margin:0 0 3mm !important;
+                line-height:1.25 !important;
+                overflow-wrap:break-word !important;
             }
 
             .sticker-print {
