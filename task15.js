@@ -2,44 +2,6 @@
 (function(){
     window.database = window.database || {};
 
-    const C = '#111827';
-    function wrap(body, w=260, h=150) {
-        return `<div style="width:100%;max-width:290px;margin:4px auto;"><svg viewBox="0 0 ${w} ${h}" style="display:block;width:100%;height:auto;overflow:visible" xmlns="http://www.w3.org/2000/svg">${body}</svg></div>`;
-    }
-    const L=(x1,y1,x2,y2,sw=2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C}" stroke-width="${sw}"/>`;
-    const T=(x,y,s)=>`<text x="${x}" y="${y}" font-size="15" font-family="serif" fill="${C}">${s}</text>`;
-    const F=n=>Number(n.toFixed(1));
-    function tickOnSegment(x1,y1,x2,y2,t=0.5,len=12,sw=2,count=1,gap=5){
-        const dx=x2-x1, dy=y2-y1;
-        const norm=Math.hypot(dx,dy)||1;
-        const ux=dx/norm, uy=dy/norm;
-        const px=x1+dx*t, py=y1+dy*t;
-        const ox=-uy*(len/2), oy=ux*(len/2);
-        const drawAt=(shift)=>L(F(px+ux*shift-ox),F(py+uy*shift-oy),F(px+ux*shift+ox),F(py+uy*shift+oy),sw);
-        if(count===2) return drawAt(-gap/2)+drawAt(gap/2);
-        return drawAt(0);
-    }
-    function triSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C'));}
-    function exteriorAngleArc(cx,cy,bx,by,r){
-        const length=Math.hypot(bx-cx,by-cy);
-        const x=Number((cx+r*(bx-cx)/length).toFixed(3));
-        const y=Number((cy+r*(by-cy)/length).toFixed(3));
-        return '<path d="M '+(cx+r)+' '+cy+' A '+r+' '+r+' 0 0 0 '+x+' '+y+'" fill="none" stroke="'+C+'" stroke-width="2"/>';
-    }
-    function extSvg(){return wrap(L(45,120,125,25)+L(125,25,190,120)+L(45,120,235,120)+exteriorAngleArc(190,120,125,25,29)+T(31,140,'A')+T(121,20,'B')+T(185,140,'C'));}
-    function isoExtSvg(){return wrap('<g fill="none" stroke="'+C+'" stroke-width="2"><path d="M 45 120 L 125 25 L 205 120 L 245 120 L 45 120"/><path d="M 81 69 L 91 78 M 159 78 L 169 69" stroke-width="2.5"/>'+exteriorAngleArc(205,120,125,25,22)+'</g>'+T(32,140,'A')+T(121,20,'B')+T(201,140,'C'));}
-    function rightSvg(){return wrap(L(45,120,200,120)+L(200,120,200,30)+L(45,120,200,30)+L(188,120,188,108)+L(188,108,200,108)+T(31,140,'A')+T(204,26,'B')+T(204,140,'C'));}
-    function isoSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+tickOnSegment(50,120,130,25,0.46,13,2.5)+tickOnSegment(130,25,210,120,0.54,13,2.5)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C'));}
-    function bisectorSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,181,81)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(185,78,'D'));}
-    function altitudeSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,125,120)+L(125,120,138,120)+L(138,120,138,107)+L(125,107,138,107)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(120,140,'H'));}
-    function medianSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,132,120)+L(86,114,86,126)+L(176,114,176,126)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(127,140,'M'));}
-    function equiSvg(){return wrap(L(50,120,130,25)+L(130,25,210,120)+L(50,120,210,120)+L(130,25,130,120)+T(36,140,'A')+T(126,20,'B')+T(214,140,'C')+T(125,140,'M'));}
-    function midSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(85,72,171,72)+tickOnSegment(45,120,85,72,0.5,11,2.2,1)+tickOnSegment(85,72,125,25,0.5,11,2.2,1)+tickOnSegment(125,25,171,72,0.5,11,2.2,2)+tickOnSegment(171,72,220,120,0.5,11,2.2,2)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(72,72,'M')+T(176,72,'N'));}
-    function akSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(45,120,177,77)+tickOnSegment(45,120,177,77,0.56,11,2.2,1)+tickOnSegment(177,77,220,120,0.55,11,2.2,1)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(181,73,'K'));}
-    function bmEqSvg(){return wrap(L(45,120,125,25)+L(125,25,220,120)+L(45,120,220,120)+L(125,25,132,120)+tickOnSegment(45,120,132,120,0.36,11,2.2,1)+tickOnSegment(132,120,220,120,0.64,11,2.2,1)+tickOnSegment(125,25,132,120,0.48,11,2.2,1)+T(31,140,'A')+T(121,20,'B')+T(224,140,'C')+T(127,140,'M'));}
-    const task = (text, answer, svg_code='') => ({text, answer:String(answer), ...(svg_code?{svg_code}:{})});
-    const proto = (desc, theory_task, theory_sol, tasks, svg_code='') => ({desc, svg_code, theory_task, theory_sol, tasks});
-
     const task15Data = {
     "title": "Задание 15. Треугольники и их элементы",
     "prototypes": [
@@ -73,7 +35,7 @@
         },
         {
             "desc": "15.2. Внешний угол треугольника",
-            "svg_code": extSvg(),
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"188\" y2=\"108\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"235\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 171 120 A 22 22 0 0 0 182 101\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"183\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
             "theory_task": "В треугольнике ABC угол C равен 97°. Найдите внешний угол при вершине C. Ответ дайте в градусах.",
             "theory_sol": "Внутренний и внешний углы при вершине C образуют развёрнутый угол: \\[180^\\circ-97^\\circ=83^\\circ.\\]<br><br><b>Ответ:</b> 83",
             "tasks": [
@@ -129,7 +91,7 @@
         },
         {
             "desc": "15.4. Равнобедренный треугольник: угол при основании",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"81.8\" y1=\"72.1\" x2=\"91.8\" y2=\"80.5\" stroke=\"#111827\" stroke-width=\"2.5\"/><line x1=\"178.2\" y1=\"72.1\" x2=\"168.2\" y2=\"80.5\" stroke=\"#111827\" stroke-width=\"2.5\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"87\" y1=\"76\" x2=\"96\" y2=\"85\" stroke=\"#111827\" stroke-width=\"2.4\"/><line x1=\"164\" y1=\"85\" x2=\"173\" y2=\"76\" stroke=\"#111827\" stroke-width=\"2.4\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
             "theory_task": "В треугольнике ABC известно, что AB = BC, ∠ABC = 102°. Найдите угол BCA. Ответ дайте в градусах.",
             "theory_sol": "Так как AB = BC, углы при основании A и C равны: \\[\\angle C=\\frac{180^\\circ-102^\\circ}{2}=39^\\circ.\\]<br><br><b>Ответ:</b> 39",
             "tasks": [
@@ -157,84 +119,84 @@
         },
         {
             "desc": "15.5. Внешний угол равнобедренного треугольника",
-            "svg_code": isoExtSvg(),
-            "theory_task": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 123°. Найдите угол ABC. Ответ дайте в градусах.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"235\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"90\" y1=\"80\" x2=\"99\" y2=\"89\" stroke=\"#111827\" stroke-width=\"2.4\"/><line x1=\"161\" y1=\"89\" x2=\"170\" y2=\"80\" stroke=\"#111827\" stroke-width=\"2.4\"/><path d=\"M 187 120 A 18 18 0 0 0 198 106\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"201\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
+            "theory_task": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 123°. Найдите величину угла ABC. Ответ дайте в градусах.",
             "theory_sol": "Внутренний угол C равен \\(180^\\circ-123^\\circ=57^\\circ\\). Углы при основании равны, поэтому \\(\\angle A=57^\\circ\\). \\[\\angle B=180^\\circ-57^\\circ-57^\\circ=66^\\circ.\\]<br><br><b>Ответ:</b> 66",
             "tasks": [
                 {
-                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 107°. Найдите угол ABC.",
+                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 107°. Найдите величину угла ABC. Ответ дайте в градусах.",
                     "answer": "34"
                 },
                 {
-                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 111°. Найдите угол ABC.",
+                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 111°. Найдите величину угла ABC. Ответ дайте в градусах.",
                     "answer": "42"
                 },
                 {
-                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 124°. Найдите угол ABC.",
+                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 124°. Найдите величину угла ABC. Ответ дайте в градусах.",
                     "answer": "68"
                 },
                 {
-                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 129°. Найдите угол ABC.",
+                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 129°. Найдите величину угла ABC. Ответ дайте в градусах.",
                     "answer": "78"
                 },
                 {
-                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 136°. Найдите угол ABC.",
-                    "answer": "92"
+                    "text": "В равнобедренном треугольнике ABC с основанием AC внешний угол при вершине C равен 138°. Найдите величину угла ABC. Ответ дайте в градусах.",
+                    "answer": "96"
                 }
             ]
         },
         {
             "desc": "15.6. Биссектриса угла треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"181\" y2=\"81\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"185\" y=\"78\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">D</text></svg></div>",
-            "theory_task": "В треугольнике ABC известно, что ∠BAC = 24°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"181\" y2=\"81\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 61 120 A 16 16 0 0 1 67 102\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><path d=\"M 63 116 A 20 20 0 0 1 80 98\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"185\" y=\"78\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">D</text></svg></div>",
+            "theory_task": "В треугольнике ABC известно, что угол BAC = 24°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
             "theory_sol": "Биссектриса делит угол BAC на два равных угла: \\[\\angle BAD=24^\\circ:2=12^\\circ.\\]<br><br><b>Ответ:</b> 12",
             "tasks": [
                 {
-                    "text": "В треугольнике ABC известно, что угол BAC = 26°, AD — биссектриса. Найдите угол BAD.",
+                    "text": "В треугольнике ABC известно, что угол BAC = 26°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
                     "answer": "13"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что угол BAC = 28°, AD — биссектриса. Найдите угол BAD.",
+                    "text": "В треугольнике ABC известно, что угол BAC = 28°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
                     "answer": "14"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что угол BAC = 42°, AD — биссектриса. Найдите угол BAD.",
+                    "text": "В треугольнике ABC известно, что угол BAC = 42°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
                     "answer": "21"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что угол BAC = 46°, AD — биссектриса. Найдите угол BAD.",
+                    "text": "В треугольнике ABC известно, что угол BAC = 46°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
                     "answer": "23"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что угол BAC = 74°, AD — биссектриса. Найдите угол BAD.",
+                    "text": "В треугольнике ABC известно, что угол BAC = 74°, AD — биссектриса. Найдите угол BAD. Ответ дайте в градусах.",
                     "answer": "37"
                 }
             ]
         },
         {
             "desc": "15.7. Биссектриса и равные отрезки",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"177\" y2=\"77\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"117.2\" y1=\"90.7\" x2=\"120.6\" y2=\"101.1\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"204.5\" y1=\"96.8\" x2=\"196.8\" y2=\"104.5\" stroke=\"#111827\" stroke-width=\"2.2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"181\" y=\"73\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">K</text></svg></div>",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"45\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"45\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"177\" y2=\"77\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 61 120 A 16 16 0 0 1 68 102\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><path d=\"M 63 116 A 20 20 0 0 1 81 98\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><line x1=\"115\" y1=\"88\" x2=\"119\" y2=\"98\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"191\" y1=\"92\" x2=\"184\" y2=\"100\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"40\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"181\" y=\"73\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">K</text></svg></div>",
             "theory_task": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 12° и AK = CK.",
             "theory_sol": "Из AK = CK следует, что треугольник AKC равнобедренный, поэтому \\(\\angle KAC=\\angle ACK=12^\\circ\\). AK — биссектриса, значит \\(\\angle A=24^\\circ\\). \\[\\angle B=180^\\circ-24^\\circ-12^\\circ=144^\\circ.\\]<br><br><b>Ответ:</b> 144",
             "tasks": [
                 {
-                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите угол B, если угол C = 23° и AK = CK.",
+                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 23° и AK = CK.",
                     "answer": "111"
                 },
                 {
-                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите угол B, если угол C = 20° и AK = CK.",
+                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 20° и AK = CK.",
                     "answer": "120"
                 },
                 {
-                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите угол B, если угол C = 11° и AK = CK.",
+                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 11° и AK = CK.",
                     "answer": "147"
                 },
                 {
-                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите угол B, если угол C = 22° и AK = CK.",
+                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 22° и AK = CK.",
                     "answer": "114"
                 },
                 {
-                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите угол B, если угол C = 18° и AK = CK.",
+                    "text": "В треугольнике ABC проведена биссектриса AK. Найдите градусную меру угла B, если ∠C = 18° и AK = CK.",
                     "answer": "126"
                 }
             ]
@@ -246,115 +208,115 @@
             "theory_sol": "BH перпендикулярна AC, поэтому \\(\\angle AHB=90^\\circ\\). \\[\\angle ABH=90^\\circ-9^\\circ=81^\\circ.\\]<br><br><b>Ответ:</b> 81",
             "tasks": [
                 {
-                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 19°. Найдите угол ABH.",
+                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 19°. Найдите угол ABH. Ответ дайте в градусах.",
                     "answer": "71"
                 },
                 {
-                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 28°. Найдите угол ABH.",
+                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 28°. Найдите угол ABH. Ответ дайте в градусах.",
                     "answer": "62"
                 },
                 {
-                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 37°. Найдите угол ABH.",
+                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 37°. Найдите угол ABH. Ответ дайте в градусах.",
                     "answer": "53"
                 },
                 {
-                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 46°. Найдите угол ABH.",
+                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 46°. Найдите угол ABH. Ответ дайте в градусах.",
                     "answer": "44"
                 },
                 {
-                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 56°. Найдите угол ABH.",
+                    "text": "В остроугольном треугольнике ABC проведена высота BH, ∠BAC = 56°. Найдите угол ABH. Ответ дайте в градусах.",
                     "answer": "34"
                 }
             ]
         },
         {
             "desc": "15.9. Медиана треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"132\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"86\" y1=\"114\" x2=\"86\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"176\" y1=\"114\" x2=\"176\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"127\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"132\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"84\" y1=\"114\" x2=\"84\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"176\" y1=\"114\" x2=\"176\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"127\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
             "theory_task": "В треугольнике ABC известно, что AC = 12, BM — медиана, BM = 11. Найдите AM.",
             "theory_sol": "Медиана делит сторону AC пополам: \\[AM=\\frac{AC}{2}=\\frac{12}{2}=6.\\]<br><br><b>Ответ:</b> 6",
             "tasks": [
                 {
-                    "text": "В треугольнике ABC известно, что AC = 14, BM — медиана. Найдите AM.",
+                    "text": "В треугольнике ABC известно, что AC = 14, BM — медиана. BM = 11. Найдите AM.",
                     "answer": "7"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что AC = 16, BM — медиана. Найдите AM.",
+                    "text": "В треугольнике ABC известно, что AC = 16, BM — медиана. BM = 12. Найдите AM.",
                     "answer": "8"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что AC = 18, BM — медиана. Найдите AM.",
+                    "text": "В треугольнике ABC известно, что AC = 18, BM — медиана. BM = 13. Найдите AM.",
                     "answer": "9"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что AC = 32, BM — медиана. Найдите AM.",
+                    "text": "В треугольнике ABC известно, что AC = 32, BM — медиана. BM = 14. Найдите AM.",
                     "answer": "16"
                 },
                 {
-                    "text": "В треугольнике ABC известно, что AC = 46, BM — медиана. Найдите AM.",
+                    "text": "В треугольнике ABC известно, что AC = 46, BM — медиана. BM = 15. Найдите AM.",
                     "answer": "23"
                 }
             ]
         },
         {
             "desc": "15.10. Средняя линия треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"85\" y1=\"72\" x2=\"171\" y2=\"72\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"60.8\" y1=\"92.5\" x2=\"69.2\" y2=\"99.5\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"100.8\" y1=\"44.9\" x2=\"109.2\" y2=\"52.1\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"150.2\" y1=\"42.9\" x2=\"142.3\" y2=\"50.6\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"153.7\" y1=\"46.4\" x2=\"145.8\" y2=\"54.1\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"197.6\" y1=\"90.3\" x2=\"189.9\" y2=\"98.2\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"201.1\" y1=\"93.8\" x2=\"193.4\" y2=\"101.7\" stroke=\"#111827\" stroke-width=\"2.2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"72\" y=\"72\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"176\" y=\"72\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"85\" y1=\"72\" x2=\"171\" y2=\"72\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"62\" y1=\"91\" x2=\"72\" y2=\"99\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"99\" y1=\"49\" x2=\"108\" y2=\"57\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"148\" y1=\"49\" x2=\"157\" y2=\"57\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"190\" y1=\"91\" x2=\"180\" y2=\"99\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"72\" y=\"72\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text><text x=\"176\" y=\"72\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">N</text></svg></div>",
             "theory_task": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 24, BC = 13, AC = 26. Найдите MN.",
             "theory_sol": "Отрезок MN соединяет середины двух сторон треугольника, поэтому MN — средняя линия: \\[MN=\\frac{AC}{2}=\\frac{26}{2}=13.\\]<br><br><b>Ответ:</b> 13",
             "tasks": [
                 {
-                    "text": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 21, BC = 22, AC = 28. Найдите MN.",
+                    "text": "Точки M и N являются серединами сторон AB и BC треугольника ABC, сторона AB равна 21, сторона BC равна 22, сторона AC равна 28. Найдите MN.",
                     "answer": "14"
                 },
                 {
-                    "text": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 28, BC = 19, AC = 34. Найдите MN.",
+                    "text": "Точки M и N являются серединами сторон AB и BC треугольника ABC, сторона AB равна 28, сторона BC равна 19, сторона AC равна 34. Найдите MN.",
                     "answer": "17"
                 },
                 {
-                    "text": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 31, BC = 27, AC = 40. Найдите MN.",
+                    "text": "Точки M и N являются серединами сторон AB и BC треугольника ABC, сторона AB равна 31, сторона BC равна 27, сторона AC равна 40. Найдите MN.",
                     "answer": "20"
                 },
                 {
-                    "text": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 26, BC = 39, AC = 48. Найдите MN.",
+                    "text": "Точки M и N являются серединами сторон AB и BC треугольника ABC, сторона AB равна 37, сторона BC равна 33, сторона AC равна 48. Найдите MN.",
                     "answer": "24"
                 },
                 {
-                    "text": "Точки M и N — середины сторон AB и BC треугольника ABC. AB = 30, BC = 41, AC = 52. Найдите MN.",
+                    "text": "Точки M и N являются серединами сторон AB и BC треугольника ABC, сторона AB равна 30, сторона BC равна 41, сторона AC равна 52. Найдите MN.",
                     "answer": "26"
                 }
             ]
         },
         {
             "desc": "15.11. Медиана и равные отрезки",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"132\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"76.3\" y1=\"114.5\" x2=\"76.3\" y2=\"125.5\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"188.3\" y1=\"114.5\" x2=\"188.3\" y2=\"125.5\" stroke=\"#111827\" stroke-width=\"2.2\"/><line x1=\"133.8\" y1=\"70.2\" x2=\"122.9\" y2=\"71\" stroke=\"#111827\" stroke-width=\"2.2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"127\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 65° и BM = AM = MC.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"132\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"79\" y1=\"114\" x2=\"79\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"176\" y1=\"114\" x2=\"176\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"123\" y1=\"72\" x2=\"133\" y2=\"73\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"127\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 66° и BM = AM = MC.",
             "theory_sol": "Из BM = AM = MC следует, что точка M равноудалена от A, B и C. Значит, AC — диаметр описанной окружности, \\(\\angle B=90^\\circ\\). \\[\\angle A=180^\\circ-90^\\circ-65^\\circ=25^\\circ.\\]<br><br><b>Ответ:</b> 25",
             "tasks": [
                 {
-                    "text": "В треугольнике ABC проведена медиана BM. Найдите угол A, если ∠C = 68° и BM = AM = MC.",
+                    "text": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 68° и BM = AM = MC.",
                     "answer": "22"
                 },
                 {
-                    "text": "В треугольнике ABC проведена медиана BM. Найдите угол A, если ∠C = 71° и BM = AM = MC.",
+                    "text": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 71° и BM = AM = MC.",
                     "answer": "19"
                 },
                 {
-                    "text": "В треугольнике ABC проведена медиана BM. Найдите угол A, если ∠C = 51° и BM = AM = MC.",
+                    "text": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 51° и BM = AM = MC.",
                     "answer": "39"
                 },
                 {
-                    "text": "В треугольнике ABC проведена медиана BM. Найдите угол A, если ∠C = 61° и BM = AM = MC.",
+                    "text": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 61° и BM = AM = MC.",
                     "answer": "29"
                 },
                 {
-                    "text": "В треугольнике ABC проведена медиана BM. Найдите угол A, если ∠C = 57° и BM = AM = MC.",
+                    "text": "В треугольнике ABC проведена медиана BM. Найдите градусную меру угла A, если ∠C = 57° и BM = AM = MC.",
                     "answer": "33"
                 }
             ]
         },
         {
             "desc": "15.12. Медиана равностороннего треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Медиана равностороннего треугольника равна 10√3. Найдите сторону этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"92\" y1=\"114\" x2=\"92\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"168\" y1=\"114\" x2=\"168\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Медиана равностороннего треугольника равна $10\\sqrt{3}$. Найдите сторону этого треугольника.",
             "theory_sol": "В равностороннем треугольнике медиана также является высотой: \\[BM=\\frac{AC\\sqrt3}{2},\\quad 10\\sqrt3=\\frac{AC\\sqrt3}{2},\\quad AC=20.\\]<br><br><b>Ответ:</b> 20",
             "tasks": [
                 {
@@ -381,8 +343,8 @@
         },
         {
             "desc": "15.13. Биссектриса равностороннего треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Биссектриса равностороннего треугольника равна 11√3. Найдите сторону этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 120 49 A 18 18 0 0 1 130 60\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><path d=\"M 140 49 A 18 18 0 0 0 130 60\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Биссектриса равностороннего треугольника равна $11\\sqrt{3}$. Найдите сторону этого треугольника.",
             "theory_sol": "В равностороннем треугольнике биссектриса также является высотой и медианой: \\[BM=\\frac{AC\\sqrt3}{2},\\quad 11\\sqrt3=\\frac{AC\\sqrt3}{2},\\quad AC=22.\\]<br><br><b>Ответ:</b> 22",
             "tasks": [
                 {
@@ -409,8 +371,8 @@
         },
         {
             "desc": "15.14. Высота равностороннего треугольника",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Высота равностороннего треугольника равна 11√3. Найдите сторону этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"120\" x2=\"142\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"142\" y1=\"120\" x2=\"142\" y2=\"108\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"108\" x2=\"142\" y2=\"108\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Высота равностороннего треугольника равна $11\\sqrt{3}$. Найдите сторону этого треугольника.",
             "theory_sol": "В равностороннем треугольнике высота также является медианой и биссектрисой: \\[BM=\\frac{AC\\sqrt3}{2},\\quad 11\\sqrt3=\\frac{AC\\sqrt3}{2},\\quad AC=22.\\]<br><br><b>Ответ:</b> 22",
             "tasks": [
                 {
@@ -437,8 +399,8 @@
         },
         {
             "desc": "15.15. Биссектриса равностороннего треугольника по стороне",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Сторона равностороннего треугольника равна 10√3. Найдите биссектрису этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><path d=\"M 120 49 A 18 18 0 0 1 130 60\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><path d=\"M 140 49 A 18 18 0 0 0 130 60\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Сторона равностороннего треугольника равна $10\\sqrt{3}$. Найдите биссектрису этого треугольника.",
             "theory_sol": "В равностороннем треугольнике биссектриса, медиана и высота совпадают. \\[BM=\\frac{AC\\sqrt3}{2}=\\frac{10\\sqrt3\\cdot\\sqrt3}{2}=15.\\]<br><br><b>Ответ:</b> 15",
             "tasks": [
                 {
@@ -465,8 +427,8 @@
         },
         {
             "desc": "15.16. Медиана равностороннего треугольника по стороне",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Сторона равностороннего треугольника равна 10√3. Найдите медиану этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"92\" y1=\"114\" x2=\"92\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><line x1=\"168\" y1=\"114\" x2=\"168\" y2=\"126\" stroke=\"#111827\" stroke-width=\"2.1\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Сторона равностороннего треугольника равна $10\\sqrt{3}$. Найдите медиану этого треугольника.",
             "theory_sol": "В равностороннем треугольнике биссектриса, медиана и высота совпадают. \\[BM=\\frac{AC\\sqrt3}{2}=\\frac{10\\sqrt3\\cdot\\sqrt3}{2}=15.\\]<br><br><b>Ответ:</b> 15",
             "tasks": [
                 {
@@ -493,8 +455,8 @@
         },
         {
             "desc": "15.17. Высота равностороннего треугольника по стороне",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"50\" y1=\"120\" x2=\"130\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"50\" y1=\"120\" x2=\"210\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"25\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"36\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"214\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
-            "theory_task": "Сторона равностороннего треугольника равна 10√3. Найдите высоту этого треугольника.",
+            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"55\" y1=\"120\" x2=\"130\" y2=\"35\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"55\" y1=\"120\" x2=\"205\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"35\" x2=\"130\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"120\" x2=\"142\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"142\" y1=\"120\" x2=\"142\" y2=\"108\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"130\" y1=\"108\" x2=\"142\" y2=\"108\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"41\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"126\" y=\"30\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"209\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text><text x=\"125\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">M</text></svg></div>",
+            "theory_task": "Сторона равностороннего треугольника равна $10\\sqrt{3}$. Найдите высоту этого треугольника.",
             "theory_sol": "В равностороннем треугольнике биссектриса, медиана и высота совпадают. \\[BM=\\frac{AC\\sqrt3}{2}=\\frac{10\\sqrt3\\cdot\\sqrt3}{2}=15.\\]<br><br><b>Ответ:</b> 15",
             "tasks": [
                 {
@@ -549,7 +511,7 @@
         },
         {
             "desc": "15.19. Площадь по стороне и высоте",
-            "svg_code": "<div style=\"width:100%;max-width:290px;margin:4px auto;\"><svg viewBox=\"0 0 260 150\" style=\"display:block;width:100%;height:auto;overflow:visible\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"45\" y1=\"120\" x2=\"125\" y2=\"25\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"125\" y1=\"25\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"45\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"31\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">A</text><text x=\"121\" y=\"20\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">B</text><text x=\"224\" y=\"140\" font-size=\"15\" font-family=\"serif\" fill=\"#111827\">C</text></svg></div>",
+            "svg_code": "",
             "theory_task": "Сторона треугольника равна 8, а высота, проведённая к этой стороне, равна 31. Найдите площадь треугольника.",
             "theory_sol": "Площадь треугольника равна половине произведения стороны на проведённую к ней высоту: \\[S=\\frac{8\\cdot31}{2}=124.\\]<br><br><b>Ответ:</b> 124",
             "tasks": [
@@ -830,8 +792,9 @@
     ]
 };
 
+
     function normalizeTask15Text(value){
-        return String(value).replace(/(\d+)√(\d+)/g, '$$$1\\sqrt{$2}$$');
+        return String(value).replace(/(\d+)√(\d+)/g, '$$$1\sqrt{$2}$$');
     }
     function normalizeTask15Block(db){
         db.prototypes.forEach(p=>{
