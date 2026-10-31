@@ -3325,7 +3325,9 @@ body.auth-locked > *:not(#passwordGate) {
             }
 
             if (input.id === 'count-extra-task19' || input.id === 'count-extra-19') {
-                total += value * 3;
+                // Одна готовая тройка утверждений — одно задание ОГЭ №19.
+                // Три утверждения остаются внутри одного условия и имеют один ответ.
+                total += value;
             } else if (input.id === 'count-task19' || input.id === 'count-19') {
                 if ((window.database.task19?.prototypes || window.database[19]?.prototypes || []).some((_,idx)=>document.getElementById(getPrototypeCheckboxId('task19', idx, 'main'))?.checked || document.getElementById(getPrototypeCheckboxId('19', idx, 'main'))?.checked)) total += value;
             } else {
@@ -6996,7 +6998,7 @@ ${window.SCRIPT_END}
 
 </script>
 
-<script src="presentations.js?v=20261031-three-fixes"></script>
+<script src="presentations.js?v=20261031-no-topic-cover-triple-count"></script>
 
 <script>
 (function(){

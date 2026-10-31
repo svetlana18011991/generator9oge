@@ -130,6 +130,13 @@ function getPresentationStartInfo() {
     return { fullVariant: false, total: tasks.length, groups };
 }
 
+function presentationTaskCountLabel(value) {
+    const n = Math.max(0, Number(value) || 0);
+    const word = n % 10 === 1 && n % 100 !== 11 ? 'задание'
+        : ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100) ? 'задания' : 'заданий');
+    return `${n} ${word}`;
+}
+
 function buildPresentationStartCardHtml(authorLine, accentColor) {
     const info = getPresentationStartInfo();
     const safeAccent = escapePresHtml(accentColor || '#ff8c00');
@@ -148,22 +155,11 @@ function buildPresentationStartCardHtml(authorLine, accentColor) {
         </div>`;
     }
 
-    const groups = info.groups || [];
-    const gridClass = groups.length >= 13 ? 'pres-topic-grid pres-topic-grid-dense'
-        : (groups.length >= 7 ? 'pres-topic-grid pres-topic-grid-mid' : 'pres-topic-grid');
-    const chips = groups.map(group => {
-        const number = Number.isFinite(group.number) ? `<b>№${group.number}</b> ` : '';
-        const suffix = group.count > 1 ? `<span class="pres-topic-count">×${group.count}</span>` : '';
-        const fullLabel = `${Number.isFinite(group.number) ? `№${group.number} ` : ''}${group.title}${group.count > 1 ? ` ×${group.count}` : ''}`;
-        return `<div class="pres-topic-chip" title="${escapePresHtml(fullLabel)}"><span>${number}${escapePresHtml(group.title)}</span>${suffix}</div>`;
-    }).join('');
-
-    const totalText = `${info.total} ${info.total % 10 === 1 && info.total % 100 !== 11 ? 'задание' : ([2,3,4].includes(info.total % 10) && ![12,13,14].includes(info.total % 100) ? 'задания' : 'заданий')}`;
+    const totalText = presentationTaskCountLabel(info.total);
     return `<div class="title-box pres-start-card pres-start-card-selection" onclick="event.stopPropagation();">
         <div class="pres-start-kicker">Основной государственный экзамен</div>
         <h1 class="pres-start-selection-title">Подборка заданий</h1>
         <div class="pres-start-meta" style="border-color:${safeAccent};color:${safeAccent};">${totalText}</div>
-        <div class="${gridClass}">${chips}</div>
         ${authorHtml}
         ${brandHtml}
     </div>`;
@@ -716,23 +712,12 @@ function updateCustomPresentationPreview() {
                     <div style="font-family:Caveat,cursive;font-size:15px;color:#555;margin-top:12px;">Шкатулка математических интерактивов</div>
                 </div>`;
         } else {
-            const groups = info.groups || [];
-            const previewGroups = groups.slice(0, 12);
-            const cols = previewGroups.length >= 7 ? 3 : 2;
-            const chips = previewGroups.map(group => {
-                const n = Number.isFinite(group.number) ? `№${group.number} ` : '';
-                const c = group.count > 1 ? ` ×${group.count}` : '';
-                return `<div style="min-width:0;padding:5px 7px;border:1px solid rgba(0,0,0,.10);border-radius:8px;background:rgba(255,255,255,.82);font-size:10px;line-height:1.1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><b style="color:#003399;">${n}</b>${escapePresHtml(group.title)}<b style="color:${accent};">${c}</b></div>`;
-            }).join('');
-            const more = groups.length > previewGroups.length ? `<div style="font-size:10px;color:#777;margin-top:6px;">+ ещё ${groups.length - previewGroups.length}</div>` : '';
             preview.innerHTML = `
                 <div style="position:absolute;inset:0;background:rgba(255,255,255,.05);"></div>
                 <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78%;max-height:80%;background:rgba(255,255,255,.94);border:2px solid ${accent};border-radius:${radius}px;box-shadow:0 10px 28px rgba(0,0,0,.20);padding:15px 18px;box-sizing:border-box;text-align:center;color:#333;overflow:hidden;">
                     <div style="font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#555;">Основной государственный экзамен</div>
                     <div style="font-weight:900;font-size:24px;line-height:1.05;color:#003399;margin:4px 0 6px;">Подборка заданий</div>
-                    <div style="display:inline-block;border:1px solid ${accent};color:${accent};border-radius:999px;padding:3px 9px;font-size:10px;font-weight:800;margin-bottom:8px;">${info.total} заданий</div>
-                    <div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:5px;">${chips}</div>
-                    ${more}
+                    <div style="display:inline-block;border:1px solid ${accent};color:${accent};border-radius:999px;padding:3px 9px;font-size:10px;font-weight:800;margin-bottom:8px;">${presentationTaskCountLabel(info.total)}</div>
                     ${author ? `<div style="font-family:Caveat,cursive;font-size:16px;color:#003399;margin-top:8px;">${author}</div>` : ''}
                     <div style="font-family:Caveat,cursive;font-size:13px;color:#555;margin-top:7px;">Шкатулка математических интерактивов</div>
                 </div>`;
