@@ -51,12 +51,12 @@
     <script src="task13.js?v=20261101-hatched-all"></script>
     <script src="task13_extra.js?v=20261101-hatched-all"></script>
     <script src="task14.js?v=20261031-workbook-verified"></script>
-    <script src="task14_extra.js?v=20261101-full-text-verified"></script>
+    <script src="task14_extra.js?v=20261101-order-topics"></script>
     <script src="task15.js?v=20261031-svg-math-fix-2"></script>
-    <script src="task15_extra.js?v=20261101-original-diagrams-grid-fit"></script>
+    <script src="task15_extra.js?v=20261101-three-diagram-fixes"></script>
     <!-- Задание 16: окружность и круг -->
     <script src="task16.js?v=20261031-workbook-verified-svg"></script>
-    <script src="task16_extra.js?v=20261018-4-resu-oge"></script>
+    <script src="task16_extra.js?v=20261101-tangent-arc-and-topic-order-v2"></script>
     <!-- Задание 17. Четырёхугольники: основное и дополнительные -->
     <script src="task17.js?v=20261031-book-diagram-1719"></script>
     <script src="task17_extra.js?v=20261018-1"></script>
@@ -5675,23 +5675,48 @@ body.auth-locked > *:not(#passwordGate) {
             const p1=ogePrintArrayToEntries(groups['1-5'],1,numbers['1-5']);
             const p2=ogePrintArrayToEntries(groups['6-14'],6,numbers['6-14']);
             const p3=ogePrintArrayToEntries(groups['15-25'],15,numbers['15-25']);
-            let sharedDiagram='';
-            if(p1.common && p1.items.length && !/<(?:img|svg|picture)\b/i.test(p1.common)) {
-                for(const item of p1.items){
-                    const temp=document.createElement('div');
-                    temp.innerHTML=item.html;
-                    const diagram=temp.querySelector('.oge-exam-diagram');
-                    if(diagram){
-                        sharedDiagram=diagram.outerHTML;
-                        break;
-                    }
-                }
-            }
             const p1IsFull=[1,2,3,4,5].every(n=>p1.items.some(t=>t.num===n));
             const tasks=[...p1.items,...p2.items,...p3.items].sort((a,b)=>a.num-b.num);
             const taskNumbers=tasks.map(t=>t.num);
             const complete=batch[i]?.mode!=='manual' && taskNumbers.length===25&&new Set(taskNumbers).size===25
                   &&Array.from({length:25},(_,k)=>k+1).every(n=>taskNumbers.includes(n));
+            let sharedDiagram='';
+            if(p1.common && p1.items.length && !/<(?:img|svg|picture)\b/i.test(p1.common)) {
+                const contextText=String(p1.common).replace(/<[^>]+>/g,' ').toLowerCase();
+                // В «Печках» схема принадлежит только пятому вопросу.
+                const isStove=complete && /печ(ь|к|и|е|н|ей)|топк|дымоход/.test(contextText);
+                if(!isStove){
+                    const temp=document.createElement('div');temp.innerHTML=p1.items[0].html;
+                    const diagram=temp.querySelector('.oge-exam-diagram');
+                    if(diagram)sharedDiagram=diagram.outerHTML;
+                }
+            }
+            // Общий план уже есть слева в условии 1–5. Убираем его клоны
+            // из ВСЕХ пяти карточек только полноценного варианта (оба режима).
+            // Уникальный чертёж задания 5 «Печки» оставляем нетронутым.
+            if(complete && p1.items.length){
+                const original=document.createElement('div');
+                original.innerHTML=p1.common + sharedDiagram;
+                const planImages=new Set(Array.from(original.querySelectorAll('img')).map(el=>el.getAttribute('src')).filter(Boolean));
+                const planSvgs=new Set(Array.from(original.querySelectorAll('svg')).map(el=>el.outerHTML));
+                const hasSharedArtwork=planImages.size>0 || planSvgs.size>0;
+                if(hasSharedArtwork){
+                    p1.items.forEach(item=>{
+                        const holder=document.createElement('div');
+                        holder.innerHTML=item.html;
+                        holder.querySelectorAll('img,svg').forEach(figure=>{
+                            const duplicate=figure.tagName.toLowerCase()==='img'
+                                ?planImages.has(figure.getAttribute('src'))
+                                :planSvgs.has(figure.outerHTML);
+                            if(!duplicate)return;
+                            const block=figure.closest('.oge-exam-diagram,.oge-print-scenario-plan,.practice-figure-card');
+                            if(block && block.querySelectorAll('img,svg').length===1)block.remove();
+                            else figure.remove();
+                        });
+                        item.html=holder.innerHTML;
+                    });
+                }
+            }
             const headingLabel=(complete?'Вариант ':'Подборка ')+(i+1);
             const heading='<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>'+headingLabel+'</strong></header>';
             if(!tasks.length)return;
@@ -5715,18 +5740,26 @@ body.auth-locked > *:not(#passwordGate) {
                     const blocks=ogePrintIntroBlocks(p1.common);
                     if(sharedDiagram)blocks.unshift(sharedDiagram);
                     if(!blocks.length)blocks.push('');
-                    const intro='<div class="oge-exam-intro oge-exam-intro-locked">'+label+blocks.join('')+'</div>';
-                    // Общее условие к заданиям 1–5 печатаем единым блоком: оно не должно
-                    // разрываться между колонками и должно оставаться на левой странице разворота.
-                    units.push(unit(prefix+intro));
-                    prefix='';
+                    if(complete) {
+                        // В ПОЛНОМ варианте общее условие и крупный план — один
+                        // неделимый блок; отдельные подборки не меняем.
+                        const intro='<div class="oge-exam-intro oge-exam-intro-locked">'+label+blocks.join('')+'</div>';
+                        units.push(unit(prefix+intro));
+                        prefix='';
+                    } else {
+                        blocks.forEach((block,index)=>{
+                            const intro='<div class="oge-exam-intro">'+(index===0?label:'')+block+'</div>';
+                            units.push(unit(prefix+intro));
+                            prefix='';
+                        });
+                    }
                     introDone=true;
                 }
                 units.push(unit(prefix+task.html));
             });
             const firstColumn='<div class="oge-exam-column"><div class="oge-exam-column-content">'+units.join('')+'</div></div>';
             const secondColumn='<div class="oge-exam-column"><div class="oge-exam-column-content"></div></div>';
-            pages.push('<article class="oge-exam-page oge-exam-flow-page" data-batch-variant="'+(i+1)+'" data-print-pages="'+(complete && !withSolutions?3:0)+'" data-exam-page="'+(i+1)+'-1">'
+            pages.push('<article class="oge-exam-page oge-exam-flow-page'+(complete?' oge-exam-full-variant':'')+'" data-batch-variant="'+(i+1)+'" data-print-pages="'+(complete && !withSolutions?3:0)+'" data-exam-page="'+(i+1)+'-1">'
                +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
                +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
         });
@@ -6478,6 +6511,8 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:9mm;align-items:start;height:173mm;flex:0 0 173mm;overflow:hidden;}
 .oge-exam-column{width:100%;height:173mm;overflow:hidden;position:relative;min-width:0;}
 .oge-exam-column-content{display:flow-root;width:100%;overflow:visible;}
+/* Равномерное, при необходимости небольшое уменьшение только трехстраничного полного варианта. */
+.oge-print-without-solutions .oge-exam-full-variant .oge-exam-column-content{zoom:var(--oge-print-zoom,1);}
 .oge-exam-column-content *{max-width:100%;}
 .oge-exam-wide-page .oge-exam-columns{grid-template-columns:minmax(0,1fr);}
 .oge-exam-wide-page .oge-exam-column+ .oge-exam-column{display:none;}
@@ -6516,8 +6551,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-statement mjx-container svg{max-width:100%;height:auto;}
 .oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
 .oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
-/* В варианте без полей рисунок к заданиям 1–5 печатается один раз в общем условии.
-   В варианте с полями сохраняем аккуратную миниатюру возле задачи. */
+/* Миниатюры у каждой задачи №1–5: рядом с условием, без дублирования крупного формата. */
 .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
 .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
 .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
@@ -6528,16 +6562,6 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task[data-exam-task="3"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="4"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="5"] .oge-exam-diagram :is(img,svg){width:100%;max-height:28mm;object-fit:contain;}
-.oge-print-without-solutions .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
-.oge-print-without-solutions .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
-.oge-print-without-solutions .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
-.oge-print-without-solutions .oge-exam-task[data-exam-task="4"] .oge-exam-diagram,
-.oge-print-without-solutions .oge-exam-task[data-exam-task="5"] .oge-exam-diagram{display:none!important;}
-.oge-print-with-solutions .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
-.oge-print-with-solutions .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
-.oge-print-with-solutions .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
-.oge-print-with-solutions .oge-exam-task[data-exam-task="4"] .oge-exam-diagram,
-.oge-print-with-solutions .oge-exam-task[data-exam-task="5"] .oge-exam-diagram{width:31%;max-width:40mm;margin:0 0 1.2mm 2.6mm;}
 .oge-exam-task:has(.oge-exam-diagram)::after{content:"";display:block;clear:both;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
@@ -6546,14 +6570,12 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%!important;max-height:var(--oge-intro-image-max,42mm)!important;width:auto!important;height:auto!important;margin:1mm auto!important;object-fit:contain;}
 .oge-exam-intro .practice-figure-card{margin:1mm 0!important;padding:0!important;}
-.oge-exam-intro-locked{break-inside:avoid;page-break-inside:avoid;}
+.oge-exam-full-variant .oge-exam-intro-locked{break-inside:avoid;page-break-inside:avoid;}
 /* Общий план №1–5 в начале условия, с обтеканием текстом и без дублей. */
 .oge-exam-intro .oge-print-scenario-body::after{content:"";display:block;clear:both;}
 .oge-exam-intro .oge-print-scenario-plan{float:left!important;display:block!important;width:48%!important;max-width:65mm!important;margin:1mm 3mm 2mm 0!important;break-inside:avoid!important;}
 .oge-exam-intro .oge-print-scenario-plan img,.oge-exam-intro .oge-print-scenario-plan svg{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:var(--oge-intro-image-max,50mm)!important;margin:0!important;object-fit:contain!important;}
 .oge-exam-intro .oge-print-scenario-body table{clear:both;}
-.oge-print-without-solutions .oge-exam-intro .oge-print-scenario-plan{width:49%!important;max-width:72mm!important;margin:1mm 3.2mm 2mm 0!important;}
-.oge-print-without-solutions .oge-exam-intro.oge-exam-intro-locked{margin-bottom:2mm;}
 
 .oge-exam-intro .oge-exam-diagram img,.oge-exam-intro .oge-exam-diagram svg{max-height:var(--oge-intro-image-max,42mm)!important;}
 .oge-exam-intro *{max-width:100%;}
@@ -6575,7 +6597,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 
 /* Два режима печати ОГЭ. В полной работе с полями число листов определяется содержимым. */
-.oge-exam-write-grid{display:none;box-sizing:border-box;border:.5pt solid #aac9df;border-radius:2.6px;background-color:white;background-image:linear-gradient(to right,#d9e8f3 .3pt,transparent .3pt),linear-gradient(to bottom,#d9e8f3 .3pt,transparent .3pt);background-size:5mm 5mm;margin:1.4mm 0 1.7mm;break-inside:avoid;page-break-inside:avoid;box-shadow:inset 0 0 0 .2pt rgba(141,177,206,.22);}
+.oge-exam-write-grid{display:none;box-sizing:border-box;border:.5pt solid #a2c4df;border-radius:2px;background-color:white;background-image:linear-gradient(to right,#d6e6f1 .3pt,transparent .3pt),linear-gradient(to bottom,#d6e6f1 .3pt,transparent .3pt);background-size:5mm 5mm;margin:1.2mm 0 1.4mm;break-inside:avoid;page-break-inside:avoid;}
 .oge-print-with-solutions .oge-exam-write-grid{display:block;height:16mm;}
 .oge-print-with-solutions .oge-exam-task[data-exam-task="20"] .oge-exam-write-grid,
 .oge-print-with-solutions .oge-exam-task[data-exam-task="21"] .oge-exam-write-grid,
@@ -6623,17 +6645,29 @@ function paginateCollections(){
    if(fixedPages){
      // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
      // Ни одна колонка и ни одно отдельное задание не уменьшаются независимо от остальных.
-     var maxImageHeights=[50,46,42,38,34,30,26];
+     var maxImageHeights=[50,46,42,38,34,30,26,23,20];
      for(var im=0;im<maxImageHeights.length&&!ranges;im++){
        start.style.setProperty('--oge-intro-image-max',maxImageHeights[im]+'mm');
-       for(var quarterPoints=46;quarterPoints>=34;quarterPoints--){
+       for(var quarterPoints=46;quarterPoints>=30;quarterPoints--){
          start.style.setProperty('--oge-print-font',(quarterPoints/4)+'pt');
          // Высоту измеряем после сжатия изображений и текста: все шесть колонок одного формата.
          ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
          if(ranges)break;
        }
      }
-     if(!ranges)throw new Error('Содержание варианта не помещается на три листа даже без стикеров');
+     if(!ranges){
+       // Более сложные сюжеты могут содержать длинные таблицы/формулы.
+       // В крайнем случае равномерно уменьшаем всю печатную колонку,
+       // а не обрезаем текст и не создаём лишние страницы.
+       for(var percent=98;percent>=74&&!ranges;percent-=2){
+         start.style.setProperty('--oge-print-zoom',String(percent/100));
+         for(var p=36;p>=30&&!ranges;p--){
+           start.style.setProperty('--oge-print-font',(p/4)+'pt');
+           ranges=solvePrintColumns(units.map(function(unit){return unit.getBoundingClientRect().height}),fixedPages*2,available);
+         }
+       }
+     }
+     if(!ranges)throw new Error('Содержание варианта не помещается на три листа даже после сокращения масштаба');
    }
    units.forEach(function(el){el.remove()});
    var template=start.cloneNode(true);
@@ -6654,7 +6688,8 @@ function paginateCollections(){
        .forEach(function(box,index){box.replaceChildren.apply(box,units.slice(ranges[index][0],ranges[index][1]))});
    }else{
      units.forEach(function(unit){
-       if(sheet.classList.contains('oge-exam-wide-page'))nextPage();
+       // Широкий лист можно заполнять следующими задачами, пока они помещаются.
+       // Иначе старый алгоритм добавлял новую страницу ДЛЯ КАЖДОЙ задачи.
        content().appendChild(unit);
        if(fits())return;
        if(content().children.length>1){
@@ -6678,12 +6713,32 @@ function paginateCollections(){
        });
      }
    }
+   // После переноса блоков реальные межстрочные расстояния иногда слегка меняются.
+   // Проверяем фактическую высоту колонок и, при необходимости, пропорционально
+   // уменьшаем содержимое всей работы, оставляя ровно три листа.
+   function overflowing(){
+     return sheets.some(function(pg){
+       return Array.from(pg.querySelectorAll('.oge-exam-column')).some(function(col){
+         const box=col.querySelector('.oge-exam-column-content');
+         // scrollHeight НЕ учитывает CSS zoom: проверять его здесь нельзя,
+         // иначе даже уменьшенный, реально помещающийся блок даёт ложную ошибку.
+         return col.clientHeight && box.getBoundingClientRect().height>col.getBoundingClientRect().height-3;
+       });
+     });
+   }
+   if(fixedPages && overflowing()){
+     var originalZoom=Number(start.style.getPropertyValue('--oge-print-zoom')||1);
+     for(var z=originalZoom-0.02;z>=0.73 && overflowing();z-=0.02){
+       sheets.forEach(function(pg){pg.style.setProperty('--oge-print-zoom',String(z));});
+     }
+   }
    var label=start.querySelector('.oge-exam-header strong').textContent;
    sheets.forEach(function(pg,i){
      pg.setAttribute('data-exam-page',start.getAttribute('data-batch-variant')+'-'+(i+1));
      pg.querySelector('.oge-exam-page-counter').textContent=label+' · страница '+(i+1)+' из '+sheets.length;
      pg.querySelectorAll('.oge-exam-column').forEach(function(col){
-       if(col.clientHeight && col.querySelector('.oge-exam-column-content').scrollHeight>col.clientHeight-1)
+       const box=col.querySelector('.oge-exam-column-content');
+       if(col.clientHeight && box.getBoundingClientRect().height>col.getBoundingClientRect().height-1)
          throw new Error('Задания выходят за границы листа');
      });
    });
