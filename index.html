@@ -51,12 +51,12 @@
     <script src="task13.js?v=20261101-hatched-all"></script>
     <script src="task13_extra.js?v=20261101-hatched-all"></script>
     <script src="task14.js?v=20261031-workbook-verified"></script>
-    <script src="task14_extra.js?v=20261101-order-topics"></script>
+    <script src="task14_extra.js?v=20261101-full-text-verified"></script>
     <script src="task15.js?v=20261031-svg-math-fix-2"></script>
-    <script src="task15_extra.js?v=20261101-three-diagram-fixes"></script>
+    <script src="task15_extra.js?v=20261101-original-diagrams-grid-fit"></script>
     <!-- Задание 16: окружность и круг -->
     <script src="task16.js?v=20261031-workbook-verified-svg"></script>
-    <script src="task16_extra.js?v=20261101-tangent-arc-and-topic-order-v2"></script>
+    <script src="task16_extra.js?v=20261018-4-resu-oge"></script>
     <!-- Задание 17. Четырёхугольники: основное и дополнительные -->
     <script src="task17.js?v=20261031-book-diagram-1719"></script>
     <script src="task17_extra.js?v=20261018-1"></script>
@@ -5676,10 +5676,16 @@ body.auth-locked > *:not(#passwordGate) {
             const p2=ogePrintArrayToEntries(groups['6-14'],6,numbers['6-14']);
             const p3=ogePrintArrayToEntries(groups['15-25'],15,numbers['15-25']);
             let sharedDiagram='';
-            if(p1.common && p1.items.length) {
-                const temp=document.createElement('div');temp.innerHTML=p1.items[0].html;
-                const diagram=temp.querySelector('.oge-exam-diagram');
-                if(diagram && !/<(?:img|svg|picture)\b/i.test(p1.common)){sharedDiagram=diagram.outerHTML;}
+            if(p1.common && p1.items.length && !/<(?:img|svg|picture)\b/i.test(p1.common)) {
+                for(const item of p1.items){
+                    const temp=document.createElement('div');
+                    temp.innerHTML=item.html;
+                    const diagram=temp.querySelector('.oge-exam-diagram');
+                    if(diagram){
+                        sharedDiagram=diagram.outerHTML;
+                        break;
+                    }
+                }
             }
             const p1IsFull=[1,2,3,4,5].every(n=>p1.items.some(t=>t.num===n));
             const tasks=[...p1.items,...p2.items,...p3.items].sort((a,b)=>a.num-b.num);
@@ -5709,15 +5715,11 @@ body.auth-locked > *:not(#passwordGate) {
                     const blocks=ogePrintIntroBlocks(p1.common);
                     if(sharedDiagram)blocks.unshift(sharedDiagram);
                     if(!blocks.length)blocks.push('');
-                    // Заголовок остаётся с началом условия, последний абзац — с первой задачей.
-                    blocks.forEach((block,index)=>{
-                        const intro='<div class="oge-exam-intro">'+(index===0?label:'')+block+'</div>';
-                        // Общее условие печатаем отдельными смысловыми блоками.
-                        // Не приклеиваем последний абзац к задаче 1 с таблицами:
-                        // большой неделимый фрагмент оставлял пустую левую колонку.
-                        units.push(unit(prefix+intro));
-                        prefix='';
-                    });
+                    const intro='<div class="oge-exam-intro oge-exam-intro-locked">'+label+blocks.join('')+'</div>';
+                    // Общее условие к заданиям 1–5 печатаем единым блоком: оно не должно
+                    // разрываться между колонками и должно оставаться на левой странице разворота.
+                    units.push(unit(prefix+intro));
+                    prefix='';
                     introDone=true;
                 }
                 units.push(unit(prefix+task.html));
@@ -6514,7 +6516,8 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-statement mjx-container svg{max-width:100%;height:auto;}
 .oge-exam-diagram{display:block;max-width:100%;margin:1.5mm 0;overflow:hidden;}
 .oge-exam-diagram svg,.oge-exam-diagram img{max-width:100%;height:auto;max-height:42mm;object-fit:contain;}
-/* Миниатюры у каждой задачи №1–5: рядом с условием, без дублирования крупного формата. */
+/* В варианте без полей рисунок к заданиям 1–5 печатается один раз в общем условии.
+   В варианте с полями сохраняем аккуратную миниатюру возле задачи. */
 .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
 .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
 .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
@@ -6525,6 +6528,16 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task[data-exam-task="3"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="4"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="5"] .oge-exam-diagram :is(img,svg){width:100%;max-height:28mm;object-fit:contain;}
+.oge-print-without-solutions .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
+.oge-print-without-solutions .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
+.oge-print-without-solutions .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
+.oge-print-without-solutions .oge-exam-task[data-exam-task="4"] .oge-exam-diagram,
+.oge-print-without-solutions .oge-exam-task[data-exam-task="5"] .oge-exam-diagram{display:none!important;}
+.oge-print-with-solutions .oge-exam-task[data-exam-task="1"] .oge-exam-diagram,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="2"] .oge-exam-diagram,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="3"] .oge-exam-diagram,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="4"] .oge-exam-diagram,
+.oge-print-with-solutions .oge-exam-task[data-exam-task="5"] .oge-exam-diagram{width:31%;max-width:40mm;margin:0 0 1.2mm 2.6mm;}
 .oge-exam-task:has(.oge-exam-diagram)::after{content:"";display:block;clear:both;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
@@ -6533,11 +6546,14 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%!important;max-height:var(--oge-intro-image-max,42mm)!important;width:auto!important;height:auto!important;margin:1mm auto!important;object-fit:contain;}
 .oge-exam-intro .practice-figure-card{margin:1mm 0!important;padding:0!important;}
+.oge-exam-intro-locked{break-inside:avoid;page-break-inside:avoid;}
 /* Общий план №1–5 в начале условия, с обтеканием текстом и без дублей. */
 .oge-exam-intro .oge-print-scenario-body::after{content:"";display:block;clear:both;}
 .oge-exam-intro .oge-print-scenario-plan{float:left!important;display:block!important;width:48%!important;max-width:65mm!important;margin:1mm 3mm 2mm 0!important;break-inside:avoid!important;}
 .oge-exam-intro .oge-print-scenario-plan img,.oge-exam-intro .oge-print-scenario-plan svg{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:var(--oge-intro-image-max,50mm)!important;margin:0!important;object-fit:contain!important;}
 .oge-exam-intro .oge-print-scenario-body table{clear:both;}
+.oge-print-without-solutions .oge-exam-intro .oge-print-scenario-plan{width:49%!important;max-width:72mm!important;margin:1mm 3.2mm 2mm 0!important;}
+.oge-print-without-solutions .oge-exam-intro.oge-exam-intro-locked{margin-bottom:2mm;}
 
 .oge-exam-intro .oge-exam-diagram img,.oge-exam-intro .oge-exam-diagram svg{max-height:var(--oge-intro-image-max,42mm)!important;}
 .oge-exam-intro *{max-width:100%;}
@@ -6559,7 +6575,7 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 @media print {html,body{width:auto!important;background:#fff!important;}.oge-exam-page{box-shadow:none!important;margin:0!important;}.oge-exam-task,.oge-exam-intro{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 
 /* Два режима печати ОГЭ. В полной работе с полями число листов определяется содержимым. */
-.oge-exam-write-grid{display:none;box-sizing:border-box;border:.5pt solid #a2c4df;border-radius:2px;background-color:white;background-image:linear-gradient(to right,#d6e6f1 .3pt,transparent .3pt),linear-gradient(to bottom,#d6e6f1 .3pt,transparent .3pt);background-size:5mm 5mm;margin:1.2mm 0 1.4mm;break-inside:avoid;page-break-inside:avoid;}
+.oge-exam-write-grid{display:none;box-sizing:border-box;border:.5pt solid #aac9df;border-radius:2.6px;background-color:white;background-image:linear-gradient(to right,#d9e8f3 .3pt,transparent .3pt),linear-gradient(to bottom,#d9e8f3 .3pt,transparent .3pt);background-size:5mm 5mm;margin:1.4mm 0 1.7mm;break-inside:avoid;page-break-inside:avoid;box-shadow:inset 0 0 0 .2pt rgba(141,177,206,.22);}
 .oge-print-with-solutions .oge-exam-write-grid{display:block;height:16mm;}
 .oge-print-with-solutions .oge-exam-task[data-exam-task="20"] .oge-exam-write-grid,
 .oge-print-with-solutions .oge-exam-task[data-exam-task="21"] .oge-exam-write-grid,
