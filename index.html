@@ -51,9 +51,9 @@
     <script src="task13.js?v=20261101-hatched-all"></script>
     <script src="task13_extra.js?v=20261101-hatched-all"></script>
     <script src="task14.js?v=20261031-workbook-verified"></script>
-    <script src="task14_extra.js?v=20260917-1"></script>
+    <script src="task14_extra.js?v=20261101-full-text-verified"></script>
     <script src="task15.js?v=20261031-svg-math-fix-2"></script>
-    <script src="task15_extra.js?v=20261018-7-finalfix"></script>
+    <script src="task15_extra.js?v=20261101-print-vectors-extra15-audit"></script>
     <!-- Задание 16: окружность и круг -->
     <script src="task16.js?v=20261031-workbook-verified-svg"></script>
     <script src="task16_extra.js?v=20261018-4-resu-oge"></script>
@@ -5844,6 +5844,40 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 }
             });
         }
+        // Сетка является настоящей SVG-графикой, а не CSS-фоном: Chrome/Edge
+        // выводят её на бумагу и в PDF даже при выключенной «Фоновой графике».
+        function addPrintableGridLines(){
+            const targets=document.querySelectorAll('.oge-print-with-solutions .oge-print-write-grid, .oge-print-with-solutions .oge-image-grid-paper, .oge-print-with-solutions .oge-exam-write-grid');
+            targets.forEach((field,index)=>{
+                if(field.querySelector('svg.oge-grid-vector'))return;
+                field.style.position='relative';
+                field.style.overflow='hidden';
+                const NS='http://www.w3.org/2000/svg';
+                const svg=document.createElementNS(NS,'svg');
+                svg.setAttribute('class','oge-grid-vector');
+                svg.setAttribute('aria-hidden','true');
+                svg.setAttribute('width','100%');svg.setAttribute('height','100%');
+                svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;z-index:0;';
+                const defs=document.createElementNS(NS,'defs');
+                const pattern=document.createElementNS(NS,'pattern');
+                const patternId='oge-grid-pdf-'+index;
+                pattern.setAttribute('id',patternId);
+                pattern.setAttribute('patternUnits','userSpaceOnUse');
+                const step=5*96/25.4;  // шаг сетки 5 мм при 96 CSS px / inch
+                pattern.setAttribute('width',String(step));pattern.setAttribute('height',String(step));
+                const path=document.createElementNS(NS,'path');
+                path.setAttribute('d',`M ${step} 0 H 0 V ${step}`);
+                path.setAttribute('fill','none');
+                path.setAttribute('stroke','#cbdce9');
+                path.setAttribute('stroke-width','0.7');
+                pattern.appendChild(path);defs.appendChild(pattern);svg.appendChild(defs);
+                const rect=document.createElementNS(NS,'rect');
+                rect.setAttribute('width','100%');rect.setAttribute('height','100%');
+                rect.setAttribute('fill','url(#'+patternId+')');svg.appendChild(rect);
+                field.prepend(svg);
+            });
+        }
+        addPrintableGridLines();
         const button = document.getElementById('oge-print-button');
         const retry = document.getElementById('oge-print-retry');
         const status = document.getElementById('oge-print-status');
