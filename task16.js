@@ -6,56 +6,56 @@
   "prototypes": [
     {
       "desc": "16.1. Центральный и вписанный угол при двух диаметрах",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"96\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"98.18\" y1=\"136.56\" x2=\"209.82\" y2=\"55.44\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"105.21\" y1=\"47.21\" x2=\"202.79\" y2=\"144.79\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"98.18\" y1=\"136.56\" x2=\"105.21\" y2=\"47.21\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"209.82\" y1=\"55.44\" x2=\"105.21\" y2=\"47.21\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"153\" y=\"91\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"92\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"99\" y=\"32\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"213\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"226\" y=\"158\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"97\" r=\"68\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"108\" y1=\"147\" x2=\"200\" y2=\"47\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"108\" y1=\"47\" x2=\"200\" y2=\"147\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"108\" y1=\"47\" x2=\"200\" y2=\"47\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"155\" y=\"93\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"100\" y=\"164\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"100\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"207\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"207\" y=\"164\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
       "theory_task": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 44°. Найдите угол ACB. Ответ дайте в градусах.",
       "theory_sol": "Лучи OB и OD противоположны, поэтому \\(\\angle AOB=180^\\circ-44^\\circ=136^\\circ\\). Вписанный угол, опирающийся на дугу AB, вдвое меньше центрального: \\(\\angle ACB=136^\\circ:2=68^\\circ\\).<br><br><b>Ответ:</b> 68",
       "tasks": [
         {
-          "text": "В окружности с центром O отрезки AC и BD — диаметры. Угол AOD равен 146°. Найдите угол ACB. Ответ дайте в градусах.",
+          "text": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 146°. Найдите угол ACB. Ответ дайте в градусах.",
           "answer": "17"
         },
         {
-          "text": "В окружности с центром O отрезки AC и BD — диаметры. Угол AOD равен 108°. Найдите угол ACB. Ответ дайте в градусах.",
+          "text": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 108°. Найдите угол ACB. Ответ дайте в градусах.",
           "answer": "36"
         },
         {
-          "text": "В окружности с центром O отрезки AC и BD — диаметры. Угол AOD равен 42°. Найдите угол ACB. Ответ дайте в градусах.",
+          "text": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 42°. Найдите угол ACB. Ответ дайте в градусах.",
           "answer": "69"
         },
         {
-          "text": "В окружности с центром O отрезки AC и BD — диаметры. Угол AOD равен 50°. Найдите угол ACB. Ответ дайте в градусах.",
+          "text": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 50°. Найдите угол ACB. Ответ дайте в градусах.",
           "answer": "65"
         },
         {
-          "text": "В окружности с центром O отрезки AC и BD — диаметры. Угол AOD равен 72°. Найдите угол ACB. Ответ дайте в градусах.",
+          "text": "В окружности с центром в точке O отрезки AC и BD — диаметры. Угол AOD равен 72°. Найдите угол ACB. Ответ дайте в градусах.",
           "answer": "54"
         }
       ]
     },
     {
       "desc": "16.2. Центральный угол по вписанному при двух диаметрах",
-      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"96\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"98.18\" y1=\"136.56\" x2=\"209.82\" y2=\"55.44\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"105.21\" y1=\"47.21\" x2=\"202.79\" y2=\"144.79\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"98.18\" y1=\"136.56\" x2=\"105.21\" y2=\"47.21\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"209.82\" y1=\"55.44\" x2=\"105.21\" y2=\"47.21\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"153\" y=\"91\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"92\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"99\" y=\"32\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"213\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"226\" y=\"158\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
-      "theory_task": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 16°. Найдите угол AOD. Ответ дайте в градусах.",
+      "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"97\" r=\"68\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"108\" y1=\"147\" x2=\"200\" y2=\"47\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"108\" y1=\"47\" x2=\"200\" y2=\"147\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"108\" y1=\"47\" x2=\"200\" y2=\"47\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"155\" y=\"93\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"100\" y=\"164\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"100\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"207\" y=\"40\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"207\" y=\"164\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">D</text></svg></div>",
+      "theory_task": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 16°. Найдите угол AOD. Ответ дайте в градусах.",
       "theory_sol": "\\(\\angle AOB=2\\angle ACB=32^\\circ\\). Поскольку OB и OD — противоположные лучи, \\(\\angle AOD=180^\\circ-32^\\circ=148^\\circ\\).<br><br><b>Ответ:</b> 148",
       "tasks": [
         {
-          "text": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 19°. Найдите угол AOD. Ответ дайте в градусах.",
+          "text": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 19°. Найдите угол AOD. Ответ дайте в градусах.",
           "answer": "142"
         },
         {
-          "text": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 54°. Найдите угол AOD. Ответ дайте в градусах.",
+          "text": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 54°. Найдите угол AOD. Ответ дайте в градусах.",
           "answer": "72"
         },
         {
-          "text": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 78°. Найдите угол AOD. Ответ дайте в градусах.",
+          "text": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 78°. Найдите угол AOD. Ответ дайте в градусах.",
           "answer": "24"
         },
         {
-          "text": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 21°. Найдите угол AOD. Ответ дайте в градусах.",
+          "text": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 21°. Найдите угол AOD. Ответ дайте в градусах.",
           "answer": "138"
         },
         {
-          "text": "Отрезки AC и BD — диаметры окружности с центром O. Угол ACB равен 31°. Найдите угол AOD. Ответ дайте в градусах.",
+          "text": "Отрезки AC и BD — диаметры окружности с центром в точке O. Угол ACB равен 31°. Найдите угол AOD. Ответ дайте в градусах.",
           "answer": "118"
         }
       ]
@@ -91,27 +91,27 @@
     {
       "desc": "16.4. Вписанный угол при указанной полуплоскости",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"96\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"97.48\" y1=\"135.58\" x2=\"210.52\" y2=\"135.58\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"162.41\" y1=\"27.51\" x2=\"210.52\" y2=\"135.58\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"162.41\" y1=\"27.51\" x2=\"97.48\" y2=\"135.58\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"96.00\" x2=\"97.48\" y2=\"135.58\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"96.00\" x2=\"210.52\" y2=\"135.58\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"151\" y=\"92\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"87\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"218\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"164\" y=\"16\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text></svg></div>",
-      "theory_task": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 59°.",
+      "theory_task": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 59°.",
       "theory_sol": "Точка C расположена на большей дуге AB, поэтому угол ACB опирается на меньшую дугу AB. \\(\\angle ACB=\\frac{59^\\circ}{2}=29{,}5^\\circ\\).<br><br><b>Ответ:</b> 29,5",
       "tasks": [
         {
-          "text": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 47°. Ответ дайте в градусах.",
+          "text": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 47°. Ответ дайте в градусах.",
           "answer": "23,5"
         },
         {
-          "text": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 113°. Ответ дайте в градусах.",
+          "text": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 113°. Ответ дайте в градусах.",
           "answer": "56,5"
         },
         {
-          "text": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 173°. Ответ дайте в градусах.",
+          "text": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 173°. Ответ дайте в градусах.",
           "answer": "86,5"
         },
         {
-          "text": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 91°. Ответ дайте в градусах.",
+          "text": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 91°. Ответ дайте в градусах.",
           "answer": "45,5"
         },
         {
-          "text": "Треугольник ABC вписан в окружность с центром O. Точки O и C лежат по одну сторону от прямой AB. Найдите угол ACB, если угол AOB равен 126°. Ответ дайте в градусах.",
+          "text": "Треугольник ABC вписан в окружность с центром в точке O. Точки O и C лежат в одной полуплоскости относительно прямой AB. Найдите угол ACB, если угол AOB равен 126°. Ответ дайте в градусах.",
           "answer": "63"
         }
       ]
@@ -119,27 +119,27 @@
     {
       "desc": "16.5. Центр описанной окружности на стороне: острый угол",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"96\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><line x1=\"85.00\" y1=\"96.00\" x2=\"223.00\" y2=\"96.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"85.00\" y1=\"96.00\" x2=\"185.33\" y2=\"34.52\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"185.33\" y1=\"34.52\" x2=\"223.00\" y2=\"96.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"154\" y=\"92\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text><text x=\"69\" y=\"104\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"236\" y=\"104\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"184\" y=\"28\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text></svg></div>",
-      "theory_task": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 9°.",
+      "theory_task": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 9°.",
       "theory_sol": "Сторона AB проходит через центр окружности и является диаметром. Следовательно, угол ACB прямой. \\(\\angle ABC=90^\\circ-9^\\circ=81^\\circ\\).<br><br><b>Ответ:</b> 81",
       "tasks": [
         {
-          "text": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 24°. Ответ дайте в градусах.",
+          "text": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 24°. Ответ дайте в градусах.",
           "answer": "66"
         },
         {
-          "text": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 17°. Ответ дайте в градусах.",
+          "text": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 17°. Ответ дайте в градусах.",
           "answer": "73"
         },
         {
-          "text": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 7°. Ответ дайте в градусах.",
+          "text": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 7°. Ответ дайте в градусах.",
           "answer": "83"
         },
         {
-          "text": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 32°. Ответ дайте в градусах.",
+          "text": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 32°. Ответ дайте в градусах.",
           "answer": "58"
         },
         {
-          "text": "Центр описанной около треугольника ABC окружности лежит на стороне AB. Найдите угол ABC, если угол BAC равен 41°. Ответ дайте в градусах.",
+          "text": "Центр окружности, описанной около треугольника ABC, лежит на стороне AB. Найдите угол ABC, если угол BAC равен 41°. Ответ дайте в градусах.",
           "answer": "49"
         }
       ]
@@ -315,27 +315,27 @@
     {
       "desc": "16.12. Сторона равностороннего треугольника по расстоянию от центра до стороны",
       "svg_code": "<div style=\"width:100%;max-width:330px;margin:5px auto\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 310 205\" style=\"width:100%;height:auto;display:block;overflow:visible\"><circle cx=\"154\" cy=\"96\" r=\"69\" stroke=\"#111827\" stroke-width=\"2\" fill=\"none\"/><polygon points=\"94.24424713887373,130.5 154.0,27.0 213.75575286112624,130.50000000000003\" fill=\"none\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"94.24\" y1=\"130.50\" x2=\"154.00\" y2=\"96.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"154.00\" y1=\"27.00\" x2=\"154.00\" y2=\"96.00\" stroke=\"#111827\" stroke-width=\"2\"/><line x1=\"213.76\" y1=\"130.50\" x2=\"154.00\" y2=\"96.00\" stroke=\"#111827\" stroke-width=\"2\"/><text x=\"87\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">A</text><text x=\"156\" y=\"18\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">B</text><text x=\"221\" y=\"152\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">C</text><text x=\"155\" y=\"100\" font-size=\"16\" font-family=\"Cambria, Georgia, serif\" text-anchor=\"middle\" fill=\"#111827\">O</text></svg></div>",
-      "theory_task": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до его сторон равно \\(\\dfrac{\\sqrt3}{2}\\). Найдите сторону треугольника.",
+      "theory_task": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до его сторон равно \\(\\dfrac{\\sqrt3}{2}\\). Найдите сторону треугольника.",
       "theory_sol": "Центр описанной окружности равностороннего треугольника одновременно является центром вписанной. \\(r=\\frac{a\\sqrt3}{6}\\); при \\(r=\\frac{\\sqrt3}{2}\\) получаем \\(a=3\\).<br><br><b>Ответ:</b> 3",
       "tasks": [
         {
-          "text": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до сторон треугольника равно \\(4\\sqrt{3}\\). Найдите сторону треугольника.",
+          "text": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до сторон треугольника равно \\(4\\sqrt{3}\\). Найдите сторону треугольника.",
           "answer": "24"
         },
         {
-          "text": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до сторон треугольника равно \\(5\\sqrt{3}\\). Найдите сторону треугольника.",
+          "text": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до сторон треугольника равно \\(5\\sqrt{3}\\). Найдите сторону треугольника.",
           "answer": "30"
         },
         {
-          "text": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до сторон треугольника равно \\(\\dfrac{\\sqrt3}{3}\\). Найдите сторону треугольника.",
+          "text": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до сторон треугольника равно \\(\\dfrac{\\sqrt3}{3}\\). Найдите сторону треугольника.",
           "answer": "2"
         },
         {
-          "text": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до сторон треугольника равно \\(\\sqrt3\\). Найдите сторону треугольника.",
+          "text": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до сторон треугольника равно \\(\\sqrt3\\). Найдите сторону треугольника.",
           "answer": "6"
         },
         {
-          "text": "В окружность с центром O вписан равносторонний треугольник. Расстояние от O до сторон треугольника равно \\(\\dfrac{2\\sqrt3}{3}\\). Найдите сторону треугольника.",
+          "text": "В окружность с центром в точке O вписан равносторонний треугольник. Расстояние от точки O до сторон треугольника равно \\(\\dfrac{2\\sqrt3}{3}\\). Найдите сторону треугольника.",
           "answer": "4"
         }
       ]
