@@ -4168,6 +4168,9 @@ body.auth-locked > *:not(#passwordGate) {
 
             let lastExtraTopicInVariant = null;
             finalTasks.forEach((item,itemIndex) => {
+                // Вычисляем номер экзаменационного задания до формирования данных
+                // для интерактивных игр, печати и самого HTML-варианта.
+                const interactiveTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
                 const printOffset = currentPrintHTML.length;
                 const replacementControl = ogeReplacementButton(blockSnapshotIndex,itemIndex,item,kind);
                 // Тематические рубрики видны не только в настройке, но и в самом варианте.
@@ -4568,7 +4571,6 @@ body.auth-locked > *:not(#passwordGate) {
                 </div>`;
 
                 let interactiveTaskCore = '';
-                const interactiveTaskNumber = parseInt(String(tid).replace(/\D/g, ''), 10) || 0;
                 const isTask7Interactive = interactiveTaskNumber === 7;
                 if (isTask7Interactive) {
                     // Задание 7 всегда верстаем вертикально:
