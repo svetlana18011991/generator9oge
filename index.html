@@ -51,9 +51,9 @@
     <script src="task13.js?v=20261101-hatched-all"></script>
     <script src="task13_extra.js?v=20261101-hatched-all"></script>
     <script src="task14.js?v=20261031-workbook-verified"></script>
-    <script src="task14_extra.js?v=20261101-full-intros-v2"></script>
+    <script src="task14_extra.js?v=20261101-full-text-verified"></script>
     <script src="task15.js?v=20261031-svg-math-fix-2"></script>
-    <script src="task15_extra.js?v=20261018-7-finalfix"></script>
+    <script src="task15_extra.js?v=20261101-original-diagrams-grid-fit"></script>
     <!-- Задание 16: окружность и круг -->
     <script src="task16.js?v=20261031-workbook-verified-svg"></script>
     <script src="task16_extra.js?v=20261018-4-resu-oge"></script>
@@ -5852,6 +5852,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 if(field.querySelector('svg.oge-grid-vector'))return;
                 field.style.position='relative';
                 field.style.overflow='hidden';
+                field.classList.add('oge-grid-active');
                 const NS='http://www.w3.org/2000/svg';
                 const svg=document.createElementNS(NS,'svg');
                 svg.setAttribute('class','oge-grid-vector');
@@ -5868,8 +5869,8 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 const path=document.createElementNS(NS,'path');
                 path.setAttribute('d',`M ${step} 0 H 0 V ${step}`);
                 path.setAttribute('fill','none');
-                path.setAttribute('stroke','#cbdce9');
-                path.setAttribute('stroke-width','0.7');
+                path.setAttribute('stroke','#b4cbdc');
+                path.setAttribute('stroke-width','0.8');
                 pattern.appendChild(path);defs.appendChild(pattern);svg.appendChild(defs);
                 const rect=document.createElementNS(NS,'rect');
                 rect.setAttribute('width','100%');rect.setAttribute('height','100%');
@@ -5877,7 +5878,35 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 field.prepend(svg);
             });
         }
-        addPrintableGridLines();
+        // Ставим сетку после размещения и измерения заданий: иначе SVG
+        // наследует стандартную область 300×150 px и получается узкая полоска.
+        function fitPrintableGridLines(){
+            document.querySelectorAll('svg.oge-grid-vector').forEach(svg=>{
+                const field=svg.parentElement;
+                if(!field || !field.isConnected) return;
+                const box=field.getBoundingClientRect();
+                const w=Math.max(1, Math.round(field.clientWidth || box.width || 1));
+                const h=Math.max(1, Math.round(field.clientHeight || box.height || 1));
+                svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+                svg.setAttribute('preserveAspectRatio', 'none');
+            });
+        }
+        if(!document.getElementById('oge-print-grid-style')){
+            const style=document.createElement('style');
+            style.id='oge-print-grid-style';
+            style.textContent=`
+              .oge-grid-active {background-image:none!important;background-color:white!important;}
+              .oge-grid-active > svg.oge-grid-vector {
+                position:absolute!important;left:0!important;top:0!important;
+                display:block!important;width:100%!important;height:100%!important;
+                max-width:none!important;min-width:0!important;max-height:none!important;
+                margin:0!important;transform:none!important;object-fit:fill!important;
+                pointer-events:none!important;overflow:hidden!important;
+              }
+            `;
+            document.head.appendChild(style);
+        }
+        window.addEventListener('beforeprint', fitPrintableGridLines);
         const button = document.getElementById('oge-print-button');
         const retry = document.getElementById('oge-print-retry');
         const status = document.getElementById('oge-print-status');
@@ -5896,7 +5925,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
             retry.hidden = false;
         }
         function print() {
-            try { window.focus(); window.print(); }
+            try { fitPrintableGridLines(); window.focus(); window.print(); }
             catch (error) {
                 status.textContent = 'Окно печати не открылось. Нажмите Ctrl + P и выберите сохранение в PDF.';
             }
@@ -5930,7 +5959,7 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 fail('Не удалось загрузить формулы или рисунки. Проверьте подключение к интернету и нажмите «Повторить подготовку».', error);
                 return;
             }
-            try { if (paginate) paginate(); }
+            try { if (paginate) paginate(); addPrintableGridLines(); fitPrintableGridLines(); }
             catch (error) {
                 fail('Не удалось разместить задания на листах. Вернитесь в генератор и попробуйте заменить задание или уменьшить подборку.', error);
                 return;
