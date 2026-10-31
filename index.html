@@ -7,9 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script>window.database = {};</script>
-    <script src="tower_template.js?v=47"></script>
-    <script src="battle_template.js?v=47"></script>
-    <script src="motivation_template.js?v=motivation-v43"></script>
+    <script src="tower_template.js?v=20261031-three-fixes"></script>
+    <script src="battle_template.js?v=20261031-three-fixes"></script>
+    <script src="motivation_template.js?v=20261031-three-fixes"></script>
     <!-- Задания 1–5: каталоги и 24 комплекта по рабочей тетради Быковой С. (2026). -->
     <script src="oge_practice.js?v=20261030-workbook-revision"></script>
     <script src="tariff_plot_base64.js?v=20261027-8themes"></script>
@@ -4201,7 +4201,8 @@ body.auth-locked > *:not(#passwordGate) {
                 if (standaloneSvg) { let tmp = document.createElement('div'); tmp.innerHTML = standaloneSvg; window.autoFixSVGArrows(tmp); standaloneSvg = tmp.innerHTML; }
 
                 let printSvg = item.printSvg !== undefined ? item.printSvg : mainSvg;
-                if (printSvg) { let tmp = document.createElement('div'); tmp.innerHTML = printSvg; window.autoFixSVGArrows(tmp); printSvg = tmp.innerHTML; }
+                if (!printSvg && Number(String(tid).replace(/\D/g,'')) === 18) printSvg = item.svg_code || item.svg || item.theory?.svg_code || '';
+                if (printSvg) { let tmp = document.createElement('div'); tmp.innerHTML = printSvg; window.autoFixSVGArrows(tmp); tmp.querySelectorAll('img').forEach(img=>{img.setAttribute('loading','eager'); img.setAttribute('decoding','sync');}); printSvg = tmp.innerHTML; }
                 
                 let theorySvgCode = "";
                 if (item.theory) {
@@ -4422,9 +4423,12 @@ body.auth-locked > *:not(#passwordGate) {
                         </div>`;
                 }
 
-                window.currentGeneratedTasks.push({ text: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : standaloneText), draftText: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : renderText), presentationText: window.ogeKeepMathHTML(item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText)), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck, taskNumber: Number(item.examNumber || item.__ogeScenarioMeta?.taskNumber || String(tid || '').replace(/\D/g, '')) || 0, scenarioGroupId: item.__ogeScenarioMeta?.groupId || '' });
+                window.currentGeneratedTasks.push({ text: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : standaloneText), draftText: window.ogeKeepMathHTML(item.gameText !== undefined ? item.gameText : renderText), presentationText: window.ogeKeepMathHTML(item.presentationText !== undefined ? item.presentationText : (item.gameText !== undefined ? item.gameText : standaloneText)), presentationHasTable: Boolean(item.presentationHasTable), svg: item.gameSvg !== undefined ? item.gameSvg : standaloneSvg, task19Single: interactiveTaskNumber === 19 && !!item.task19Single, answer: String(item.answer), accepts: acceptedAnswers, theory: theoryHtml, showCorrectOnError: showCorrectOnError, instantCheck: instantCheck, taskNumber: Number(item.examNumber || item.__ogeScenarioMeta?.taskNumber || String(tid || '').replace(/\D/g, '')) || 0, scenarioGroupId: item.__ogeScenarioMeta?.groupId || '' });
                 
                 let stickerHTMLInteractive = "";
+                const paperAnswerLine = interactiveTaskNumber === 19 && item.task19Single
+                    ? 'Ответ: &#9633; Верно &nbsp;&nbsp; &#9633; Неверно'
+                    : 'Ответ: ______________________________';
                 let stickerHTMLPrint = "";
                 let pr = 0;
 
@@ -4647,7 +4651,7 @@ body.auth-locked > *:not(#passwordGate) {
                                 <div style="font-size:14px;line-height:1.35;">${p11.statementHTML}</div>
                                 ${printSvg ? `<div style="width:100%;max-width:780px;margin:8px auto 7px;">${printSvg}</div>` : ''}
                                 ${p11.choicesHTML ? `<div style="font-size:13.5px;line-height:1.35;margin-top:4px;">${p11.choicesHTML}</div>` : ''}
-                                <div class="task-print-answer" style="margin-top:8px;">Ответ: ______________________________</div>
+                                <div class="task-print-answer" style="margin-top:8px;">${paperAnswerLine}</div>
                             </div>${stickerHTMLPrint}
                         </div>
                     </div>`;
@@ -4664,12 +4668,12 @@ body.auth-locked > *:not(#passwordGate) {
                         .print-compact-task-${taskCounter} .common-table td { padding:3px 4px !important; line-height:1.12 !important; }
                         .print-compact-task-${taskCounter} p { margin:5px 0 !important; line-height:1.2 !important; }
                     </style>` : '';
-                    currentPrintHTML += `${compactStyle}<div class="task-print-block ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;"><div style="margin-bottom:${compactPrint ? 5 : 8}px; font-size:${compactPrint ? 14 : 16}px; line-height:1.25;"><b>${taskCounter}.</b> ${renderText}</div><div style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div style="flex:1; min-width:0; display:block;"><div style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">Ответ: ______________________________</div></div>${stickerHTMLPrint}</div></div>`;
+                    currentPrintHTML += `${compactStyle}<div class="task-print-block ${compactPrint ? `print-compact-task-${taskCounter}` : ''}" style="page-break-inside:avoid; break-inside:avoid;"><div style="margin-bottom:${compactPrint ? 5 : 8}px; font-size:${compactPrint ? 14 : 16}px; line-height:1.25;"><b>${taskCounter}.</b> ${renderText}</div><div style="display:flex; gap:${compactPrint ? 8 : 10}px; align-items:flex-start;">${printSvg ? `<div class="task-print-img" style="flex:0 0 63%; max-width:63%; align-self:flex-start;">${printSvg}</div>` : ''}<div style="flex:1; min-width:0; display:block;"><div style="font-weight:700; color:#003399; margin-bottom:5px;">Решение:</div><div style="min-height:${gridHeight}px; border:2px solid #7aa7d2; border-radius:6px; background-size:16px 16px; background-image:linear-gradient(to right,#c7dceb 1px,transparent 1px),linear-gradient(to bottom,#c7dceb 1px,transparent 1px);"></div><div class="task-print-answer" style="margin-top:${compactPrint ? 5 : 8}px;">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 } else {
-                    currentPrintHTML += `<div class="task-print-block"><div class="task-print-flex"><div class="task-print-num">${taskCounter}</div>${printSvg ? `<div class="task-print-img">${printSvg}</div>` : ""}<div class="task-print-text"><div>${renderText}</div><div class="task-print-answer">Ответ: ______________________________</div></div>${stickerHTMLPrint}</div></div>`;
+                    currentPrintHTML += `<div class="task-print-block"><div class="task-print-flex"><div class="task-print-num">${taskCounter}</div>${printSvg ? `<div class="task-print-img">${printSvg}</div>` : ""}<div class="task-print-text"><div>${renderText}</div><div class="task-print-answer">${paperAnswerLine}</div></div>${stickerHTMLPrint}</div></div>`;
                 }
                 
-                currentAnswersHTML += `<div style="margin-bottom: 10px; font-size: 18px;"><b>${taskCounter}.</b> Ответ: <strong style="color: #d32f2f;">${answerDisplay}</strong></div>`;
+                currentAnswersHTML += `<div style="margin-bottom: 10px; font-size: 18px;"><b>${taskCounter}.</b> Ответ: <strong style="color: #d32f2f;">${interactiveTaskNumber===19 && item.task19Single ? (String(item.answer)==='1' ? 'Верно' : 'Неверно') : answerDisplay}</strong></div>`;
                 if (item.afterHTML) currentInteractiveHTML += item.afterHTML;
                 if (item.afterPrintHTML) currentPrintHTML += item.afterPrintHTML;
                 if (item.afterAnswersHTML) currentAnswersHTML += item.afterAnswersHTML;
@@ -5721,6 +5725,12 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 .oge-manual-collection .task-print-answer{margin:2mm 0 0!important;font:normal 10.5pt/1.25 "Times New Roman",Times,serif!important;}
 .oge-manual-collection .task-print-img{flex:0 1 48mm!important;width:auto!important;min-width:0!important;max-width:48mm!important;overflow:visible!important;}
 .oge-manual-collection .task-print-img svg,.oge-manual-collection .task-print-img img{display:block;max-width:100%!important;max-height:56mm!important;width:auto!important;height:auto!important;object-fit:contain!important;}
+/* Own grid/geometry drawings remain visible with stickers beside the condition. */
+.oge-manual-collection .task-print-flex:has(.sticker-print):has(.task-print-img){gap:1.5mm!important;}
+.oge-manual-collection .task-print-flex:has(.sticker-print) .task-print-img{flex:0 0 41mm!important;max-width:41mm!important;min-width:35mm!important;display:block!important;}
+.oge-manual-collection .task-print-img .t18-source-figure{display:block!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;line-height:0!important;}
+.oge-manual-collection .task-print-img .t18-source-figure img{display:block!important;width:100%!important;max-height:52mm!important;opacity:1!important;visibility:visible!important;object-fit:contain!important;}
+
 .oge-manual-collection img,.oge-manual-collection svg{max-width:100%;height:auto;}
 .oge-manual-collection .sticker-print{flex:0 0 22mm!important;width:22mm!important;max-width:22mm!important;margin:0 0 0 1mm!important;position:static!important;transform:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;break-inside:avoid!important;}
 .oge-manual-collection .sticker-print img{width:auto!important;height:auto!important;max-width:20mm!important;max-height:20mm!important;object-fit:contain!important;}
@@ -6579,7 +6589,8 @@ ${window.SCRIPT_END}
 
                 const correctAnswer = String(t.answer ?? '');
                 return {
-                    type: 'input',
+                    type: t.task19Single ? 'boolean' : 'input',
+                    task19Single: !!t.task19Single,
                     prompt: fullPrompt,
                     text: cleanText,
                     svg: t.svg || '',
@@ -6773,7 +6784,7 @@ ${window.SCRIPT_END}
 
         const script = document.createElement('script');
         script.id = 'motivation-template-loader';
-        script.src = 'motivation_template.js?v=motivation-v43-' + Date.now();
+        script.src = 'motivation_template.js?v=20261031-three-fixes' + Date.now();
 
         script.onload = function() {
             if (typeof window.MOTIVATION_TEMPLATE !== 'undefined') {
@@ -6826,7 +6837,8 @@ ${window.SCRIPT_END}
             }
             const answer = String(t.answer ?? '');
             return {
-                type: "input",
+                type: t.task19Single ? "boolean" : "input",
+                task19Single: !!t.task19Single,
                 prompt: fullPrompt,
                 text: t.text || '',
                 svg: t.svg || '',
@@ -6878,7 +6890,8 @@ ${window.SCRIPT_END}
                 fullPrompt = `<div style="background:#fff; padding:14px; border-radius:10px; margin-bottom:12px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.14); color:#000;">${t.svg}</div>` + fullPrompt;
             }
             return {
-                type: "input",
+                type: t.task19Single ? "boolean" : "input",
+                task19Single: !!t.task19Single,
                 prompt: fullPrompt,
                 draftText: t.draftText || t.text || '',
                 draftSvg: t.svg || '',
@@ -6917,7 +6930,7 @@ ${window.SCRIPT_END}
 
 </script>
 
-<script src="presentations.js?v=51"></script>
+<script src="presentations.js?v=20261031-three-fixes"></script>
 
 <script>
 (function(){

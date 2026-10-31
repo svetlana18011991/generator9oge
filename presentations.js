@@ -205,9 +205,9 @@ function buildPresentationControls(task, index, options) {
 
     const answerJs = escapePresJsSingle(task && task.answer);
     return `<div class="pres-check-zone" style="display:flex;gap:12px;justify-content:center;align-items:center;width:100%;flex-wrap:wrap;flex-shrink:0;">
-        <input type="text" class="pres-input" placeholder="Ответ..." id="ans-${index}" style="font-size:1.1em;padding:12px 20px;width:180px;border-radius:10px;border:2px solid ${accent};text-align:center;outline:none;">
+        ${task && task.task19Single ? `<input type="hidden" id="ans-${index}" value=""><div class="pres-19-choices" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;width:100%;"><button type="button" onclick="choosePresentation19(${index},'1',this)" style="border:2px solid ${accent};border-radius:10px;background:#fff;color:#203248;font-size:18px;font-weight:700;padding:10px 18px;cursor:pointer;">Верно</button><button type="button" onclick="choosePresentation19(${index},'0',this)" style="border:2px solid ${accent};border-radius:10px;background:#fff;color:#203248;font-size:18px;font-weight:700;padding:10px 18px;cursor:pointer;">Неверно</button></div>` : `<input type="text" class="pres-input" placeholder="Ответ..." id="ans-${index}" style="font-size:1.1em;padding:12px 20px;width:180px;border-radius:10px;border:2px solid ${accent};text-align:center;outline:none;">`}
         <div id="pres-feedback-${index}" class="pres-feedback" style="width:100%;text-align:center;font-weight:bold;min-height:24px;display:none;"></div>
-        ${instantCheck ? `<button class="pres-btn-instant" onclick="checkPresSingle(${index}, '${answerJs}', this, ${showCorrectOnError})" style="background:#e8f5e9;border:1px solid #4CAF50;border-radius:10px;font-size:18px;cursor:pointer;padding:8px 12px;outline:none;box-shadow:0 4px 10px rgba(76,175,80,.2);" title="Проверить">✅</button>` : ''}
+        ${instantCheck ? `<button id="pres-instant-${index}" class="pres-btn-instant" onclick="checkPresSingle(${index}, '${answerJs}', this, ${showCorrectOnError})" style="background:#e8f5e9;border:1px solid #4CAF50;border-radius:10px;font-size:18px;cursor:pointer;padding:8px 12px;outline:none;box-shadow:0 4px 10px rgba(76,175,80,.2);" title="Проверить">✅</button>` : ''}
         ${showSolutions && task && task.theory && String(task.theory).trim() !== '' ? `<button id="pres-help-${index}" class="btn-settings" style="display:none;background:#e3f2fd;color:#003399;border:1px solid #90caf9;font-size:16px;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;" onclick="event.stopPropagation(); window.openTheoryModalLocal('theory-pres-${index}')" title="Открыть разбор">💡 Разбор</button>` : ''}
         <button type="button" class="pres-btn" onclick="submitTask(event, ${index}, false)" data-correct="${escapePresAttr(task && task.answer)}" style="font-size:1.1em;padding:12px 30px;border-radius:10px;border:none;background:${accent};color:white;cursor:pointer;font-weight:bold;">ОК</button>
         <button type="button" class="pres-skip-btn" onclick="submitTask(event, ${index}, true)" style="font-size:1em;padding:10px 16px;border-radius:10px;border:1px solid #b8c5d1;background:#f3f6fa;color:#29465d;cursor:pointer;">Пропустить →</button>
@@ -1227,6 +1227,20 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         }
 
         // --- МГНОВЕННАЯ ПРОВЕРКА В ПРЕЗЕНТАЦИИ ---
+        function choosePresentation19(idx, value, btn) {
+            if (typeof event !== 'undefined' && event) event.stopPropagation();
+            const input = document.getElementById('ans-' + idx);
+            if (!input || input.readOnly || input.dataset.checked === '1') return;
+            input.value = value;
+            const group = btn.parentElement;
+            group.querySelectorAll('button').forEach(function(b){
+                b.style.background = (b === btn) ? '#e1f3e6' : '#fff';
+                b.style.borderColor = (b === btn) ? '#28853b' : '#aaa';
+                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+            });
+            const check = document.querySelector('#pres-instant-' + idx);
+            if (check) check.click();
+        }
         function checkPresSingle(idx, correctAns, btn, showCorrectFlag) {
             event.stopPropagation();
             let input = document.getElementById('ans-'+idx);
@@ -1255,6 +1269,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
             }
 
             input.readOnly = true;
+            input.dataset.checked = '1';
             btn.style.display = 'none';
 
             let helpBtn = document.getElementById('pres-help-'+idx);

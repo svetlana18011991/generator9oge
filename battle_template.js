@@ -296,6 +296,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
             <div id="q"></div>
             <div id="answerRow">
                 <input id="ansInput" type="text" autocomplete="off" placeholder="Ответ...">
+                <div id="battleBinary19" style="display:none;gap:9px;flex-wrap:wrap;"><button type="button" onclick="chooseBattle19('1')" style="background:#e8f5e9;border:2px solid #4caf50;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;">Верно</button><button type="button" onclick="chooseBattle19('0')" style="background:#ffebee;border:2px solid #e57373;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;">Неверно</button></div>
                 <button id="attackBtn" type="button">Атаковать</button>
                 <button id="nextBtn" type="button">Следующее задание →</button>
                 <button id="draftBtnBattle" type="button" title="Открыть черновик">✏️</button>
@@ -459,8 +460,11 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
 
         syncDraftTaskStatement();
         $('ansInput').value = '';
+        const binary = !!q.task19Single;
+        $('battleBinary19').style.display = binary ? 'flex' : 'none';
+        $('ansInput').style.display = binary ? 'none' : '';
         $('ansInput').readOnly = false;
-        $('attackBtn').style.display = 'inline-block';
+        $('attackBtn').style.display = binary ? 'none' : 'inline-block';
         $('nextBtn').style.display = 'none';
         setMessage('');
         typeset();
@@ -510,6 +514,11 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         }, 520);
     }
 
+    window.chooseBattle19 = function(value){
+        if(locked) return;
+        $('ansInput').value = value;
+        resolveAttack();
+    };
     function resolveAttack(){
         if(locked) return;
         const raw = $('ansInput').value;

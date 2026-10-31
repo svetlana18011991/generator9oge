@@ -84,6 +84,8 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
             transition:transform .14s ease, box-shadow .25s ease, opacity .25s ease, filter .25s ease;
             box-shadow:inset 0 0 0 1px rgba(182,222,255,.20), inset 0 0 20px rgba(255,255,255,.035);
         }
+        #puzzle-source-image{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;pointer-events:none;z-index:0;}
+        .piece{z-index:1;}
         .piece .piece-image{
             position:absolute;
             inset:0;
@@ -280,6 +282,10 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         <div id="taskText"></div>
         <div class="answerRow">
             <input id="answerInput" type="text" placeholder="Ответ..." autocomplete="off">
+            <div id="motivationBinary19" style="display:none;gap:9px;flex-wrap:wrap;">
+              <button type="button" onclick="chooseMotivation19('1')" style="padding:11px 17px;background:#e6f4e8;color:#145928;border:2px solid #5fb679;border-radius:12px;font-weight:800;cursor:pointer;">Верно</button>
+              <button type="button" onclick="chooseMotivation19('0')" style="padding:11px 17px;background:#fff0ed;color:#992c20;border:2px solid #e5a299;border-radius:12px;font-weight:800;cursor:pointer;">Неверно</button>
+            </div>
             <button class="checkBtn" type="button" onclick="checkAnswer()">Проверить</button>
             <button class="draftBtn" id="draftToggle" type="button" onclick="toggleDraft()" title="Открыть черновик">✏️</button>
         </div>
@@ -421,6 +427,14 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
 
     function buildPuzzle(){
         puzzle.innerHTML = '';
+        if(image) {
+            const sourceImage=document.createElement('img');
+            sourceImage.id='puzzle-source-image';
+            sourceImage.alt='Изображение пазла';
+            sourceImage.src=image;
+            sourceImage.onerror=function(){ console.error('Не удалось открыть пользовательскую картинку пазла'); };
+            puzzle.appendChild(sourceImage);
+        }
         if(!questions.length){
             puzzle.innerHTML = '<div style="padding:30px;color:#fff;font-weight:900">Нет заданий для игры. Сначала сгенерируйте вариант.</div>';
             return;
@@ -435,11 +449,12 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
             piece.type = 'button';
             piece.className = 'piece';
             piece.dataset.index = i;
-            piece.style.setProperty('--img', 'url("' + image + '")');
+            // Изображение уже лежит под деталями; открытая деталь прозрачна.
             stylePieceFromRect(piece, rect, i);
 
             const inner = document.createElement('div');
             inner.className = 'piece-image';
+            inner.style.display = 'none';
             piece.appendChild(inner);
 
             const lines = document.createElement('div');
@@ -467,6 +482,11 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         const prompt = String(q.prompt || q.text || '');
         document.getElementById('taskText').innerHTML = prompt.replace(/\s+([.,!?;:])/g, '$1');
         document.getElementById('answerInput').value = '';
+        const binary = !!q.task19Single;
+        document.getElementById('motivationBinary19').style.display = binary ? 'flex' : 'none';
+        document.getElementById('answerInput').style.display = binary ? 'none' : '';
+        const checkBtn = document.querySelector('.answerRow .checkBtn');
+        if(checkBtn) checkBtn.style.display = binary ? 'none' : '';
         document.getElementById('feedback').textContent = '';
         document.getElementById('feedback').style.color = '#333';
         document.getElementById('taskModal').classList.add('open');
@@ -482,6 +502,10 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         currentIndex = -1;
     };
 
+    window.chooseMotivation19 = function(value){
+        document.getElementById('answerInput').value = value;
+        window.checkAnswer();
+    };
     window.checkAnswer = function(){
         if(currentIndex < 0) return;
         const q = questions[currentIndex] || {};
