@@ -22,10 +22,10 @@
     <script src="plot_plan_base64.js?v=20261031-optimized-1350-lossless-v1"></script>
     <script src="plot_practice.js?v=20261031-optimized-1350-lossless-v1"></script>
     <script src="trails_maslovka_scenario.js?v=20261030-workbook-revision"></script>
-    <script src="villages_practice.js?v=20261029-workbook"></script>
-    <script src="villages_three_new_scenarios.js?v=20261029-4plots-checked-v2"></script>
+    <script src="villages_practice.js?v=20261101-offline-plans"></script>
+    <script src="villages_three_new_scenarios.js?v=20261101-offline-plans"></script>
     <script src="practice_scenario_overrides.js?v=20261030-workbook-revision"></script>
-    <script src="workbook_trails_villages.js?v=20261030-workbook-revision"></script>
+    <script src="workbook_trails_villages.js?v=20261101-offline-plans"></script>
     <script src="workbook_tariff_apartment_tires.js?v=20261031-final-pdf-sync"></script>
     <script src="workbook_stove_sheets_plot.js?v=20261031-final-pdf-sync"></script>
     <script src="task6.js"></script>
@@ -2949,7 +2949,14 @@ body.auth-locked > *:not(#passwordGate) {
                         const theme = state.theme;
                         const diagramHTML = scenario.imageHTML || extractFirstDiagramHTML(scenario.common || '');
                         const introHTML = makeOgePracticeIntro(theme.title, scenario, setNumber);
-                        const printIntro = `${ogePracticeOutputStyles()}<div class="oge-practice-common"><h3>Практический комплект ${setNumber}. ${theme.title}</h3><div>${stripDiagramsFromHTML(scenario.common || '')}</div></div>`;
+                        // Общий план входит в начало полного условия, а не повторяется
+                        // возле поля решения каждой из пяти задач. Печь — исключение:
+                        // её собственный рисунок нужен только в задании №5.
+                        const commonPlanForPrint = state.themeId === 'stove' ? '' : diagramHTML;
+                        const printIntro = `${ogePracticeOutputStyles()}<div class="oge-practice-common oge-print-scenario-intro${state.themeId === 'stove' ? ' oge-print-stove-intro' : ''}">
+                            <h3>Практический комплект ${setNumber}. ${theme.title}</h3>
+                            <div class="oge-print-scenario-body">${commonPlanForPrint ? `<div class="oge-print-scenario-plan">${commonPlanForPrint}</div>` : ''}${stripDiagramsFromHTML(scenario.common || '')}<div style="clear:both"></div></div>
+                        </div>`;
 
                         for (let taskNumber = 1; taskNumber <= 5; taskNumber++) {
                             const allTasks = scenario.tasks && Array.isArray(scenario.tasks[taskNumber]) ? scenario.tasks[taskNumber] : [];
@@ -3002,9 +3009,9 @@ body.auth-locked > *:not(#passwordGate) {
                                 displaySvg: '',
                                 // В печати дополнительные изображения у задания №5
                                 // допустимы только для печи. Общий план сюжета не дублируем.
-                                printSvg: useDraftDiagram
-                                    ? (chosen.printSvg || chosen.imageHTML || chosen.svg_code || diagramHTML)
-                                    : stoveTask5Diagram.replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
+                                // Общие планы 1–5 печатаются один раз в общем условии;
+                                // единственный индивидуальный чертёж — печь №5.
+                                printSvg: stoveTask5Diagram.replace(/<(img|svg)\b/i, '<$1 data-oge-own-diagram="1"'),
                                 draftSvg: useDraftDiagram ? (chosen.draftSvg || chosen.imageHTML || chosen.svg_code || diagramHTML) : '', 
                                 standaloneText,
                                 standaloneSvg: chosen.standaloneSvg || chosen.imageHTML || chosen.svg_code || diagramHTML,
@@ -4674,8 +4681,10 @@ body.auth-locked > *:not(#passwordGate) {
                     const practiceName = String(item.__ogeScenarioMeta?.themeTitle || '');
                     const isTropinkiPicture = isPracticePicture && /тропинк/i.test(practiceName);
                     const isStovePicture = isPracticePicture && /печ(ь|к)/i.test(practiceName);
-                    const enlargePracticePicture = isPracticePicture && !isTropinkiPicture;
-                    const moveConditionBesidePicture = enlargePracticePicture && !isStovePicture && Boolean(printSvg);
+                    // Схемы сюжетов теперь крупно расположены внутри общего условия.
+                    // Клетчатое поле задания остаётся свободным для записи решения.
+                    const enlargePracticePicture = isPracticePicture && isStovePicture && Number(item.examNumber) === 5;
+                    const moveConditionBesidePicture = false;
                     const printPictureClasses = (enlargePracticePicture ? ' oge-print-enlarged' : '')
                         + (moveConditionBesidePicture ? ' oge-print-cond-side' : '');
                     if (item.printBreakBefore) {
@@ -5991,6 +6000,44 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
                 background:#eef6ff !important;
                 color:var(--blue) !important;
             }
+
+            /* Пятёрки №1–5: крупный план внутри общего условия, с обтеканием текстом.
+               Печь не содержит общий чертёж: её рисунок остаётся в задаче №5. */
+            .print-page .oge-practice-common.oge-print-scenario-intro {
+                display:block !important;
+                overflow:visible !important;
+                padding:2mm 2.5mm 2mm !important;
+                margin:2mm 0 4mm !important;
+                page-break-inside:avoid !important;
+                break-inside:avoid !important;
+            }
+            .print-page .oge-print-scenario-body { font-size:12.5px !important; line-height:1.31 !important; }
+            .print-page .oge-print-scenario-body::after { content:"";display:block;clear:both; }
+            .print-page .oge-print-scenario-plan {
+                float:left !important;
+                display:block !important;
+                box-sizing:border-box !important;
+                width:81mm !important;
+                max-width:48% !important;
+                margin:1mm 4mm 2mm 0 !important;
+                padding:0 !important;
+                break-inside:avoid !important;
+                page-break-inside:avoid !important;
+            }
+            .print-page .oge-print-scenario-plan img,
+            .print-page .oge-print-scenario-plan svg,
+            .print-page .oge-print-scenario-plan picture {
+                width:100% !important;
+                max-width:100% !important;
+                height:auto !important;
+                max-height:82mm !important;
+                display:block !important;
+                object-fit:contain !important;
+                margin:0 !important;
+            }
+            .print-page .oge-print-scenario-body p { margin:0 0 2mm !important; }
+            .print-page .oge-print-scenario-body table { clear:both; width:100%; }
+            .print-page .oge-print-scenario-body > div:last-child { clear:both; }
             .task-print-block {
                 display:block;
                 page-break-inside:avoid !important;
@@ -6188,6 +6235,12 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
         }
 
         @media screen {
+            .print-page .oge-print-scenario-plan {float:left;width:48%;max-width:81mm;margin:4px 14px 9px 0;}
+            .print-page .oge-print-scenario-plan img,.print-page .oge-print-scenario-plan svg {display:block;width:100%!important;max-width:100%!important;height:auto!important;max-height:82mm!important;margin:0!important;}
+            .print-page .oge-print-scenario-body::after {content:"";display:block;clear:both;}
+            .print-page .oge-print-scenario-body p {margin:0 0 7px;}
+        }
+        @media screen {
             body {
                 background:#eef3f8;
                 font-family:"Times New Roman", serif;
@@ -6345,6 +6398,12 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task svg,.oge-exam-intro svg,.oge-exam-task img,.oge-exam-intro img{max-width:100%;height:auto;object-fit:contain;}
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%!important;max-height:var(--oge-intro-image-max,42mm)!important;width:auto!important;height:auto!important;margin:1mm auto!important;object-fit:contain;}
 .oge-exam-intro .practice-figure-card{margin:1mm 0!important;padding:0!important;}
+/* Общий план №1–5 в начале условия, с обтеканием текстом и без дублей. */
+.oge-exam-intro .oge-print-scenario-body::after{content:"";display:block;clear:both;}
+.oge-exam-intro .oge-print-scenario-plan{float:left!important;display:block!important;width:48%!important;max-width:65mm!important;margin:1mm 3mm 2mm 0!important;break-inside:avoid!important;}
+.oge-exam-intro .oge-print-scenario-plan img,.oge-exam-intro .oge-print-scenario-plan svg{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:var(--oge-intro-image-max,50mm)!important;margin:0!important;object-fit:contain!important;}
+.oge-exam-intro .oge-print-scenario-body table{clear:both;}
+
 .oge-exam-intro .oge-exam-diagram img,.oge-exam-intro .oge-exam-diagram svg{max-height:var(--oge-intro-image-max,42mm)!important;}
 .oge-exam-intro *{max-width:100%;}
 .oge-exam-statement .common-table{font-size:max(7.4pt,.78em);margin:1.6mm 0;}
@@ -6402,7 +6461,7 @@ function paginateCollections(){
    if(fixedPages){
      // Для всего варианта выбираем один максимальный размер шрифта, который помещается в 6 колонок.
      // Ни одна колонка и ни одно отдельное задание не уменьшаются независимо от остальных.
-     var maxImageHeights=[42,38,34,30,26];
+     var maxImageHeights=[50,46,42,38,34,30,26];
      for(var im=0;im<maxImageHeights.length&&!ranges;im++){
        start.style.setProperty('--oge-intro-image-max',maxImageHeights[im]+'mm');
        for(var quarterPoints=46;quarterPoints>=34;quarterPoints--){
