@@ -58,7 +58,7 @@
     <script src="task16.js?v=20261031-workbook-verified-svg"></script>
     <script src="task16_extra.js?v=20261018-4-resu-oge"></script>
     <!-- Задание 17. Четырёхугольники: основное и дополнительные -->
-    <script src="task17.js?v=20261031-workbook-verified-svg"></script>
+    <script src="task17.js?v=20261031-book-diagram-1719"></script>
     <script src="task17_extra.js?v=20261018-1"></script>
     <!-- Задание 18. Фигуры на клетчатой бумаге -->
     <script src="task18.js?v=20261025-1"></script>
@@ -3325,9 +3325,7 @@ body.auth-locked > *:not(#passwordGate) {
             }
 
             if (input.id === 'count-extra-task19' || input.id === 'count-extra-19') {
-                // Одна готовая тройка утверждений — одно задание ОГЭ №19.
-                // Три утверждения остаются внутри одного условия и имеют один ответ.
-                total += value;
+                total += value * 3;
             } else if (input.id === 'count-task19' || input.id === 'count-19') {
                 if ((window.database.task19?.prototypes || window.database[19]?.prototypes || []).some((_,idx)=>document.getElementById(getPrototypeCheckboxId('task19', idx, 'main'))?.checked || document.getElementById(getPrototypeCheckboxId('19', idx, 'main'))?.checked)) total += value;
             } else {
@@ -5760,31 +5758,29 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 `;
     }
     function openOgePrintDocument(html, filename) {
-        // Печатная вкладка blob: работала в одном контексте сайта с генератором.
-        // Тяжёлая верстка MathJax и подготовка печати могли блокировать его
-        // при возврате из окна печати, особенно в Edge и при больших подборках.
-        // Файл скачивается независимо: генератор не открывает новую вкладку,
-        // не ждёт окно печати и сохраняет доступность своих кнопок.
-        // HTML изначально готов к печати, с встроенными чертежами и скриптами.
+        // Preserve the same typography helper used by downloaded documents.
         if (!html.includes('__ogeNoSplitMath')) {
             const helper = '<script>' + OGE_MATH_NO_SPLIT_SCRIPT + '<\/script>';
             html = html.replace(/<\/head>/i, helper + '</head>');
         }
         const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        try {
-            link.click();
-        } finally {
-            link.remove();
-            // Не удалять blob URL до начала сохранения больших HTML-файлов.
-            // После загрузки он больше не нужен генератору.
-            setTimeout(() => URL.revokeObjectURL(url), 90000);
+        // Keep this synchronous with the user's click so browsers allow the tab.
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            downloadBlobSafely(blob, filename);
+            alert('Браузер заблокировал вкладку печати. После закрытия этого сообщения скачается файл для печати: откройте его и нажмите «Печать / сохранить PDF». Можно также разрешить всплывающие окна для генератора.');
+            return;
         }
+        const url = URL.createObjectURL(blob);
+        printWindow.opener = null;
+        printWindow.location.replace(url);
+        // Keep the URL alive for «Повторить подготовку», which reloads this tab.
+        const cleanup = setInterval(function(){
+            if (printWindow.closed) {
+                clearInterval(cleanup);
+                URL.revokeObjectURL(url);
+            }
+        }, 10000);
     }
     function ogePrintToolsHTML() {
         return `<style>
@@ -6998,7 +6994,7 @@ ${window.SCRIPT_END}
 
 </script>
 
-<script src="presentations.js?v=20261031-no-topic-cover-triple-count"></script>
+<script src="presentations.js?v=20261031-second-part-next"></script>
 
 <script>
 (function(){
