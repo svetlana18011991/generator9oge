@@ -5656,6 +5656,7 @@ body.auth-locked > *:not(#passwordGate) {
             ?window.ogeVariantBatch:[{printGroups:window.ogePrintableGroups||{}}];
         const printBrand='<span class="brand">Шкатулка математических интерактивов · <a href="https://shkatulka.sistema-math.ru/">shkatulka.sistema-math.ru</a></span>';
         const pages=[];
+        const completeVariants=[];
         batch.forEach((entry,i)=>{
             const groups=entry.printGroups||{};
             // Сохраняем точные номера задач из сохранённой подборки — при выборочной
@@ -5717,6 +5718,7 @@ body.auth-locked > *:not(#passwordGate) {
                     });
                 }
             }
+            completeVariants.push(complete && entry.mode !== 'manual');
             const headingLabel=(complete?'Вариант ':'Подборка ')+(i+1);
             const heading='<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>'+headingLabel+'</strong></header>';
             if(!tasks.length)return;
@@ -5743,7 +5745,19 @@ body.auth-locked > *:not(#passwordGate) {
                     if(complete) {
                         // В ПОЛНОМ варианте общее условие и крупный план — один
                         // неделимый блок; отдельные подборки не меняем.
-                        const intro='<div class="oge-exam-intro oge-exam-intro-locked">'+label+blocks.join('')+'</div>';
+                        // У самостоятельных планов листов/квартиры нет готового обтекания.
+                    // В ПОЛНОМ варианте с полями используем ширину обеих сторон
+                    // колонки: изображение слева, текст общего условия справа.
+                    // Данные, размеры и сам рисунок не меняются.
+                    const laidOutBlocks=blocks.map(function(block){
+                        if(!complete || !withSolutions)return block;
+                        if(/oge-print-scenario-plan/.test(block))return block; // уже обтекается
+                        if(!/<(?:svg|img|picture)\b/i.test(block) || /<table\b/i.test(block))return block;
+                        const withoutTags=block.replace(/<[^>]+>/g,'').trim();
+                        if(withoutTags.length>180)return block;
+                        return '<div class="oge-exam-intro-leading-figure">'+block+'</div>';
+                    });
+                    const intro='<div class="oge-exam-intro oge-exam-intro-locked">'+label+laidOutBlocks.join('')+'</div>';
                         units.push(unit(prefix+intro));
                         prefix='';
                     } else {
@@ -5763,6 +5777,38 @@ body.auth-locked > *:not(#passwordGate) {
                +heading+'<div class="oge-exam-columns">'+firstColumn+secondColumn+'</div>'
                +'<footer class="oge-exam-footer">'+printBrand+'<span class="oge-exam-page-counter">'+headingLabel+'</span></footer></article>');
         });
+        // Ключи печатаются последними листами после всех полных вариантов.
+        // В обычных подборках и вручную отмеченных 25 заданиях ключи по-прежнему
+        // доступны отдельной кнопкой и НЕ добавляются в печатный документ.
+        if(completeVariants.length === batch.length && completeVariants.every(Boolean)) {
+            const grouped=[];
+            const blockSize=4; // на одном альбомном листе до четырёх вариантов
+            for(let offset=0;offset<batch.length;offset+=blockSize) {
+                grouped.push(batch.slice(offset,offset+blockSize).map((entry,j)=>({
+                    index:offset+j+1,
+                    answers:new Map(ogeKeyTaskEntries(entry.snapshot).map(t=>[t.num,t.answer]))
+                })));
+            }
+            grouped.forEach(group=>{
+                const from=group[0].index;
+                const to=group[group.length-1].index;
+                const variantCaption=from===to?'Вариант №'+from:'Варианты №'+from+'–'+to;
+                const colHeads=group.map(v=>'<th scope="col">Вариант №'+v.index+'</th>').join('');
+                const rows=Array.from({length:25},(_,j)=>{
+                    const num=j+1;
+                    const cells=group.map(v=>'<td>'+ogeKeyEscape(v.answers.get(num)??'—')+'</td>').join('');
+                    return '<tr><th scope="row">'+num+'</th>'+cells+'</tr>';
+                }).join('');
+                pages.push('<article class="oge-exam-page oge-exam-keys-page" aria-label="Ключи ответов">'
+                    +'<header class="oge-exam-header"><span>Математика ОГЭ</span><strong>Ключи ответов</strong></header>'
+                    +'<section class="oge-keys-content"><h1>Ключи к полным вариантам ОГЭ</h1>'
+                    +'<p class="oge-keys-subtitle">'+variantCaption+' · задания 1–25</p>'
+                    +'<table class="oge-keys-table"><thead><tr><th scope="col">№ задания</th>'+colHeads+'</tr></thead>'
+                    +'<tbody>'+rows+'</tbody></table>'
+                    +'<p class="oge-keys-note">Задания 20–25: указаны итоговые ответы, если они есть в базе. Развёрнутые решения проверяет учитель.</p></section>'
+                    +'<footer class="oge-exam-footer">'+printBrand+'<span>Ключи ответов</span></footer></article>');
+            });
+        }
         return pages.join('');
     }
     // Ручная подборка — обычный текстовый документ A4 (одна колонка).
@@ -6503,6 +6549,20 @@ ${window.SCRIPT_END}
 html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New Roman",Times,serif;font-weight:400;}
 .oge-exam-page{width:277mm;height:190mm;max-height:190mm;margin:0;display:flex;flex-direction:column;overflow:hidden;break-after:page;page-break-after:always;}
 .oge-exam-page:last-child{page-break-after:auto;break-after:auto;}
+.oge-exam-page:last-of-type{page-break-after:auto;break-after:auto;}
+/* Финальные ключи только для полноценных вариантов 1–25. */
+.oge-exam-keys-page{background:white;color:#111;}
+.oge-keys-content{flex:1 1 auto;min-height:0;padding:4mm 9mm 0;overflow:hidden;}
+.oge-keys-content h1{text-align:center;font:bold 14pt/1.15 "Times New Roman",Times,serif;margin:0 0 1mm;}
+.oge-keys-subtitle{font:10pt/1.15 "Times New Roman",Times,serif;text-align:center;margin:0 0 2mm;}
+.oge-keys-table{width:100%;border-collapse:collapse;table-layout:fixed;font:9.5pt/1.12 "Times New Roman",Times,serif;color:#111;}
+.oge-keys-table th,.oge-keys-table td{border:.45pt solid #888;padding:.65mm 2mm;vertical-align:middle;overflow-wrap:anywhere;}
+.oge-keys-table thead th{font-weight:700;text-align:center;background:#f4f6f8;}
+.oge-keys-table tbody th{width:22mm;text-align:center;font-weight:700;background:#fafafa;}
+.oge-keys-table tbody td{text-align:center;}
+.oge-keys-table tr{break-inside:avoid;page-break-inside:avoid;}
+.oge-keys-note{font:8pt/1.2 "Times New Roman",Times,serif;color:#444;margin:2mm 0 0;}
+@media print{.oge-keys-table thead th,.oge-keys-table tbody th{background:#fff;}}
 .oge-exam-flow-unit{display:flow-root;break-inside:avoid;page-break-inside:avoid;}
 .oge-exam-flow-unit .oge-exam-task{margin-bottom:2mm;}
 
@@ -6571,6 +6631,11 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-intro img,.oge-exam-intro svg{display:block;max-width:100%!important;max-height:var(--oge-intro-image-max,42mm)!important;width:auto!important;height:auto!important;margin:1mm auto!important;object-fit:contain;}
 .oge-exam-intro .practice-figure-card{margin:1mm 0!important;padding:0!important;}
 .oge-exam-full-variant .oge-exam-intro-locked{break-inside:avoid;page-break-inside:avoid;}
+/* Только полная работа с полями: единый план и текст занимают общую ширину
+   колонки без повторов рисунка, что уменьшает пустоту под общим условием. */
+.oge-print-with-solutions .oge-exam-full-variant .oge-exam-intro-leading-figure{float:left;display:block!important;width:45%;max-width:61mm;margin:1mm 3mm 2mm 0!important;break-inside:avoid;page-break-inside:avoid;}
+.oge-print-with-solutions .oge-exam-full-variant .oge-exam-intro-leading-figure :is(img,svg){display:block;max-height:68mm!important;max-width:100%!important;width:100%;height:auto!important;object-fit:contain;}
+.oge-print-with-solutions .oge-exam-full-variant .oge-exam-intro-locked::after{content:"";display:block;clear:both;}
 /* Общий план №1–5 в начале условия, с обтеканием текстом и без дублей. */
 .oge-exam-intro .oge-print-scenario-body::after{content:"";display:block;clear:both;}
 .oge-exam-intro .oge-print-scenario-plan{float:left!important;display:block!important;width:48%!important;max-width:65mm!important;margin:1mm 3mm 2mm 0!important;break-inside:avoid!important;}
@@ -6677,6 +6742,38 @@ function paginateCollections(){
    function columns(){return Array.from(sheet.querySelectorAll('.oge-exam-column'))}
    function content(){return columns()[columnIndex].querySelector('.oge-exam-column-content')}
    function fits(){return content().scrollHeight<=columns()[columnIndex].clientHeight-2}
+   // Только полноценный вариант С ПОЛЯМИ. Когда следующему заданию
+   // не хватает нескольких миллиметров, компактно уменьшаем пустые
+   // клетчатые участки первой части, но не текст, формулы или чертежи.
+   // Возврат отмены нужен: неудачное пробное уменьшение не должно
+   // менять предыдущую колонку.
+   function tryFitByTighteningWritingGrids(){
+     if(!fullWithFields)return false;
+     var box=content(),col=columns()[columnIndex];
+     var deficit=box.scrollHeight-col.clientHeight+3;
+     if(deficit<=0)return true;
+     var grids=Array.from(box.querySelectorAll('.oge-exam-task .oge-exam-write-grid'))
+       .filter(function(grid){
+         var task=grid.closest('.oge-exam-task[data-exam-task]');
+         var number=task?Number(task.getAttribute('data-exam-task')):0;
+         return number>=1&&number<=19;
+       }).reverse();
+     var changes=[];
+     grids.forEach(function(grid){
+       if(deficit<=0)return;
+       var before=grid.getBoundingClientRect().height;
+       var minimum=37; // не меньше примерно двух рядов клетки (10 мм)
+       var reducible=Math.max(0,before-minimum);
+       if(reducible<2)return;
+       var amount=Math.min(reducible,deficit+3);
+       changes.push([grid,grid.style.height]);
+       grid.style.height=(before-amount)+'px';
+       deficit-=amount;
+     });
+     if(fits())return true;
+     changes.forEach(function(change){change[0].style.height=change[1];});
+     return false;
+   }
    function nextPage(){
      var next=template.cloneNode(true);sheet.after(next);sheets.push(next);sheet=next;columnIndex=0;
    }
@@ -6697,10 +6794,10 @@ function paginateCollections(){
        if(secondPartTask && content().children.length)advance();
        // Заполняем каждую колонку сверху вниз, без искусственных пустот.
        content().appendChild(unit);
-       if(fits())return;
+       if(fits() || tryFitByTighteningWritingGrids())return;
        if(content().children.length>1){
          unit.remove();advance();content().appendChild(unit);
-         if(fits())return;
+         if(fits() || tryFitByTighteningWritingGrids())return;
        }
        // Слишком высокий блок в выборочной подборке получает целый лист по ширине.
        unit.remove();
@@ -6767,7 +6864,10 @@ function paginateCollections(){
    var label=start.querySelector('.oge-exam-header strong').textContent;
    sheets.forEach(function(pg,i){
      pg.setAttribute('data-exam-page',start.getAttribute('data-batch-variant')+'-'+(i+1));
-     pg.querySelector('.oge-exam-page-counter').textContent=label+' · страница '+(i+1)+' из '+sheets.length;
+     pg.querySelector('.oge-exam-page-counter').textContent=
+       start.classList.contains('oge-exam-full-variant')
+         ? 'Страница '+(i+1)
+         : label+' · страница '+(i+1)+' из '+sheets.length;
      pg.querySelectorAll('.oge-exam-column').forEach(function(col){
        const box=col.querySelector('.oge-exam-column-content');
        if(col.clientHeight && box.getBoundingClientRect().height>col.getBoundingClientRect().height-1)
