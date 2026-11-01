@@ -6791,6 +6791,27 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 
 .oge-exam-statement mjx-container[display="true"]{margin:1mm 0!important;}
 .oge-exam-statement .task7-choices,.oge-exam-statement .choices-row{display:flex;gap:2mm;flex-wrap:wrap;}
+/* Только печатные полные варианты: компактная координатная прямая №7.
+   Исходное изображение и его пропорции не меняем — запрещаем растягивать PNG
+   на всю ширину колонки. Никаких изменений №6, №8 и другим заданиям. */
+.oge-print-exam .oge-exam-task[data-exam-task="7"] .oge-exam-diagram{
+    width:min(100%,88mm)!important;
+    max-width:88mm!important;
+    margin:1mm auto 1.5mm!important;
+    padding:0!important;
+    overflow:visible!important;
+    text-align:center;
+}
+.oge-print-exam .oge-exam-task[data-exam-task="7"] .oge-exam-diagram :is(img,svg){
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:19mm!important;
+    object-fit:contain!important;
+    margin:0 auto!important;
+    image-rendering:auto;
+}
 /* Стикеры печатаются компактно внутри задания, не перекрывая условие. */
 .oge-exam-sticker{float:right;display:block;width:17mm;max-width:17mm;margin:0 0 1.5mm 2mm;text-align:center;break-inside:avoid;page-break-inside:avoid;}
 .oge-exam-sticker img{display:block!important;max-width:16mm!important;max-height:15mm!important;width:auto!important;height:auto!important;margin:0 auto!important;object-fit:contain;filter:none!important;}
