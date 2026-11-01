@@ -6135,6 +6135,14 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
             if (!width || !height) return tag;
             return tag.replace(/<svg\b/i, '<svg viewBox="0 0 ' + width[1] + ' ' + height[1] + '"');
         });
+        // Только выборочная печать «Тарифов»: сокращаем громоздкие рамки
+        // и не меняем настройки полноценных вариантов 1–25.
+        const isTariffSelection=/<h3\b[^>]*>\s*Практический комплект\s*\d+[^<]{0,120}тариф/i.test(original);
+        if(isTariffSelection){
+            // В старых прототипах перед первой задачей мог быть принудительный
+            // разрыв страницы. Для выборочной пятёрки он не нужен.
+            original=original.replace(/<div\s+style=["']page-break-before:always;\s*break-before:page;\s*height:0;["']>\s*<\/div>/gi,'');
+        }
         const teacherName=String(document.getElementById('teacher-name')?.value || '').trim();
         const signatureEnabled=Boolean(document.getElementById('toggle-signature')?.checked);
         const gender=document.getElementById('teacher-gender')?.value;
@@ -6524,8 +6532,80 @@ html,body{margin:0!important;padding:0!important;background:#fff!important;color
 .oge-print-without-solutions .task20-part2-item [style*="height:66px"],.oge-print-without-solutions .task20-part2-item [style*="border-bottom:1px dotted"]{display:none!important;}
 .oge-print-without-solutions .oge-image-grid-layout{align-items:center!important;}
 .oge-print-without-solutions .oge-image-grid-solution{min-width:0!important;}
+
+/* Компактная выборочная печать тарифных комплектов 1–5.
+   Полные варианты и другие подборки не меняем. */
+@media print {
+    body.oge-tariff-selection .print-header {
+        margin-bottom:2.5mm!important;
+        padding-bottom:2mm!important;
+    }
+    body.oge-tariff-selection .print-header::before {
+        height:2mm!important;
+        margin-bottom:2.2mm!important;
+    }
+    body.oge-tariff-selection h3 {
+        margin:2.5mm 0 1.5mm!important;
+        padding:1.4mm 2.5mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-practice-common.oge-print-scenario-intro {
+        padding:0!important;
+        margin:1mm 0 2mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-print-scenario-body {
+        font-size:12.5px!important;
+        line-height:1.24!important;
+    }
+    body.oge-tariff-selection .print-page .oge-print-scenario-body p {
+        margin-bottom:1.2mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-print-scenario-body table {
+        margin:1.2mm 0!important;
+    }
+    body.oge-tariff-selection .print-page .task-print-block {
+        margin:0 0 2.3mm!important;
+        padding:1.6mm 2.6mm 1.7mm 2.8mm!important;
+        border-left-width:2.2px!important;
+        border-radius:5px!important;
+        box-shadow:none!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .oge-print-question {
+        margin-bottom:1.6mm!important;
+        font-size:14px!important;
+        line-height:1.18!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .oge-image-grid-layout {
+        gap:2mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .oge-image-grid-figure {
+        flex-basis:55mm!important;
+        width:55mm!important;
+        max-width:55mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .oge-image-grid-figure img,
+    body.oge-tariff-selection .print-page .oge-image-grid-print .oge-image-grid-figure svg {
+        max-height:47mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-solution .task-print-answer {
+        margin-top:1mm!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .common-table {
+        margin:1mm 0!important;
+        line-height:1.15!important;
+    }
+    body.oge-tariff-selection .print-page .oge-image-grid-print .common-table td,
+    body.oge-tariff-selection .print-page .oge-image-grid-print .common-table th {
+        padding:.65mm .8mm!important;
+    }
+    /* При выборе режима с полями оставляем реальную клетку, но делаем её
+       немного ниже именно у «Тарифов», чтобы больше задач поместилось на лист. */
+    body.oge-tariff-selection.oge-print-with-solutions .oge-image-grid-paper {
+        height:19mm!important;
+        min-height:19mm!important;
+    }
+}
 </style></head>
-<body class="${withSolutions ? 'oge-print-with-solutions' : 'oge-print-without-solutions'}">${ogePrintToolsHTML()}
+<body class="${withSolutions ? 'oge-print-with-solutions' : 'oge-print-without-solutions'}${isTariffSelection ? ' oge-tariff-selection' : ''}">${ogePrintToolsHTML()}
 <main class="print-page"><header class="print-header">
 <h1 class="print-title">Подборка заданий</h1>
 <div class="print-subtitle">ОГЭ · математика · тренировочный набор</div>
