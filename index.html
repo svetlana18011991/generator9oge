@@ -6767,11 +6767,29 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task[data-exam-task="4"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="5"] .oge-exam-diagram :is(img,svg){width:100%;max-height:28mm;object-fit:contain;}
 .oge-exam-task:has(.oge-exam-diagram)::after{content:"";display:block;clear:both;}
-.oge-exam-statement:has(.oge-exam-local-diagram)::after{content:"";display:block;clear:both;}
-.oge-exam-local-diagram{float:right!important;width:47mm!important;max-width:47mm!important;margin:0 0 1.4mm 3mm!important;overflow:visible!important;}
-.oge-exam-local-diagram :is(img,svg){display:block;width:100%!important;height:auto!important;max-height:46mm!important;object-fit:contain!important;}
-.oge-exam-task[data-exam-task="5"] .oge-exam-local-diagram{width:49mm!important;max-width:49mm!important;margin:0 0 1.6mm 3.2mm!important;}
-.oge-exam-task[data-exam-task="5"] .oge-exam-local-diagram :is(img,svg){max-height:48mm!important;}
+/* ТОЛЬКО полный вариант 1–25: собственный рисунок печи у №5
+   стоит слева в начале условия; текст обтекает его справа и ниже.
+   Не влияет на подборки, другие рисунки или интерактивный режим. */
+.oge-exam-full-variant .oge-exam-task[data-exam-task="5"] .oge-exam-statement:has(.oge-exam-local-diagram)::after{content:"";display:block;clear:both;}
+.oge-exam-full-variant .oge-exam-task[data-exam-task="5"] .oge-exam-statement > .oge-exam-local-diagram{
+    float:left!important;
+    display:block!important;
+    width:64mm!important;
+    max-width:64mm!important;
+    margin:1mm 3.5mm 1.5mm 0!important;
+    overflow:visible!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+}
+.oge-exam-full-variant .oge-exam-task[data-exam-task="5"] .oge-exam-local-diagram :is(img,svg){
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:50mm!important;
+    object-fit:contain!important;
+    margin:0!important;
+}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
