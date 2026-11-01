@@ -5662,10 +5662,16 @@ body.auth-locked > *:not(#passwordGate) {
             body += '<table class="oge-match11-print" aria-label="Таблица ответа для задания 11"><thead><tr><th>А</th><th>Б</th><th>В</th></tr></thead><tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table>';
         }
         if(!body && !artwork)return '';
-        const graph=artwork?'<div class="oge-exam-diagram'+(/data-oge-own-diagram=["']1["']/.test(artwork)?' oge-exam-local-diagram':'')+'">'+artwork+'</div>':'';
+        const isLocalDiagram = /data-oge-own-diagram=["']1["']/.test(artwork);
+        const graph=artwork?'<div class="oge-exam-diagram'+(isLocalDiagram?' oge-exam-local-diagram':'')+'">'+artwork+'</div>':'';
         const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
         const writingArea='<div class="oge-exam-write-grid" aria-label="Поле для решения"></div>';
         const answerLine='<div class="oge-exam-answer-line">Ответ: ________________________</div>';
+        if (isLocalDiagram) {
+            return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
+               +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
+               +stickerHtml+graph+body+'</div>'+writingArea+answerLine+'</section>';
+        }
         return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
            +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
            +stickerHtml+body+'</div>'+graph+writingArea+answerLine+'</section>';
@@ -6761,6 +6767,11 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
 .oge-exam-task[data-exam-task="4"] .oge-exam-diagram :is(img,svg),
 .oge-exam-task[data-exam-task="5"] .oge-exam-diagram :is(img,svg){width:100%;max-height:28mm;object-fit:contain;}
 .oge-exam-task:has(.oge-exam-diagram)::after{content:"";display:block;clear:both;}
+.oge-exam-statement:has(.oge-exam-local-diagram)::after{content:"";display:block;clear:both;}
+.oge-exam-local-diagram{float:right!important;width:47mm!important;max-width:47mm!important;margin:0 0 1.4mm 3mm!important;overflow:visible!important;}
+.oge-exam-local-diagram :is(img,svg){display:block;width:100%!important;height:auto!important;max-height:46mm!important;object-fit:contain!important;}
+.oge-exam-task[data-exam-task="5"] .oge-exam-local-diagram{width:49mm!important;max-width:49mm!important;margin:0 0 1.6mm 3.2mm!important;}
+.oge-exam-task[data-exam-task="5"] .oge-exam-local-diagram :is(img,svg){max-height:48mm!important;}
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
 .oge-exam-geometry .oge-exam-diagram{margin:0;}
