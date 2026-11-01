@@ -1105,8 +1105,49 @@
     padding:24px;
     box-sizing:border-box;
 }
-#textInstructionModalToggle:checked ~ .text-instruction-css-modal{
+#textInstructionModalToggle:checked ~ .text-instruction-css-modal:not(.video-instruction-css-modal){
     display:flex;
+}
+#videoInstructionModalToggle{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+}
+#videoInstructionModalToggle:checked ~ .video-instruction-css-modal{
+    display:flex;
+}
+.video-instruction-modal-box{
+    width:min(1000px,96vw);
+}
+.video-instruction-modal-content{
+    padding:18px 20px 22px;
+    overflow:auto;
+    max-height:calc(88vh - 72px);
+}
+.video-instruction-player{
+    display:block;
+    width:100%;
+    height:auto;
+    max-height:calc(88vh - 140px);
+    aspect-ratio:1280 / 684;
+    background:#10151c;
+    border-radius:10px;
+    outline:1px solid #dde3eb;
+    object-fit:contain;
+}
+.video-instruction-modal-note{
+    color:#4c5b69;
+    font:14px/1.5 'Segoe UI',Tahoma,sans-serif;
+    margin:10px 0 0;
+}
+.video-instruction-modal-note a{color:#0f568a;}
+@media(max-width:760px){
+    .video-instruction-modal-content{padding:10px;}
+    .video-instruction-player{max-height:calc(88vh - 120px);}
+}
+@media print{
+    .video-instruction-css-modal{display:none!important;}
+    .instruction-actions-wrap{display:none!important;}
 }
 .text-instruction-backdrop{
     position:absolute;
@@ -1525,10 +1566,12 @@ body.auth-locked > *:not(#passwordGate) {
 
 
 <input type="checkbox" id="textInstructionModalToggle">
+<input type="checkbox" id="videoInstructionModalToggle">
 
 <div class="instruction-actions-wrap">
     <div class="instruction-actions-row">
         <label for="textInstructionModalToggle" class="instruction-small-btn">📘 Текстовая инструкция</label>
+        <label for="videoInstructionModalToggle" class="instruction-small-btn" role="button" tabindex="0">🎬 Видеоинструкция</label>
     </div>
 </div>
 
@@ -1590,6 +1633,66 @@ body.auth-locked > *:not(#passwordGate) {
         </div>
     </div>
 </div>
+
+
+<!-- Видео загружается ТОЛЬКО при открытии видеоинструкции. -->
+<div class="text-instruction-css-modal video-instruction-css-modal" role="dialog" aria-modal="true" aria-label="Видеоинструкция">
+    <label for="videoInstructionModalToggle" class="text-instruction-backdrop" aria-label="Закрыть видеоинструкцию"></label>
+    <div class="text-instruction-modal-box video-instruction-modal-box">
+        <div class="text-instruction-modal-head">
+            <h2>🎬 Видеоинструкция</h2>
+            <label for="videoInstructionModalToggle" class="text-instruction-close" aria-label="Закрыть">×</label>
+        </div>
+        <div class="video-instruction-modal-content">
+            <video id="ogeVideoInstructionPlayer" class="video-instruction-player" controls preload="none" playsinline aria-label="Видеоинструкция по работе с генератором"></video>
+            <p class="video-instruction-modal-note">Включите воспроизведение кнопкой ▶. Видео не скачивается при открытии главной страницы. Если видео не открывается, <a href="oge_video_instruction.mp4" target="_blank" rel="noopener noreferrer">откройте его в отдельной вкладке</a>.</p>
+        </div>
+    </div>
+</div>
+<script id="oge-video-instruction-loader">
+(function(){
+    'use strict';
+    var textToggle = document.getElementById('textInstructionModalToggle');
+    var videoToggle = document.getElementById('videoInstructionModalToggle');
+    var video = document.getElementById('ogeVideoInstructionPlayer');
+    if (!textToggle || !videoToggle || !video) return;
+    var videoPath = 'oge_video_instruction.mp4';
+    function closeVideo(){
+        try { video.pause(); } catch(e) { /* Browser may not have started playback yet. */ }
+    }
+    videoToggle.addEventListener('change', function(){
+        if (videoToggle.checked) {
+            textToggle.checked = false;
+            if (!video.hasAttribute('src')) {
+                video.setAttribute('src', videoPath);
+                video.load();
+            }
+        } else {
+            closeVideo();
+        }
+    });
+    textToggle.addEventListener('change', function(){
+        if (textToggle.checked && videoToggle.checked) {
+            videoToggle.checked = false;
+            closeVideo();
+        }
+    });
+    var openLabel = document.querySelector('label[for="videoInstructionModalToggle"].instruction-small-btn');
+    if (openLabel) openLabel.addEventListener('keydown', function(event){
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openLabel.click();
+        }
+    });
+    document.addEventListener('keydown', function(event){
+        if (event.key === 'Escape' && videoToggle.checked) {
+            videoToggle.checked = false;
+            closeVideo();
+            if (openLabel) openLabel.focus();
+        }
+    });
+})();
+</script>
 
 
 
@@ -7059,25 +7162,37 @@ function paginateCollections(){
        sheets.forEach(function(pg){pg.style.setProperty('--oge-print-zoom',String(z));});
      }
    }
-   // Для ПОЛНОГО варианта с полями: задача второй части занимает свою колонку.
-   // Удлиняем сетку на оставшееся место ДО нижнего поля, не двигая условие
-   // и сохраняя строку «Ответ» внутри печатной области.
+   // Полный вариант с полями: пустая нижняя часть колонки используется как
+   // дополнительная клетка для решения ПОСЛЕДНЕГО задания этой колонки.
+   // Сохраняем последовательность номеров и целостность условий/чертежей.
+   // Это НЕ изменяет количество листов искусственно и не влияет на подборки.
    if(fullWithFields){
      sheets.forEach(function(pg){
        pg.querySelectorAll('.oge-exam-column').forEach(function(col){
-         if(!col.clientHeight) return;
+         if(!col.clientHeight)return;
          var box=col.querySelector('.oge-exam-column-content');
          var unitsHere=Array.from(box.children);
-         if(unitsHere.length!==1)return;
-         var exercise=unitsHere[0].querySelector('.oge-exam-task[data-exam-task]');
-         if(!exercise)return;
+         if(!unitsHere.length)return;
+         var lastUnit=unitsHere[unitsHere.length-1];
+         var tasks=Array.from(lastUnit.querySelectorAll('.oge-exam-task[data-exam-task]'));
+         if(!tasks.length)return;
+         var exercise=tasks[tasks.length-1];
          var number=Number(exercise.getAttribute('data-exam-task'));
-         if(number<20 || number>25)return;
+         if(number<1||number>25)return;
+         // Во второй части обычно одна задача на всю колонку: старое правило
+         // сохраняется. В первой части не заполняем микропустоты клеткой.
+         if(number>=20&&number<=25&&unitsHere.length!==1)return;
          var grid=exercise.querySelector('.oge-exam-write-grid');
-         if(!grid)return;
-         var remaining=col.getBoundingClientRect().bottom-box.getBoundingClientRect().bottom-8;
-         if(remaining>2){
-           grid.style.height=(grid.getBoundingClientRect().height+remaining)+'px';
+         if(!grid||getComputedStyle(grid).display==='none')return;
+         var remaining=col.getBoundingClientRect().bottom-box.getBoundingClientRect().bottom-10;
+         var threshold=(number<=19?25:2);
+         if(remaining<threshold)return;
+         var before=grid.getBoundingClientRect().height;
+         // Не выводим строку «Ответ» за нижний колонтитул.
+         grid.style.height=(before+remaining)+'px';
+         if(box.getBoundingClientRect().bottom>col.getBoundingClientRect().bottom-2){
+           // Разница размеров округления/плавающих рисунков: не рискуем обрезкой.
+           grid.style.height=before+'px';
          }
        });
      });
