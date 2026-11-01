@@ -7,9 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script>window.database = {};</script>
-    <script src="tower_template.js?v=20261031-three-fixes"></script>
-    <script src="battle_template.js?v=20261031-three-fixes"></script>
-    <script src="motivation_template.js?v=20261031-three-fixes"></script>
     <!-- Задания 1–5: каталоги и 24 комплекта по рабочей тетради Быковой С. (2026). -->
     <script src="oge_practice.js?v=20261031-optimized-1350-lossless-v1"></script>
     <script src="tariff_plot_base64.js?v=20261031-optimized-1350-lossless-v1"></script>
@@ -71,11 +68,7 @@
     <script src="task23.js?v=20261027-typed-text-v2"></script>
     <script src="task24.js?v=20261027-typed-text-v2"></script>
     <script src="task25.js?v=20261027-typed-text-v2"></script>
-
-    <script src="assets_base64_1.js"></script>
-    <script src="assets_base64_2.js"></script>
-    <script src="assets_base64_3.js"></script>
-    <script src="assets_base64_4.js"></script>
+    <script src="oge_season_assets.js?v=20261101-lean-assets"></script>
     <script src="offline_assets_bundle.js"></script>
 
     <style>
@@ -7171,6 +7164,28 @@ ${window.SCRIPT_END}
             `${full ? 'Ключи_варианты' : 'Ключи_подборки'}_${variants.length}.html`);
     }
 
+    // Дополнительные шаблоны игр грузятся только при запуске самой игры.
+    // Банки заданий, настройки и глазики продолжают загружаться прежним способом.
+    const ogeOptionalGameLoads = new Map();
+    function ogeLoadGameTemplate(url, isReady) {
+        if (isReady()) return Promise.resolve();
+        if (ogeOptionalGameLoads.has(url)) return ogeOptionalGameLoads.get(url);
+        const job = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.async = true;
+            script.onload = () => isReady() ? resolve() : reject(new Error('Шаблон игры не обнаружен в загруженном файле'));
+            script.onerror = () => reject(new Error('Не удалось загрузить ' + url.split('?')[0]));
+            document.head.appendChild(script);
+        });
+        ogeOptionalGameLoads.set(url, job);
+        job.catch(() => ogeOptionalGameLoads.delete(url));
+        return job;
+    }
+    function ogeReportGameLoadingError(error) {
+        alert('Не удалось загрузить шаблон игры. Проверьте соединение и попробуйте снова.\n' + (error?.message || ''));
+    }
+
     function getOgeGameEligibleTasks() {
         return (window.currentGeneratedTasks || []).filter(t => !t.isSecondPart && Number(t.part || 1) !== 2 && Number(t.taskNumber || 0) < 20);
     }
@@ -7222,8 +7237,14 @@ ${window.SCRIPT_END}
                 return;
             }
             const selectedTowerTasks=eligibleTowerTasks;
-            if (typeof window.TOWER_TEMPLATE !== 'string' || !window.TOWER_TEMPLATE.includes('/*__CONFIG_DATA__*/')) {
-                alert("Не удалось загрузить шаблон игры «Башня знаний». Обновите страницу через Ctrl+F5 и проверьте файл tower_template.js.");
+            if (typeof window.TOWER_TEMPLATE !== 'string') {
+                ogeLoadGameTemplate('tower_template.js?v=20261031-three-fixes',
+                    () => typeof window.TOWER_TEMPLATE === 'string')
+                    .then(() => generateTowerGame()).catch(ogeReportGameLoadingError);
+                return;
+            }
+            if (!window.TOWER_TEMPLATE.includes('/*__CONFIG_DATA__*/')) {
+                alert('В файле tower_template.js отсутствует блок конфигурации.');
                 return;
             }
 
@@ -7533,7 +7554,12 @@ ${window.SCRIPT_END}
 
     window.generateBattleGame = function generateBattleGame() {
         if (getOgeGameEligibleTasks().length === 0) { alert("Баттл создаётся только по заданиям первой части (№1–19)."); return; }
-        if (typeof BATTLE_TEMPLATE === 'undefined') { alert("Не найден battle_template.js. Подключите файл рядом с index.html."); return; }
+        if (typeof BATTLE_TEMPLATE === 'undefined') {
+            ogeLoadGameTemplate('battle_template.js?v=20261031-three-fixes',
+                () => typeof BATTLE_TEMPLATE === 'string')
+                .then(() => window.generateBattleGame()).catch(ogeReportGameLoadingError);
+            return;
+        }
 
         let gameQuestions = getOgeGameEligibleTasks().map(t => {
             let cleanText = String(t.text || '');
