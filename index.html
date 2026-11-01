@@ -2935,18 +2935,24 @@ body.auth-locked > *:not(#passwordGate) {
                         return state;
                     }
 
-                    // В полном варианте один сюжет = пять связанных заданий.
-                    // Сначала проходим ВСЕ доступные сюжеты без повторения;
-                    // только затем используем новый перемешанный круг.
-                    const fullScenarioStates = autoFull && fullPrototypeDecks instanceof Map
-                        ? availableThemeIds.flatMap(themeId => selectedScenariosByTheme.get(themeId) || []) : [];
+                    // ПОЛНЫЕ ВАРИАНТЫ: два независимых уровня чередования.
+                    // 1) Сначала каждый доступный ТЕМАТИЧЕСКИЙ сюжет 1–5 выбирается
+                    //    ровно по разу (например, «Тарифы» не повторятся до обхода
+                    //    «Печек», «Листов», «Шин» и остальных доступных тем).
+                    // 2) Лишь когда тема выпадет снова, выбираем её следующий
+                    //    внутренний сценарий, тоже без повторения внутри своего круга.
+                    // В ручных подборках остаётся прежний механизм выбора.
                     for (let setIndex = 0; setIndex < requestedSets; setIndex++) {
                         let themeId, state;
-                        if (fullScenarioStates.length) {
-                            const choice = ogeFullNextCycleChoice(fullPrototypeDecks, 'full-scenarios-1-5',
-                                fullScenarioStates.map(s => String(s.themeId) + ':' + s.scenarioIndex));
-                            state = fullScenarioStates.find(s => String(s.themeId) + ':' + s.scenarioIndex === choice);
-                            themeId = state.themeId;
+                        if (autoFull && fullPrototypeDecks instanceof Map) {
+                            themeId = ogeFullNextCycleChoice(fullPrototypeDecks,
+                                'full-scenario-themes-1-5', availableThemeIds);
+                            const availableScenarios = selectedScenariosByTheme.get(themeId) || [];
+                            const sceneKey = ogeFullNextCycleChoice(fullPrototypeDecks,
+                                'full-scenario-variants-1-5:' + themeId,
+                                availableScenarios.map(s => String(s.scenarioIndex)));
+                            state = availableScenarios.find(s => String(s.scenarioIndex) === sceneKey);
+                            if (!state) throw new Error('Не удалось выбрать сюжет темы ' + themeId);
                         } else {
                             themeId = nextThemeId();
                             state = nextScenarioForTheme(themeId);
@@ -5663,10 +5669,24 @@ body.auth-locked > *:not(#passwordGate) {
         }
         if(!body && !artwork)return '';
         const isLocalDiagram = /data-oge-own-diagram=["']1["']/.test(artwork);
+        const isStoveFigure = num === 5 && artwork &&
+            (isLocalDiagram || /alt=["'][^"']*(?:печь|печи|кожух|топк)/i.test(artwork));
         const graph=artwork?'<div class="oge-exam-diagram'+(isLocalDiagram?' oge-exam-local-diagram':'')+'">'+artwork+'</div>':'';
         const special=[15,16,17,18].includes(num)?' oge-exam-geometry':'';
         const writingArea='<div class="oge-exam-write-grid" aria-label="Поле для решения"></div>';
         const answerLine='<div class="oge-exam-answer-line">Ответ: ________________________</div>';
+        if (isStoveFigure) {
+            // Чертёж печки принадлежит только заданию 5. Выводим его прямо
+            // ВНУТРИ условия, СЛЕВА, с настоящим текстовым обтеканием.
+            // Inline-важные размеры не позволяют стилям других диаграмм
+            // уменьшить рисунок до миниатюры или отправить вправо.
+            const stoveFigure='<div class="oge-exam-stove5-figure" style="float:left!important;display:block!important;width:64mm!important;max-width:64mm!important;margin:1mm 3.3mm 1.5mm 0!important;clear:none!important;">'
+                +artwork+'</div>';
+            return '<section class="oge-exam-task oge-exam-stove5'+special+'" data-exam-task="'+num+'">'
+               +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong>'
+               +'<div class="oge-exam-stove5-flow">'+stoveFigure+body+'</div></div>'
+               +writingArea+answerLine+'</section>';
+        }
         if (isLocalDiagram) {
             return '<section class="oge-exam-task'+special+'" data-exam-task="'+num+'">'
                +'<div class="oge-exam-statement"><strong class="oge-exam-task-name">Задание '+num+'.</strong> '
@@ -6789,6 +6809,19 @@ html,body{margin:0;padding:0;color:#111;background:#fff;font-family:"Times New R
     max-height:50mm!important;
     object-fit:contain!important;
     margin:0!important;
+}
+/* Исправление печи №5 в ПОЛНОМ варианте: рисунок сам является первым
+   элементом условия, выравнивается слева и обтекается текстом. */
+.oge-exam-full-variant .oge-exam-stove5 .oge-exam-stove5-flow{display:block!important;min-width:0!important;}
+.oge-exam-full-variant .oge-exam-stove5 .oge-exam-stove5-flow::after{content:"";display:block;clear:both;}
+.oge-exam-full-variant .oge-exam-stove5 .oge-exam-stove5-figure{
+    display:block!important;float:left!important;position:static!important;
+    width:64mm!important;max-width:64mm!important;margin:1mm 3.3mm 1.5mm 0!important;
+    clear:none!important;overflow:visible!important;
+}
+.oge-exam-full-variant .oge-exam-stove5 .oge-exam-stove5-figure img{
+    display:block!important;width:100%!important;max-width:100%!important;height:auto!important;
+    max-height:49mm!important;object-fit:contain!important;margin:0!important;
 }
 .oge-exam-geometry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,45%);column-gap:2mm;border-bottom:.35pt solid #ccc;padding:0 0 1.8mm;margin:0 0 1.8mm;align-items:center;}
 .oge-exam-geometry:not(:has(.oge-exam-diagram)){display:block;}
