@@ -1637,7 +1637,7 @@ body.auth-locked > *:not(#passwordGate) {
         
         <div id="oge-fast-variant-panel" class="oge-fast-variant-panel">
             <div class="oge-fast-panel-title">🎲 Быстрый полный вариант ОГЭ</div>
-            <div class="oge-fast-panel-note">По одному заданию каждого номера <b>1–25</b>, без предварительного выбора. Задания 1–5 — единый сюжет. При создании нескольких вариантов генератор старается не повторять темы, прототипы и задачи.</div>
+            <div class="oge-fast-panel-note">По одному заданию каждого номера <b>1–25</b>, без предварительного выбора. Задания 1–5 — единый сюжет. При создании нескольких полных вариантов прототипы каждого номера задания сначала проходят без повторений, затем перемешиваются для нового круга. Задания №1–5 остаются единым сюжетом.</div>
             <div class="oge-generation-row">
                 <label for="oge-variant-count" class="oge-variant-count-label">Количество вариантов</label>
                 <input id="oge-variant-count" type="number" min="1" max="40" step="1" value="1" inputmode="numeric" onblur="ogeNormalizeVariantCount()" title="От 1 до 40 вариантов" aria-label="Количество вариантов">
@@ -2782,7 +2782,8 @@ body.auth-locked > *:not(#passwordGate) {
 
     window.adjustOgePracticeStickyHeights = adjustOgePracticeStickyHeights;
 
-    function buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts = new Map(), autoFull = false) {
+    function buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts = new Map(), autoFull = false,
+                                    fullPrototypeDecks = null) {
         const database = window.ogePracticeDatabase || {};
         const trainerTasks = [];
         const scenarioTasks = [];
@@ -2941,9 +2942,22 @@ body.auth-locked > *:not(#passwordGate) {
                         return state;
                     }
 
+                    // В полном варианте один сюжет = пять связанных заданий.
+                    // Сначала проходим ВСЕ доступные сюжеты без повторения;
+                    // только затем используем новый перемешанный круг.
+                    const fullScenarioStates = autoFull && fullPrototypeDecks instanceof Map
+                        ? availableThemeIds.flatMap(themeId => selectedScenariosByTheme.get(themeId) || []) : [];
                     for (let setIndex = 0; setIndex < requestedSets; setIndex++) {
-                        const themeId = nextThemeId();
-                        const state = nextScenarioForTheme(themeId);
+                        let themeId, state;
+                        if (fullScenarioStates.length) {
+                            const choice = ogeFullNextCycleChoice(fullPrototypeDecks, 'full-scenarios-1-5',
+                                fullScenarioStates.map(s => String(s.themeId) + ':' + s.scenarioIndex));
+                            state = fullScenarioStates.find(s => String(s.themeId) + ':' + s.scenarioIndex === choice);
+                            themeId = state.themeId;
+                        } else {
+                            themeId = nextThemeId();
+                            state = nextScenarioForTheme(themeId);
+                        }
                         const setNumber = setIndex + 1;
                         const scenario = state.scenario;
                         const theme = state.theme;
@@ -2968,13 +2982,26 @@ body.auth-locked > *:not(#passwordGate) {
                             const typeKey = pair => scenarioTypePrefix + String(pair.task.typeId || ('type-' + pair.originalIndex));
                             const typeUse = pair => (usageCounts.get(typeKey(pair)) || 0) +
                                 (usage.get(typeKey(pair)) || 0);
-                            const minTypeUse = Math.min(...candidatePairsAll.map(typeUse));
-                            const freshTypes = candidatePairsAll.filter(pair => typeUse(pair) === minTypeUse);
                             const taskUse = pair => (usage.get(`${state.themeId}:${state.scenarioIndex}:${taskNumber}:${pair.originalIndex}`) || 0) +
                                 (usageCounts.get('scenario:'+`${state.themeId}:${state.scenarioIndex}:${setNumber}`+':'+taskNumber+':'+ogeTaskReplacementKey(pair.task))||0);
-                            const minTaskUse = Math.min(...freshTypes.map(taskUse));
-                            const candidatePairs = shuffleArray(freshTypes.filter(pair => taskUse(pair) === minTaskUse));
-                            const chosenPair = candidatePairs[0];
+                            let chosenPair;
+                            if (autoFull && fullPrototypeDecks instanceof Map) {
+                                const deckPrefix = 'full-scenario-types:' + state.themeId + ':' + state.scenarioIndex + ':' + taskNumber;
+                                const keys = [...new Set(candidatePairsAll.map(typeKey))];
+                                const selectedType = ogeFullNextCycleChoice(fullPrototypeDecks, deckPrefix, keys);
+                                const sameType = candidatePairsAll.filter(pair => typeKey(pair) === selectedType);
+                                // Когда внутри одного прототипа несколько числовых аналогов,
+                                // их также берём по кругу, не повторяя раньше времени.
+                                const chosenIndex = ogeFullNextCycleChoice(fullPrototypeDecks, deckPrefix + ':' + selectedType,
+                                    sameType.map(pair => String(pair.originalIndex)));
+                                chosenPair = sameType.find(pair => String(pair.originalIndex) === chosenIndex);
+                            } else {
+                                const minTypeUse = Math.min(...candidatePairsAll.map(typeUse));
+                                const freshTypes = candidatePairsAll.filter(pair => typeUse(pair) === minTypeUse);
+                                const minTaskUse = Math.min(...freshTypes.map(taskUse));
+                                const candidatePairs = shuffleArray(freshTypes.filter(pair => taskUse(pair) === minTaskUse));
+                                chosenPair = candidatePairs[0];
+                            }
                             usage.set(typeKey(chosenPair), (usage.get(typeKey(chosenPair)) || 0) + 1);
                             const chosen = chosenPair.task;
                             const analogTasks = allTasks
@@ -3658,10 +3685,13 @@ body.auth-locked > *:not(#passwordGate) {
         window.ogeVariantBatch=[];window.ogeActiveVariantIndex=0;
         window.ogeGenerationMode=full?'full':'manual';
         const usage=new Map();
+        // Независимые перемешанные очереди для каждого номера задания в этой пачке.
+        // При запуске новой пачки начинаются новые циклы.
+        const fullPrototypeDecks = full ? new Map() : null;
         let current=0;
         const makeNext=()=>{
             try{
-                generateVariant({silent:true,usageCounts:usage,autoFull:full});
+                generateVariant({silent:true,usageCounts:usage,autoFull:full,fullPrototypeDecks});
                 if(!window.ogeVariantSnapshot || !window.ogeVariantSnapshot.length) throw Error('Не выбраны задания для генерации.');
                 if(full) {
                     const numbers=new Set();
@@ -3867,13 +3897,38 @@ body.auth-locked > *:not(#passwordGate) {
     }
 
 
+    // Перемешанная очередь для ПОЛНЫХ вариантов: каждый тип используется ровно
+    // один раз за круг. После исчерпания банка создаём новый случайный круг.
+    // Очереди независимы для номеров заданий и существуют только внутри одной пачки.
+    function ogeFullNextCycleChoice(decks, key, candidates) {
+        if (!(decks instanceof Map) || !candidates.length) return null;
+        // Сохраняем порядок кандидатов стабильным; менять его может только shuffleArray.
+        const signature = candidates.join('\u001f');
+        let state = decks.get(key);
+        if (!state || state.signature !== signature) {
+            state = {signature, queue: [], last: null};
+            decks.set(key, state);
+        }
+        if (!state.queue.length) {
+            state.queue = shuffleArray(candidates.slice());
+            if (state.queue.length > 1 && state.queue[0] === state.last) {
+                // Не допускаем одинаковых прототипов на стыке двух кругов.
+                const swapIndex = state.queue.findIndex(value => value !== state.last);
+                if (swapIndex > 0) [state.queue[0], state.queue[swapIndex]] = [state.queue[swapIndex], state.queue[0]];
+            }
+        }
+        const chosen = state.queue.shift();
+        state.last = chosen;
+        return chosen;
+    }
+
     // A random, balanced prototype cycle is maintained separately for each task
     // number and each bank (main / extra). A prototype repeats only after its
     // peers have been drawn equally often, unless the user has selected fewer
     // types than requested tasks.
     function ogeChooseBalancedPrototypes({selectedProtos, sourceData, kind, tid,
                                           requiredCount, usageCounts, orderedTasks,
-                                          createTask}) {
+                                          createTask, fullPrototypeDecks = null}) {
         const activePools = selectedProtos.map((proto) => {
             const index = sourceData.prototypes.indexOf(proto);
             return {
@@ -3890,15 +3945,22 @@ body.auth-locked > *:not(#passwordGate) {
         const localTaskUse = new Map();
         const chosen = [];
         for (let slot = 0; slot < requiredCount; slot++) {
-            // Lower global+current-batch counts always win; random ties avoid
-            // predictable 1,2,3,... ordering while exhausting types first.
-            const minUse = Math.min(...activePools.map(pool =>
-                (usageCounts.get(pool.typeKey) || 0) + (localTypeUse.get(pool.typeKey) || 0)));
-            let choices = activePools.filter(pool =>
-                (usageCounts.get(pool.typeKey) || 0) + (localTypeUse.get(pool.typeKey) || 0) === minUse);
-            const notPrevious = choices.filter(pool => !lastTypeSet.has(pool.typeKey));
-            if (notPrevious.length) choices = notPrevious;
-            const pool = choices[Math.floor(Math.random() * choices.length)];
+            let pool;
+            if (fullPrototypeDecks instanceof Map) {
+                const key = ogeFullNextCycleChoice(fullPrototypeDecks,
+                    'full-prototypes:' + String(tid), activePools.map(p => p.typeKey));
+                pool = activePools.find(p => p.typeKey === key);
+            } else {
+                // Ручные подборки: оставляем прежнюю сбалансированную случайную выборку.
+                const minUse = Math.min(...activePools.map(p =>
+                    (usageCounts.get(p.typeKey) || 0) + (localTypeUse.get(p.typeKey) || 0)));
+                let choices = activePools.filter(p =>
+                    (usageCounts.get(p.typeKey) || 0) + (localTypeUse.get(p.typeKey) || 0) === minUse);
+                const notPrevious = choices.filter(p => !lastTypeSet.has(p.typeKey));
+                if (notPrevious.length) choices = notPrevious;
+                pool = choices[Math.floor(Math.random() * choices.length)];
+            }
+            if (!pool) continue;
 
             let task;
             if (createTask) {
@@ -3944,6 +4006,8 @@ body.auth-locked > *:not(#passwordGate) {
     function generateVariant(options = {}) {
         const frozenSnapshot = options && Array.isArray(options.snapshot) ? options.snapshot : null;
         const usageCounts = options && options.usageCounts instanceof Map ? options.usageCounts : new Map();
+        const fullPrototypeDecks = options.autoFull && options.fullPrototypeDecks instanceof Map
+            ? options.fullPrototypeDecks : null;
         const printGroups={'1-5':[],'6-14':[],'15-25':[]};
         const snapshotBuilt = [];
         const infoBoard = document.getElementById('info-board');
@@ -4001,7 +4065,8 @@ body.auth-locked > *:not(#passwordGate) {
             orderedTasks: orderedTasks
         };
 
-        const practiceGroups = frozenSnapshot ? {trainerTasks:[],scenarioTasks:[]} : buildOgePracticeTasks(infoBoard, orderedTasks, usageCounts, !!options.autoFull);
+        const practiceGroups = frozenSnapshot ? {trainerTasks:[],scenarioTasks:[]} : buildOgePracticeTasks(
+            infoBoard, orderedTasks, usageCounts, !!options.autoFull, fullPrototypeDecks);
         const trainerTasks = practiceGroups.trainerTasks || [];
         const scenarioTasks = practiceGroups.scenarioTasks || [];
         // Каждый выбранный сюжет — ровно пять связанных задач.
@@ -4102,7 +4167,7 @@ body.auth-locked > *:not(#passwordGate) {
                 }
                 finalTasks = ogeChooseBalancedPrototypes({
                     selectedProtos, sourceData, kind, tid, requiredCount,
-                    usageCounts, orderedTasks,
+                    usageCounts, orderedTasks, fullPrototypeDecks: block.autoFull ? fullPrototypeDecks : null,
                     createTask: isStatements ? (proto =>
                         window.task19MakeStatementTasks(1, 1, [proto.topic])[0]) : null
                 });
