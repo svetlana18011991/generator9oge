@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Генератор вариантов — ОГЭ по математике</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet"><script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, loader: { paths: { mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5' } }, chtml: { fontURL: new URL('vendor/mathjax/fonts/woff-v2', document.baseURI).href } };</script>
+    <script src="vendor/mathjax/tex-mml-chtml.js?v=3.2.2-local-1"></script>
     
     <script>window.database = {};</script>
     <!-- Задания 1–5: каталоги и 24 комплекта по рабочей тетради Быковой С. (2026). -->
@@ -36,9 +36,7 @@
     <!-- Задание 10 + дополнительные задачи 10 -->
     <script src="task10.js?v=20261031-blue-line-fixed-41"></script>
     <script src="task10_extra.js?v=20260914"></script>
-    <!-- Задание 11: сначала изображения, затем база задания -->
-    <script src="task11_images_1.js?v=20260914"></script>
-    <script src="task11_images_2.js?v=20260914"></script>
+    <!-- Задание 11: графики формируются самой базой в SVG. -->
     <script src="task11.js?v=20260914"></script>
     <script src="task11_extra.js?v=20260914-2"></script>
     <!-- Задание 12 + дополнительные прототипы -->
@@ -68,7 +66,6 @@
     <script src="task23.js?v=20261027-typed-text-v2"></script>
     <script src="task24.js?v=20261027-typed-text-v2"></script>
     <script src="task25.js?v=20261027-typed-text-v2"></script>
-    <script src="oge_season_assets.js?v=20261101-lean-assets"></script>
     <script src="offline_assets_bundle.js"></script>
     <script src="shared_image_assets.js?v=20261107-1"></script>
 

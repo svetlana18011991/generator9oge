@@ -35,15 +35,15 @@ test('task 10 PDF corrections reach selectors, diagrams, theory and HTML export'
         await page.addInitScript(({key,hash}) => sessionStorage.setItem(key,hash),{key:sessionKey,hash:passwordHash});
         await page.route('**/*',async route => {
             const url = new URL(route.request().url());
+            if (url.pathname.endsWith('/tex-mml-chtml.js')) {
+                return route.fulfill({contentType:'application/javascript',body:'window.MathJax.typesetPromise=()=>Promise.resolve();window.MathJax.startup={promise:Promise.resolve()};'});
+            }
             if (url.origin === origin) {
                 const name = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
                 const filename = path.resolve(root,'.'+name);
                 if (filename.startsWith(root+path.sep) && fs.existsSync(filename)) {
                     return route.fulfill({path:filename,contentType:mime[path.extname(filename)] || 'application/octet-stream'});
                 }
-            }
-            if (url.pathname.endsWith('/tex-mml-chtml.js')) {
-                return route.fulfill({contentType:'application/javascript',body:'window.MathJax.typesetPromise=()=>Promise.resolve();window.MathJax.startup={promise:Promise.resolve()};'});
             }
             return route.abort();
         });

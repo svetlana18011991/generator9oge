@@ -44,14 +44,6 @@ test('optimized generation retains independent variants, usable downloads and ca
         await context.route('**/*', route => {
             const url = new URL(route.request().url());
             if (url.protocol === 'file:') return route.continue();
-            if (url.origin === origin) {
-                const name = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-                const filename = path.resolve(root, '.' + name);
-                if (filename.startsWith(root + path.sep) && fs.existsSync(filename)) {
-                    return route.fulfill({path:filename,contentType:mime[path.extname(filename)] || 'application/octet-stream'});
-                }
-                return route.abort();
-            }
             if (url.pathname.endsWith('/tex-mml-chtml.js')) {
                 // Formula rendering has a separate real-MathJax regression. This
                 // suite isolates selection, export resources and event lifetimes.
@@ -60,6 +52,14 @@ test('optimized generation retains independent variants, usable downloads and ca
                     'MathJax.typesetPromise=()=>Promise.resolve();' +
                     'MathJax.typesetClear=()=>{window.__mathClears++;};' +
                     'MathJax.startup={promise:Promise.resolve()};'});
+            }
+            if (url.origin === origin) {
+                const name = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
+                const filename = path.resolve(root, '.' + name);
+                if (filename.startsWith(root + path.sep) && fs.existsSync(filename)) {
+                    return route.fulfill({path:filename,contentType:mime[path.extname(filename)] || 'application/octet-stream'});
+                }
+                return route.abort();
             }
             return route.abort();
         });
