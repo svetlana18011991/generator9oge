@@ -312,8 +312,8 @@ function generatePresentation1() {
     const panelBottom = '15%';
     
     let taskSlides = window.currentGeneratedTasks.map((t, i) => `
-        <div class="slide task-slide" style="background-image: url('${window.getEmbeddedAssetUrl('p2.jpg')}')">
-            <div class="header-plate" style="position: absolute; top: calc(15% - 107px); left: 70%; transform: translateX(-50%); width: calc(351px * 0.64); height: calc(220px * 0.64); background: url('${window.getEmbeddedAssetUrl('p3.jpg')}') center/100% 100% no-repeat; display: flex; justify-content: center; align-items: center; z-index: 30;">
+        <div class="slide task-slide pres-bg-main">
+            <div class="header-plate pres-bg-header" style="position: absolute; top: calc(15% - 107px); left: 70%; transform: translateX(-50%); width: calc(351px * 0.64); height: calc(220px * 0.64); background-position: center; background-size: 100% 100%; background-repeat: no-repeat; display: flex; justify-content: center; align-items: center; z-index: 30;">
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
             
@@ -378,7 +378,7 @@ function generatePresentation2() {
     let topicsList = window.selectedBlockTitles.map(t => `<li style="margin-bottom: 10px;">${t}</li>`).join('');
     
     let taskSlides = window.currentGeneratedTasks.map((t, i) => `
-        <div class="slide task-slide" style="background-image: url('${window.getEmbeddedAssetUrl('f2.png')}')">
+        <div class="slide task-slide pres-bg-main">
             <div class="header-plate" style="position: absolute; top: calc(15% - 107px); left: 70%; transform: translateX(-50%); width: calc(351px * 0.64); height: calc(220px * 0.64); background: url('${window.ASSETS_URL}f4.png') center/100% 100% no-repeat; display: flex; justify-content: center; align-items: center; z-index: 30;">
                 <h3 style="font-family: 'Caveat', cursive; font-size: calc(39px * 0.64); color: #333; margin: 0; padding-bottom: 5px;">Задание ${i+1}</h3>
             </div>
@@ -444,7 +444,7 @@ function generatePresentation3() {
     let topicsList = window.selectedBlockTitles.map(t => `<li style="margin-bottom: 10px;">${t}</li>`).join('');
     
     let taskSlides = window.currentGeneratedTasks.map((t, i) => `
-        <div class="slide task-slide" style="background-image: url('${window.getEmbeddedAssetUrl('s1.png')}')">
+        <div class="slide task-slide pres-bg-main">
             <div style="position: absolute; top: calc(15% - 55px); left: 70%; transform: translateX(-50%); z-index: 30;">
                 <h3 style="font-family: 'Caveat', cursive; font-size: 38px; color: #fff; text-shadow: 0 0 10px #9c27b0, 0 0 20px #9c27b0; margin: 0;">Задание ${i+1}</h3>
             </div>
@@ -915,6 +915,21 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
     }
     const resolvedBgTitle = resolvePresentationBgUrl(bgTitle);
     const resolvedBgMain = resolvePresentationBgUrl(bgMain);
+    // Store each background once in the standalone file; every slide shares it.
+    // Use regular CSS rules: very large data URLs can exceed custom-property limits.
+    const backgroundSelectors = new Map();
+    function addSharedBackground(selector, url) {
+        const selectors = backgroundSelectors.get(url);
+        if (selectors) selectors.push(selector);
+        else backgroundSelectors.set(url, [selector]);
+    }
+    addSharedBackground('.pres-bg-title', resolvedBgTitle);
+    addSharedBackground('.pres-bg-main', resolvedBgMain);
+    if (taskSlides.includes('pres-bg-header')) {
+        addSharedBackground('.pres-bg-header', window.getEmbeddedAssetUrl('p3.jpg'));
+    }
+    const sharedBackgroundCSS = Array.from(backgroundSelectors, ([url, selectors]) =>
+        `${selectors.join(', ')} { background-image: url('${url}'); }`).join('\n');
     const startCardHtml = buildPresentationStartCardHtml(authorLine, accentColor);
 
     let fullHTML = `<!DOCTYPE html>
@@ -927,6 +942,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
     <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\\\(', '\\\\)']], macros: { tg: '\\\\operatorname{tg}', ctg: '\\\\operatorname{ctg}' } } };${window.SCRIPT_END}
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">${window.SCRIPT_END}
     <style>
+        ${sharedBackgroundCSS}
         body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         .slide { width: 100vw; height: 100vh; background-size: cover; background-position: center; display: none; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 50px; box-sizing: border-box; }
         .slide.active { display: flex; }
@@ -1021,14 +1037,14 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
 <body>
     <div id="pres-timer-box" class="pres-timer-box">⏱ 00:00</div>
 
-    <div class="slide active" style="background-image: url('${resolvedBgTitle}')">
+    <div class="slide active pres-bg-title">
         ${startCardHtml}
         <div class="nav-btns" id="start-nav"><button class="nav-btn" onclick="event.stopPropagation(); nextSlide()">Начать →</button></div>
     </div>
 
     ${taskSlides}
 
-    <div class="slide" id="results-slide" style="background-image: url('${resolvedBgMain}')">
+    <div class="slide pres-bg-main" id="results-slide">
         <div class="title-box" style="padding: 40px; max-width: 1200px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation();">
             <h2 style="font-size:3.2em; color:#4CAF50; margin:0;">Спасибо за работу!</h2>
             <div id="results-summary" style="font-size: 1.35em; color:#333; margin-top: 12px; font-weight: bold;"></div>
