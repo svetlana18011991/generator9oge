@@ -5,14 +5,18 @@ const vm = require('node:vm');
 const { test } = require('node:test');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const generatorSource = fs.readFileSync(path.join(root, 'generator.js'), 'utf8');
 const expected = require('./fixtures/workbook-1-5.json').themes;
 const normalize = value => String(value).replace('.', ',');
 
 function loadPractice() {
     const window = { database: {} };
     const context = vm.createContext({ window, console });
-    const head = html.slice(0, html.indexOf('<script src="task6.js"'));
-    for (const [, filename] of head.matchAll(/<script src="([^"?]+)(?:\?[^"<>]*)?"><\/script>/g)) {
+    for (const [, attributes] of html.matchAll(/<script\b([^>]*)>\s*<\/script>/gi)) {
+        const src = attributes.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+        if (!src) continue;
+        const filename = src.split('?')[0];
+        if (filename === 'task6.js') break;
         if (/practice|tariff_plot|plot_plan|scenario|tires_2_2|workbook/.test(filename)) {
             vm.runInContext(fs.readFileSync(path.join(root, filename), 'utf8'), context, { filename });
         }
@@ -164,9 +168,9 @@ function generatorContext({sets = 0, trainer = false} = {}) {
         makeOgePracticeStandalone: (_a,_b,_c,_d,task) => task.text,
         makeOgeScenarioGameStatement: (_a,_b,_c,_d,task) => task.text
     });
-    const selectors = html.slice(html.indexOf('function getOgeTrainerThemeIds()'), html.indexOf('function renderPracticeCatalog('));
-    const catalogSelector = html.slice(html.indexOf('function getSelectedCatalogPrototypes('), html.indexOf('function ogePracticeOutputStyles()'));
-    const builder = html.slice(html.indexOf('function buildOgePracticeTasks('), html.indexOf('// ===== Дополнительные прототипы:'));
+    const selectors = generatorSource.slice(generatorSource.indexOf('function getOgeTrainerThemeIds()'), generatorSource.indexOf('function renderPracticeCatalog('));
+    const catalogSelector = generatorSource.slice(generatorSource.indexOf('function getSelectedCatalogPrototypes('), generatorSource.indexOf('function ogePracticeOutputStyles()'));
+    const builder = generatorSource.slice(generatorSource.indexOf('function buildOgePracticeTasks('), generatorSource.indexOf('// ===== Дополнительные прототипы:'));
     vm.runInContext(selectors + '\n' + catalogSelector + '\n' + builder, context);
     return context;
 }
