@@ -17,7 +17,7 @@ try { ({chromium} = require('playwright')); } catch {
 }
 const executable = process.env.CHROMIUM_PATH || '/usr/bin/chromium';
 
-test('print file opens a ready printable tab with a PDF action and blocked-popup fallback',{
+test('downloaded print files prepare formulas and diagrams before the explicit PDF action',{
     skip:!chromium || !fs.existsSync(executable) ? 'Requires Playwright and Chromium' : false,
     timeout:120000
 },async t => {
@@ -31,6 +31,7 @@ test('print file opens a ready printable tab with a PDF action and blocked-popup
             window.print=()=>{window.__printCalls++;};
         },{key:sessionKey,hash:passwordHash});
         let app, controlledImageReady = false;
+        const savedDocuments = new Map();
         const errors=[],dialogs=[];
         context.on('page',page => {
             page.on('pageerror',error => errors.push(error.message));
@@ -38,6 +39,9 @@ test('print file opens a ready printable tab with a PDF action and blocked-popup
         });
         await context.route('**/*',async route => {
             const request=route.request(),url=new URL(request.url());
+            if (url.origin === origin && savedDocuments.has(url.pathname)) {
+                return route.fulfill({contentType:'text/html; charset=utf-8',body:savedDocuments.get(url.pathname)});
+            }
             if (url.origin === origin && url.pathname === '/controlled-image.svg') {
                 return controlledImageReady
                     ? route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8"/></svg>'})
@@ -68,11 +72,29 @@ test('print file opens a ready printable tab with a PDF action and blocked-popup
             const random=Math.random;Math.random=()=>0;
             generateVariant();Math.random=random;
         });
-        async function printTab() {
-            const pending=context.waitForEvent('page');
+        async function downloadPrintFile() {
+            const pageCount=context.pages().length;
+            const pending=app.waitForEvent('download');
             await app.locator('button[onclick="downloadPrintPDF()"]').click();
-            const page=await pending;
-            await page.waitForURL(/^blob:/);
+            await app.locator('[data-oge-print-choice="without"]').click();
+            const download=await pending;
+            assert.match(download.suggestedFilename(),/\.html$/);
+            const directory=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'oge-print-file-'));
+            try {
+                const filename=path.join(directory,'print.html');
+                await download.saveAs(filename);
+                assert.equal(context.pages().length,pageCount,'Export must download without opening another tab');
+                return fs.readFileSync(filename,'utf8');
+            } finally {fs.rmSync(directory,{recursive:true,force:true});}
+        }
+        async function printTab() {
+            const saved=await downloadPrintFile();
+            const pathname='/downloaded-print-'+savedDocuments.size+'.html';
+            savedDocuments.set(pathname,saved);
+            const page=await context.newPage();
+            // Load the actual saved document through a local test route; file://
+            // navigation is disabled by some managed Chrome installations.
+            await page.goto(origin+pathname,{waitUntil:'load'});
             await page.waitForFunction(() => {
                 const button=document.getElementById('oge-print-button');
                 return button && (!button.disabled || document.getElementById('oge-print-status')?.hasAttribute('data-error'));
@@ -81,17 +103,20 @@ test('print file opens a ready printable tab with a PDF action and blocked-popup
         }
         async function assertReady(page) {
             assert.equal(await page.locator('#oge-print-status').getAttribute('data-error'),null,await page.locator('#oge-print-status').textContent());
-            await page.waitForFunction(()=>__printCalls===1);
+            assert.equal(await page.evaluate(()=>__printCalls),0,'Preparation must not open a modal print dialog');
             assert.equal(await page.evaluate(()=>window.opener),null);
-            assert.match(await page.locator('#oge-print-status').textContent(),/Сохранить в формате PDF/);
+            assert.match(await page.locator('#oge-print-status').textContent(),/Документ готов/);
+            assert.match(await page.locator('#oge-print-button').textContent(),/Печать \/ сохранить PDF/);
             assert.equal(await page.locator('[data-mjx-error],mjx-merror').count(),0);
             assert.ok(await page.locator('mjx-container').count()>0);
+            await page.locator('#oge-print-button').click();
+            assert.equal(await page.evaluate(()=>__printCalls),1);
             await page.locator('#oge-print-button').click();
             assert.equal(await page.evaluate(()=>__printCalls),2);
             await page.emulateMedia({media:'print'});
             assert.equal(await page.locator('#oge-print-tools').evaluate(node=>getComputedStyle(node).display),'none');
         }
-        await t.test('manual selection opens a new tab and prints real CHTML formulas with corrected tree SVG',async () => {
+        await t.test('the downloaded manual selection renders real CHTML formulas and corrected tree SVG',async () => {
             const page=await printTab();
             await assertReady(page);
             const labels=await page.locator('.task-print-img svg text').allTextContents();
@@ -114,33 +139,34 @@ test('print file opens a ready printable tab with a PDF action and blocked-popup
             await page.close();
             await app.evaluate(()=>{openOgePrintDocument=window.__originalPrintOpen;delete window.__originalPrintOpen;});
         });
-        await t.test('full variant opens its three-page layout and automatic print',async () => {
+        await t.test('the full variant preserves three task pages plus its answer-key page in PDF',async () => {
             await app.evaluate(() => {let seed=26;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};});
             await app.locator('.oge-fast-btn').click();
             await app.waitForFunction(()=>!document.querySelector('.oge-fast-btn').disabled);
             const page=await printTab();
             await assertReady(page);
-            assert.equal(await page.locator('.oge-exam-page').count(),3);
+            assert.equal(await page.locator('.oge-exam-flow-page').count(),3);
+            assert.equal(await page.locator('.oge-exam-keys-page').count(),1);
+            assert.equal(await page.locator('.oge-exam-page').count(),4);
             assert.equal(await page.locator('.oge-exam-task[data-exam-task]').count(),25);
+            const pdf=await page.pdf({preferCSSPageSize:true,printBackground:false});
+            const pages=Array.from(pdf.toString('latin1').matchAll(/\/Type\s*\/Page\b/g));
+            assert.equal(pages.length,4,'PDF must contain three task sheets and one separate answer-key sheet');
             await page.close();
         });
-        await t.test('a blocked print tab still downloads a usable document with an explicit instruction',async () => {
-            await app.evaluate(()=>{window.open=()=>null;});
-            const pending=app.waitForEvent('download');
-            await app.locator('button[onclick="downloadPrintPDF()"]').click();
-            const download=await pending;
-            assert.match(download.suggestedFilename(),/\.html$/);
-            assert.ok(dialogs.some(message=>/заблокировал вкладку печати/.test(message)));
-            const directory=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'oge-print-blocked-'));
-            try {
-                const filename=path.join(directory,'print.html');
-                await download.saveAs(filename);
-                const saved=fs.readFileSync(filename,'utf8');
-                assert.ok(saved.includes('Печать / сохранить PDF'));
-                assert.ok(saved.includes('function ogePreparePrint('));
-                assert.ok(saved.includes('__ogeNoSplitMath'));
-            } finally {fs.rmSync(directory,{recursive:true,force:true});}
+        await t.test('direct download works with popups blocked and keeps generator controls usable',async () => {
+            await app.evaluate(()=>{window.__openCalls=0;window.open=()=>{window.__openCalls++;return null;};});
+            const saved=await downloadPrintFile();
+            assert.ok(saved.includes('Печать / сохранить PDF'));
+            assert.ok(saved.includes('function ogePreparePrint('));
+            assert.ok(saved.includes('__ogeNoSplitMath'));
+            assert.equal(await app.evaluate(()=>__openCalls),0);
+            assert.equal(await app.evaluate(()=>__printCalls),0);
+            await app.locator('button[onclick="resetTaskCounts()"]').click();
+            assert.equal(await app.locator('#output-section').isVisible(),false);
+            assert.equal(await app.locator('.oge-fast-btn').isEnabled(),true);
         });
         assert.deepEqual(errors,[]);
+        assert.deepEqual(dialogs,[]);
     } finally {await browser.close();}
 });
