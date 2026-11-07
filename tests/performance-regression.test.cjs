@@ -2,7 +2,6 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const vm = require('node:vm');
 const {pathToFileURL} = require('node:url');
 const {test} = require('node:test');
 
@@ -269,16 +268,12 @@ test('optimized generation retains independent variants, usable downloads and ca
             await student.close();
         });
         await t.test('all four seasonal exports preserve their backgrounds after the generator closes', async () => {
-            const seasonalWindow={};
-            vm.runInNewContext(fs.readFileSync(path.join(root,'seasonal_backgrounds.js'),'utf8'),{window:seasonalWindow});
-            const seasonalCSS=seasonalWindow.OGE_SEASONAL_CSS;
-            assert.equal(typeof seasonalCSS,'string','The optional seasonal resource should publish its CSS');
-            const rules=Array.from(seasonalCSS.matchAll(/\.bg-(winter|spring|summer|autumn)\s*\{[^}]*\}/g));
-            assert.equal(rules.length,4,'Each seasonal rule should occur once in the optional resource');
+            const rules=Array.from(source.matchAll(/\.bg-(winter|spring|summer|autumn)\s*\{[^}]*\}/g));
+            assert.equal(rules.length,4,'Each seasonal rule should occur once in the source, not in both the page and export template');
             const expected=new Map();
             for (const rule of rules) {
                 const image=rule[0].match(/url\(['"]?(data:image\/[^'"\)]+)['"]?\)/)[1];
-                assert.equal(seasonalCSS.split(image).length-1,1,`The ${rule[1]} image should be embedded once in the optional resource`);
+                assert.equal(source.split(image).length-1,1,`The ${rule[1]} image should be embedded once in the application source`);
                 const bytes=Buffer.from(image.slice(image.indexOf(',')+1),'base64');
                 let checksum=2166136261;
                 for (const byte of bytes) checksum=Math.imul(checksum^byte,16777619)>>>0;

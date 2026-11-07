@@ -4,7 +4,7 @@ const { test } = require('node:test');
 const vm = require('node:vm');
 
 // Exercise the actual export template without loading the application UI.
-const source = readFileSync(new URL('../generator.js', `file://${__filename}`), 'utf8');
+const source = readFileSync(new URL('../index.html', `file://${__filename}`), 'utf8');
 const exportSource = source.slice(
     source.indexOf('function downloadPrintPDF('),
     source.indexOf('function downloadAnswers()')
