@@ -510,7 +510,7 @@
         },
         {
             "desc": "15.19. Площадь по стороне и высоте",
-            "svg_code": "",
+            "svg_code": "<div style=\"width:100%;max-width:320px;margin:6px auto;\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 320 200\" role=\"img\" aria-label=\"Треугольник ABC, сторона AC и проведённая к ней высота BH\" style=\"display:block;width:100%;height:auto;overflow:visible\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M35 155 L150 28 L280 155 Z\"/><path d=\"M150 28 V155\" stroke-dasharray=\"5 4\"/><path d=\"M150 143 H162 V155\"/></g><g fill=\"#111827\" font-family=\"serif\" font-size=\"16\"><text x=\"19\" y=\"174\">A</text><text x=\"145\" y=\"21\">B</text><text x=\"285\" y=\"174\">C</text><text x=\"143\" y=\"177\">H</text><text x=\"161\" y=\"99\">h</text><text x=\"212\" y=\"177\">a</text></g></svg></div>",
             "theory_task": "Сторона треугольника равна 8, а высота, проведённая к этой стороне, равна 31. Найдите площадь треугольника.",
             "theory_sol": "Площадь треугольника равна половине произведения стороны на проведённую к ней высоту: \\[S=\\frac{8\\cdot31}{2}=124.\\]<br><br><b>Ответ:</b> 124",
             "tasks": [

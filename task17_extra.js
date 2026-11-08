@@ -665,7 +665,7 @@
         }
       ],
       "source": "Ширяева, блок 2, № 122",
-      "svg_code": ""
+      "svg_code": "<div style=\"width:100%;max-width:320px;margin:6px auto;\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 320 200\" role=\"img\" aria-label=\"Равнобедренная трапеция ABCD, средняя линия KM и высота CH\" style=\"display:block;width:100%;height:auto;overflow:visible\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 160 L105 40 H215 L280 160 Z\"/><path d=\"M72.5 100 H247.5\"/><path d=\"M215 40 V160\" stroke-dasharray=\"5 4\"/><path d=\"M215 148 H227 V160\"/><path d=\"M80.5 73 L90.5 79 M229.5 79 L239.5 73\"/></g><g fill=\"#111827\" font-family=\"serif\" font-size=\"16\"><text x=\"24\" y=\"178\">A</text><text x=\"98\" y=\"28\">B</text><text x=\"215\" y=\"28\">C</text><text x=\"284\" y=\"178\">D</text><text x=\"50\" y=\"105\">K</text><text x=\"254\" y=\"105\">M</text><text x=\"208\" y=\"181\">H</text></g></svg></div>"
     },
     {
       "desc": "17.Д23. Диагонали трапеции и подобие треугольников: найти AO",
@@ -725,7 +725,7 @@
         }
       ],
       "source": "Ширяева, блок 2, № 62",
-      "svg_code": ""
+      "svg_code": "<div style=\"width:100%;max-width:320px;margin:6px auto;\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 320 200\" role=\"img\" aria-label=\"Трапеция ABCD, высота BH и острый угол при боковой стороне AB\" style=\"display:block;width:100%;height:auto;overflow:visible\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M35 160 L173.564 80 H240 L295 160 Z\"/><path d=\"M173.564 80 V160\" stroke-dasharray=\"5 4\"/><path d=\"M173.564 148 H185.564 V160\"/><path d=\"M65 160 A30 30 0 0 0 60.981 145\"/></g><g fill=\"#111827\" font-family=\"serif\" font-size=\"16\"><text x=\"19\" y=\"179\">A</text><text x=\"164\" y=\"67\">B</text><text x=\"238\" y=\"67\">C</text><text x=\"298\" y=\"179\">D</text><text x=\"167\" y=\"182\">H</text><text x=\"76\" y=\"151\">α</text><text x=\"184\" y=\"124\">h</text></g></svg></div>"
     },
     {
       "desc": "17.Д25. Площадь параллелограмма через высоту и диагональ",
@@ -965,7 +965,7 @@
         }
       ],
       "source": "Ширяева, блок 2, № 118",
-      "svg_code": ""
+      "svg_code": "<div style=\"width:100%;max-width:320px;margin:6px auto;\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 320 200\" role=\"img\" aria-label=\"Прямоугольная трапеция ABCD, меньшее основание BC равно высоте AB; CH — вспомогательная высота\" style=\"display:block;width:100%;height:auto;overflow:visible\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 160 V50 H150 L280 160 Z\"/><path d=\"M150 50 V160\" stroke-dasharray=\"5 4\"/><path d=\"M40 148 H52 V160 M40 62 H52 V50 M150 148 H162 V160\"/><path d=\"M34 105 H46 M95 44 V56\"/><path d=\"M250 160 A30 30 0 0 1 257.097 140.621\"/></g><g fill=\"#111827\" font-family=\"serif\" font-size=\"16\"><text x=\"24\" y=\"180\">A</text><text x=\"24\" y=\"43\">B</text><text x=\"149\" y=\"38\">C</text><text x=\"283\" y=\"180\">D</text><text x=\"143\" y=\"182\">H</text><text x=\"18\" y=\"112\">h</text><text x=\"91\" y=\"35\">h</text><text x=\"230\" y=\"150\">α</text></g></svg></div>"
     },
     {
       "desc": "17.Д33. Площадь верхней трапеции по средней линии",
@@ -995,7 +995,7 @@
         }
       ],
       "source": "Ширяева, блок 2, № 126",
-      "svg_code": ""
+      "svg_code": "<div style=\"width:100%;max-width:320px;margin:6px auto;\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 320 200\" role=\"img\" aria-label=\"Трапеция ABCD, средняя линия MN; выделена трапеция BCNM\" style=\"display:block;width:100%;height:auto;overflow:visible\"><g fill=\"none\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M90 40 H230 L260 102.5 H62.5 Z\" fill=\"#dbeafe\" stroke=\"none\"/><path d=\"M35 165 L90 40 H230 L290 165 Z\"/><path d=\"M62.5 102.5 H260\"/><path d=\"M43.75 131.55 L53.75 135.95 M71.25 69.05 L81.25 73.45 M238.5 72.0 L248.5 67.2 M241.5 78.25 L251.5 73.45 M268.5 134.5 L278.5 129.7 M271.5 140.75 L281.5 135.95\"/></g><g fill=\"#111827\" font-family=\"serif\" font-size=\"16\"><text x=\"18\" y=\"184\">A</text><text x=\"80\" y=\"27\">B</text><text x=\"230\" y=\"27\">C</text><text x=\"291\" y=\"184\">D</text><text x=\"42\" y=\"107\">M</text><text x=\"270\" y=\"107\">N</text></g></svg></div>"
     }
   ]
 };
