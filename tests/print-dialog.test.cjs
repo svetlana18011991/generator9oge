@@ -4,12 +4,13 @@ const path = require('node:path');
 const {test} = require('node:test');
 const root = path.resolve(__dirname,'..');
 const source = fs.readFileSync(path.join(root,'index.html'),'utf8');
+const exportResources = fs.readFileSync(path.join(root,'export-resources.js'),'utf8');
 const origin = 'http://print-dialog.test';
 const sessionKey = source.match(/var SESSION_STORAGE_KEY = '([^']+)';/)[1];
 const passwordHash = source.match(/var PASSWORD_HASH = (\d+);/)[1];
-const embeddedMath = Buffer.from(source.match(/<script\b[^>]*src="data:text\/javascript;base64,([^"]+)"/)[1],'base64');
+const embeddedMath = Buffer.from(exportResources.match(/<script\b[^>]*src="data:text\/javascript;base64,([^"]+)"/)[1],'base64');
 const fontFiles = {'MJXZERO':'Zero','MJXTEX':'Main-Regular','MJXTEX-B':'Main-Bold','MJXTEX-I':'Main-Italic','MJXTEX-MI':'Math-Italic','MJXTEX-BI':'Math-BoldItalic','MJXTEX-S1':'Size1-Regular','MJXTEX-S2':'Size2-Regular','MJXTEX-S3':'Size3-Regular','MJXTEX-S4':'Size4-Regular','MJXTEX-A':'AMS-Regular','MJXTEX-C':'Caligraphic-Regular','MJXTEX-CB':'Caligraphic-Bold','MJXTEX-FR':'Fraktur-Regular','MJXTEX-FRB':'Fraktur-Bold','MJXTEX-SS':'SansSerif-Regular','MJXTEX-SSB':'SansSerif-Bold','MJXTEX-SSI':'SansSerif-Italic','MJXTEX-SC':'Script-Regular','MJXTEX-T':'Typewriter-Regular','MJXTEX-V':'Vector-Regular','MJXTEX-VB':'Vector-Bold'};
-const fonts = new Map([...source.matchAll(/@font-face\{font-family:"([^"]+)";src:url\("data:font\/woff;base64,([^"]+)"/g)].map(match => ['MathJax_'+fontFiles[match[1]]+'.woff',Buffer.from(match[2],'base64')]));
+const fonts = new Map([...exportResources.matchAll(/@font-face\{font-family:"([^"]+)";src:url\("data:font\/woff;base64,([^"]+)"/g)].map(match => ['MathJax_'+fontFiles[match[1]]+'.woff',Buffer.from(match[2],'base64')]));
 const mime = {'.html':'text/html; charset=utf-8','.js':'application/javascript','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp'};
 let chromium;
 try { ({chromium} = require('playwright')); } catch {

@@ -6,6 +6,7 @@ const {test} = require('node:test');
 
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const exportResources = fs.readFileSync(path.join(root, 'export-resources.js'), 'utf8');
 const directory = path.join(root, 'vendor/mathjax');
 const component = fs.readFileSync(path.join(directory, 'tex-mml-chtml.js'));
 const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.json'), 'utf8'));
@@ -28,7 +29,7 @@ test('local MathJax is the unchanged upstream 3.2.2 component with original embe
     const filenames = [...new Set(component.toString().match(/MathJax_[\w-]+\.woff/g))].sort();
     assert.equal(filenames.length, 22);
     assert.deepEqual(Object.keys(manifest.fonts).sort(), filenames);
-    const embedded = new Map([...source.matchAll(/@font-face\{font-family:"([^"]+)";src:url\("data:font\/woff;base64,([^"]+)"/g)]
+    const embedded = new Map([...exportResources.matchAll(/@font-face\{font-family:"([^"]+)";src:url\("data:font\/woff;base64,([^"]+)"/g)]
         .map(match => [match[1], Buffer.from(match[2], 'base64')]));
     for (const [name, metadata] of Object.entries(manifest.fonts)) {
         const font = fs.readFileSync(path.join(directory, 'fonts/woff-v2', name));

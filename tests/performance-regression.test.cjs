@@ -7,6 +7,7 @@ const {test} = require('node:test');
 
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const exportResources = fs.readFileSync(path.join(root, 'export-resources.js'), 'utf8');
 const origin = 'http://performance-regression.test';
 // Exercise the same access state as an already authenticated owner's browser.
 const sessionKey = source.match(/var SESSION_STORAGE_KEY = '([^']+)';/)[1];
@@ -268,12 +269,12 @@ test('optimized generation retains independent variants, usable downloads and ca
             await student.close();
         });
         await t.test('all four seasonal exports preserve their backgrounds after the generator closes', async () => {
-            const rules=Array.from(source.matchAll(/\.bg-(winter|spring|summer|autumn)\s*\{[^}]*\}/g));
+            const rules=Array.from(exportResources.matchAll(/\.bg-(winter|spring|summer|autumn)\s*\{[^}]*\}/g));
             assert.equal(rules.length,4,'Each seasonal rule should occur once in the source, not in both the page and export template');
             const expected=new Map();
             for (const rule of rules) {
                 const image=rule[0].match(/url\(['"]?(data:image\/[^'"\)]+)['"]?\)/)[1];
-                assert.equal(source.split(image).length-1,1,`The ${rule[1]} image should be embedded once in the application source`);
+                assert.equal(exportResources.split(image).length-1,1,`The ${rule[1]} image should be embedded once in the application source`);
                 const bytes=Buffer.from(image.slice(image.indexOf(',')+1),'base64');
                 let checksum=2166136261;
                 for (const byte of bytes) checksum=Math.imul(checksum^byte,16777619)>>>0;

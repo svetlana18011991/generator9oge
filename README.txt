@@ -8,3 +8,15 @@ workbook_*.js должны подключаться после practice_scenario
 При обновлении переносите все изменённые и новые файлы вместе с index.html.
 Проверка: node --test --test-isolation=none tests/workbook-practice.test.cjs
 Независимый эталон: tests/fixtures/workbook-1-5.json.
+
+Быстрый запуск (ноябрь 2026): index.html показывает интерфейс до завершения
+загрузки баз. Скрипты с defer выполняются в исходном порядке. До готовности
+баз генерация заблокирована; вход по паролю работает независимо от них.
+Рисунки баз лежат в assets/bank/ и запрашиваются только при использовании.
+При скачивании bank-image-assets.js встраивает использованные рисунки обратно,
+включая закодированные скрытые разборы. export-resources.js (справка, формулы,
+шрифты и фоны для автономного файла) и offline_assets_bundle.js (оформление)
+загружаются по запросу. Для публикации переносите весь набор изменённых файлов
+и каталог assets/bank/, а не только index.html.
+Проверки запуска и автономного экспорта:
+node --test --test-isolation=none tests/startup-loading.test.cjs tests/bank-image-assets.test.cjs tests/local-mathjax.test.cjs tests/interactive-offline-export.test.cjs tests/performance-regression.test.cjs tests/print-dialog.test.cjs

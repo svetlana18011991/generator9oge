@@ -4,7 +4,8 @@ const { test } = require('node:test');
 const vm = require('node:vm');
 
 // Exercise the actual export template without loading the application UI.
-const source = readFileSync(new URL('../index.html', `file://${__filename}`), 'utf8');
+const source = readFileSync(new URL('../generator.js', `file://${__filename}`), 'utf8');
+const exportResources = readFileSync(new URL('../export-resources.js', `file://${__filename}`), 'utf8');
 const exportSource = source.slice(
     source.indexOf('function downloadPrintPDF('),
     source.indexOf('function downloadAnswers()')
@@ -24,7 +25,7 @@ async function exportedScripts() {
         openOgePrintDocument: html => { download = new Blob([html]); }
     });
     const runtime = source.slice(source.indexOf('function ogePrintToolsHTML()'),source.indexOf('// The selective print layout'));
-    vm.runInContext(`${runtime}\n${exportSource}\ndownloadPrintPDF('without');`, context);
+    vm.runInContext(`${exportResources}\n${runtime}\n${exportSource}\ndownloadPrintPDF('without');`, context);
     assert.ok(download, 'The export must create a downloadable document');
     const html = await download.text();
     return Array.from(html.matchAll(/<script>([\s\S]*?)<\/script>/g), match => match[1]);

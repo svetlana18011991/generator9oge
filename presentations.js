@@ -357,7 +357,7 @@ function generatePresentation1() {
     `).join('');
 
     let hiddenTheories = buildPresentationHiddenData(window.currentGeneratedTasks);
-    generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль1.html", 'p1.jpg', 'p2.jpg', '#ff8c00');
+    return generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль1.html", 'p1.jpg', 'p2.jpg', '#ff8c00');
 }
 
 // ==========================================
@@ -423,7 +423,7 @@ function generatePresentation2() {
     `).join('');
 
     let hiddenTheories = buildPresentationHiddenData(window.currentGeneratedTasks);
-    generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль2.html", 'f1.png', 'f2.png', '#ff4081');
+    return generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль2.html", 'f1.png', 'f2.png', '#ff4081');
 }
 
 // ==========================================
@@ -489,7 +489,7 @@ function generatePresentation3() {
     `).join('');
 
     let hiddenTheories = buildPresentationHiddenData(window.currentGeneratedTasks);
-    generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль3.html", 's2.png', 's1.png', '#9c27b0');
+    return generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, "Презентация_Урока_Стиль3.html", 's2.png', 's1.png', '#9c27b0');
 }
 
 
@@ -686,7 +686,7 @@ function generateCustomPresentationFromEditor() {
     const authorLine = getCustomPresAuthorLine();
     const taskSlides = tasks.map((t, i) => makeCustomPresentationTaskSlide(t, i, settings)).join('');
     const hiddenTheories = buildPresentationHiddenData(tasks);
-    generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, 'Презентация_Урока_Свой_стиль.html', startBg, fallbackMain, accentColor);
+    return generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, 'Презентация_Урока_Свой_стиль.html', startBg, fallbackMain, accentColor);
     const modal = document.getElementById('custom-pres-editor-modal');
     if (modal) modal.style.display = 'none';
 }
@@ -1430,6 +1430,10 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
     // Весь экспортируемый HTML содержит встроенные изображения тетрадных планов.
     fullHTML = ogeInlinePresentationImages(fullHTML);
     let blob = new Blob([fullHTML], { type: "text/html;charset=utf-8" });
+    if (window.downloadBlobSafely) {
+        document.getElementById('pres-modal').style.display = 'none';
+        return window.downloadBlobSafely(blob, fileName);
+    }
     let a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
     document.getElementById('pres-modal').style.display = 'none';
 }
