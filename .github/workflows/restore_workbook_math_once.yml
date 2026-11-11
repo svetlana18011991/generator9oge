@@ -1,0 +1,64 @@
+name: Restore OGE workbook wording and math typography
+on:
+  push:
+    paths:
+      - '.github/workflows/restore_workbook_math_once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  precise-repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Repair only three exact integration points and verify scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re
+          path=Path('index.html')
+          s=path.read_text(encoding='utf-8')
+          anchor='<script src="workbook_stove_sheets_plot.js?v=20261031-final-pdf-sync"></script>'
+          correction='<script src="workbook_1_5_literal_corrections.js?v=20261111-restored"></script>'
+          if correction not in s:
+              assert s.count(anchor)==1, 'Unexpected correction insertion anchor'
+              s=s.replace(anchor,anchor+'\n    '+correction,1)
+          typography='<script src="oge_math_typography_20261111.js?v=20261111-safe2" defer></script>'
+          if typography not in s:
+              assert s.count('</head>')==1, 'Unexpected head'
+              s=s.replace('</head>','    '+typography+'\n</head>',1)
+          pattern=r'const OGE_MATH_NO_SPLIT_SCRIPT = ("(?:\\.|[^"\\])*");'
+          m=re.search(pattern,s)
+          assert m, 'Export script constant not found'
+          legacy=json.loads(m.group(1))
+          helper=Path('oge_math_typography_20261111.js').read_text(encoding='utf-8')
+          assert 'window.__ogeNoSplitMath' in legacy
+          if '__ogeMathPunctuationGuard' not in legacy:
+              updated=legacy+'\n'+helper
+              s=s[:m.start()]+ 'const OGE_MATH_NO_SPLIT_SCRIPT = '+json.dumps(updated,ensure_ascii=False)+';' + s[m.end():]
+          else:
+              updated=legacy
+          Path('/tmp/export_math_helper.js').write_text(updated,encoding='utf-8')
+          assert correction in s and typography in s
+          path.write_text(s,encoding='utf-8')
+          print('Checked: correction layer, math helper, export script')
+          PY
+          node --check oge_math_typography_20261111.js
+          node --check workbook_1_5_literal_corrections.js
+          node --check /tmp/export_math_helper.js
+      - name: Commit precisely scoped fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Restore exact 1-5 wording and prevent split math punctuation"
+            git push origin HEAD:main
+          fi
