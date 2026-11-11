@@ -128,27 +128,27 @@
         {
             desc: "13.2. Система линейных неравенств: луч",
             svg_code: choiceLinesSvg([rayRight(-7,true,"−7"), rayRight(-2.5,true,"−2,5"), between(-7,-2.5,true,true,"−7","−2,5"), outside(-7,-2.5,true,true,"−7","−2,5")]),
-            theory_task: stacked("Укажите решение системы $\\begin{cases}x+4\\ge-3,\\\\x+2{,}5\\ge0.\\end{cases}$"),
+            theory_task: stacked("Укажите решение системы неравенств $\\begin{cases}x+4\\ge-3,\\\\x+2{,}5\\ge0.\\end{cases}$"),
             theory_sol: "Решаем неравенства отдельно: $x\\ge-7$ и $x\\ge-2{,}5$. Их пересечение: $x\\ge-2{,}5$. На рисунках это вариант 2.<br><br><b>Ответ:</b> 2",
             tasks: [
-                {text: stacked("Укажите решение системы $\\begin{cases}x+5\\ge-1,\\\\x+2{,}4\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-6,true,"−6"),rayRight(-2.4,true,"−2,4"),between(-6,-2.4,true,true,"−6","−2,4"),outside(-6,-2.4,true,true,"−6","−2,4")]), layout:"stacked11", answer:"2"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x+2\\ge-5,\\\\x+3{,}2\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([between(-7,-3.2,true,true,"−7","−3,2"),rayRight(-7,true,"−7"),outside(-7,-3.2,true,true,"−7","−3,2"),rayRight(-3.2,true,"−3,2")]), layout:"stacked11", answer:"4"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x+7\\ge1,\\\\x+1{,}5\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-1.5,true,"−1,5"),between(-6,-1.5,true,true,"−6","−1,5"),rayRight(-6,true,"−6"),outside(-6,-1.5,true,true,"−6","−1,5")]), layout:"stacked11", answer:"1"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x+1\\ge-3,\\\\x+0{,}8\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([between(-4,-0.8,true,true,"−4","−0,8"),outside(-4,-0.8,true,true,"−4","−0,8"),rayRight(-0.8,true,"−0,8"),rayRight(-4,true,"−4")]), layout:"stacked11", answer:"3"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x+6\\ge2,\\\\x+2{,}2\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-4,true,"−4"),between(-4,-2.2,true,true,"−4","−2,2"),rayRight(-2.2,true,"−2,2"),outside(-4,-2.2,true,true,"−4","−2,2")]), layout:"stacked11", answer:"3"}
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x+5\\ge-1,\\\\x+2{,}4\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-6,true,"−6"),rayRight(-2.4,true,"−2,4"),between(-6,-2.4,true,true,"−6","−2,4"),outside(-6,-2.4,true,true,"−6","−2,4")]), layout:"stacked11", answer:"2"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x+2\\ge-5,\\\\x+3{,}2\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([between(-7,-3.2,true,true,"−7","−3,2"),rayRight(-7,true,"−7"),outside(-7,-3.2,true,true,"−7","−3,2"),rayRight(-3.2,true,"−3,2")]), layout:"stacked11", answer:"4"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x+7\\ge1,\\\\x+1{,}5\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-1.5,true,"−1,5"),between(-6,-1.5,true,true,"−6","−1,5"),rayRight(-6,true,"−6"),outside(-6,-1.5,true,true,"−6","−1,5")]), layout:"stacked11", answer:"1"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x+1\\ge-3,\\\\x+0{,}8\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([between(-4,-0.8,true,true,"−4","−0,8"),outside(-4,-0.8,true,true,"−4","−0,8"),rayRight(-0.8,true,"−0,8"),rayRight(-4,true,"−4")]), layout:"stacked11", answer:"3"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x+6\\ge2,\\\\x+2{,}2\\ge0.\\end{cases}$"), svg_code: choiceLinesSvg([rayRight(-4,true,"−4"),between(-4,-2.2,true,true,"−4","−2,2"),rayRight(-2.2,true,"−2,2"),outside(-4,-2.2,true,true,"−4","−2,2")]), layout:"stacked11", answer:"3"}
             ]
         },
         {
             desc: "13.3. Система линейных неравенств: отрезок",
             svg_code: "",
-            theory_task: stacked("Укажите решение системы $\\begin{cases}x-4{,}8\\le0,\\\\x-1{,}2\\ge1{,}8.\\end{cases}$", choicesHtml(["$[3;4{,}8]$","$(-\\infty;4{,}8]$","$(-\\infty;3]\\cup[4{,}8;+\\infty)$","$[3;+\\infty)$"])),
+            theory_task: stacked("Укажите решение системы неравенств $\\begin{cases}x-4{,}8\\le0,\\\\x-1{,}2\\ge1{,}8.\\end{cases}$", choicesHtml(["$[3;4{,}8]$","$(-\\infty;4{,}8]$","$(-\\infty;3]\\cup[4{,}8;+\\infty)$","$[3;+\\infty)$"])),
             theory_sol: "Первое неравенство даёт $x\\le4{,}8$, второе — $x\\ge3$. Пересечение: $[3;4{,}8]$. Это вариант 1.<br><br><b>Ответ:</b> 1",
             tasks: [
-                {text: stacked("Укажите решение системы $\\begin{cases}x-5{,}4\\le0,\\\\x-1{,}4\\ge2.\\end{cases}$", choicesHtml(["$[3{,}4;5{,}4]$","$(-\\infty;5{,}4]$","$(-\\infty;3{,}4]\\cup[5{,}4;+\\infty)$","$[3{,}4;+\\infty)$"])), answer:"1"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x-6{,}2\\le0,\\\\x-2{,}1\\ge1{,}9.\\end{cases}$", choicesHtml(["$(-\\infty;4]\\cup[6{,}2;+\\infty)$","$[4;6{,}2]$","$[4;+\\infty)$","$(-\\infty;6{,}2]$"])), answer:"2"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x-3{,}8\\le0,\\\\x-0{,}7\\ge1{,}6.\\end{cases}$", choicesHtml(["$(-\\infty;3{,}8]$","$[2{,}3;+\\infty)$","$[2{,}3;3{,}8]$","$(-\\infty;2{,}3]\\cup[3{,}8;+\\infty)$"])), answer:"3"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x-7{,}5\\le0,\\\\x-2{,}5\\ge3{,}1.\\end{cases}$", choicesHtml(["$[5{,}6;+\\infty)$","$(-\\infty;5{,}6]\\cup[7{,}5;+\\infty)$","$(-\\infty;7{,}5]$","$[5{,}6;7{,}5]$"])), answer:"4"},
-                {text: stacked("Укажите решение системы $\\begin{cases}x-4{,}6\\le0,\\\\x-1{,}1\\ge2{,}2.\\end{cases}$", choicesHtml(["$[3{,}3;4{,}6]$","$(-\\infty;3{,}3]\\cup[4{,}6;+\\infty)$","$(-\\infty;4{,}6]$","$[3{,}3;+\\infty)$"])), answer:"1"}
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x-5{,}4\\le0,\\\\x-1{,}4\\ge2.\\end{cases}$", choicesHtml(["$[3{,}4;5{,}4]$","$(-\\infty;5{,}4]$","$(-\\infty;3{,}4]\\cup[5{,}4;+\\infty)$","$[3{,}4;+\\infty)$"])), answer:"1"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x-6{,}2\\le0,\\\\x-2{,}1\\ge1{,}9.\\end{cases}$", choicesHtml(["$(-\\infty;4]\\cup[6{,}2;+\\infty)$","$[4;6{,}2]$","$[4;+\\infty)$","$(-\\infty;6{,}2]$"])), answer:"2"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x-3{,}8\\le0,\\\\x-0{,}7\\ge1{,}6.\\end{cases}$", choicesHtml(["$(-\\infty;3{,}8]$","$[2{,}3;+\\infty)$","$[2{,}3;3{,}8]$","$(-\\infty;2{,}3]\\cup[3{,}8;+\\infty)$"])), answer:"3"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x-7{,}5\\le0,\\\\x-2{,}5\\ge3{,}1.\\end{cases}$", choicesHtml(["$[5{,}6;+\\infty)$","$(-\\infty;5{,}6]\\cup[7{,}5;+\\infty)$","$(-\\infty;7{,}5]$","$[5{,}6;7{,}5]$"])), answer:"4"},
+                {text: stacked("Укажите решение системы неравенств $\\begin{cases}x-4{,}6\\le0,\\\\x-1{,}1\\ge2{,}2.\\end{cases}$", choicesHtml(["$[3{,}3;4{,}6]$","$(-\\infty;3{,}3]\\cup[4{,}6;+\\infty)$","$(-\\infty;4{,}6]$","$[3{,}3;+\\infty)$"])), answer:"1"}
             ]
         },
         {
