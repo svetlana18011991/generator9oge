@@ -31,8 +31,8 @@ jobs:
               s=s.replace(anchor,anchor+'\n    '+correction,1)
           typography='<script src="oge_math_typography_20261111.js?v=20261111-safe2" defer></script>'
           if typography not in s:
-              assert s.count('</head>')==1, 'Unexpected head'
-              s=s.replace('</head>','    '+typography+'\n</head>',1)
+              assert s.count('</head>\n<body class="auth-locked">')==1, 'Unexpected main head'
+              s=s.replace('</head>\n<body class="auth-locked">','    '+typography+'\n</head>\n<body class="auth-locked">',1)
           pattern=r'const OGE_MATH_NO_SPLIT_SCRIPT = ("(?:\\.|[^"\\])*");'
           m=re.search(pattern,s)
           assert m, 'Export script constant not found'
