@@ -154,3 +154,20 @@
         tires.scenarios.forEach((scenario, index) => { scenario.workbookVariant = index + 1; });
     }
 })();
+
+/* UI-only wording: Tariffs use one shared storyline with three workbook variants. */
+(function () {
+    'use strict';
+    function correctTariffLabel() {
+        var checkbox = document.getElementById('practice-scenario-theme-tariff');
+        var label = checkbox && checkbox.closest('label');
+        var badge = label && label.querySelector('.practice-catalog-count');
+        if (badge && badge.textContent !== '1 сюжет') badge.textContent = '1 сюжет';
+    }
+    function start() {
+        correctTariffLabel();
+        new MutationObserver(correctTariffLabel).observe(document.body, { childList: true, subtree: true });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+    else start();
+})();
