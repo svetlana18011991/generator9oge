@@ -3806,8 +3806,21 @@ body.auth-locked > *:not(#passwordGate) {
 
     // Точечная замена как в ЕГЭ: сохраняем остальные уже выбранные задачи.
     window.ogeVariantSnapshot = null;
+    const ogeTaskReplacementValueIds = new Map();
     function ogeTaskReplacementKey(t) {
-        return String(t && (t.id ?? t.text ?? '') || '');
+        if (!t) return '';
+        // Графические аналоги могут иметь одинаковые условие и ответ.
+        // Используем исходный рисунок: поле svg дополняется при сборке варианта.
+        // Короткие ключи не копируют большие строки встроенных изображений.
+        return [t.id??'',t.text??'',t.answer??'',t.svg_code??'',t.imageHTML??''].map(value=>{
+            const text=String(value);
+            let key=ogeTaskReplacementValueIds.get(text);
+            if (key===undefined) {
+                key=ogeTaskReplacementValueIds.size;
+                ogeTaskReplacementValueIds.set(text,key);
+            }
+            return key;
+        }).join(':');
     }
     function ogeSelectedPrototypesForBlock(block) {
         const kind=block.kind || 'main', data=block.data;

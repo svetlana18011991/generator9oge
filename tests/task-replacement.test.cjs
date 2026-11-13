@@ -207,6 +207,79 @@ test('selective preview replacements immediately update the variant and every ex
         assert.notEqual(differentTopic.index, sameTopic.index);
         assert.notEqual(differentTopic.id, sameTopic.id);
         assert.equal(differentTopic.otherTask, initialStatement.otherTask);
+
+        // Graphic analogues can share their whole statement and even their
+        // answer. Only their drawings distinguish the two real bank entries.
+        async function graphicState() {
+            return page.evaluate(() => {
+                const digest = value => {
+                    let hash=2166136261;
+                    for (const char of String(value || '')) hash=Math.imul(hash ^ char.charCodeAt(0),16777619) >>> 0;
+                    return hash;
+                };
+                const graphics = root => [...root.querySelectorAll('svg,img')].map(node => node.outerHTML).join('');
+                const item=window.ogeVariantSnapshot[0].tasks[0];
+                const print=document.createElement('div');
+                print.innerHTML=currentPrintHTML;
+                const game=window.currentGeneratedTasks[0];
+                return {
+                    text:item.text,answer:String(item.answer),type:item.__ogeSelectedPrototypeIndex,
+                    sourceGraphic:digest(item.svg_code || item.svg),
+                    previewGraphic:digest(graphics(document.querySelector('#output-section [data-oge-block-index="0"][data-oge-item-index="0"]'))),
+                    printGraphic:digest(graphics(print)),gameGraphic:digest(game.svg),gameAnswer:game.answer,
+                    other:window.ogeVariantSnapshot[1].tasks[0].text,
+                    otherGame:window.currentGeneratedTasks[1].text,
+                    batchCurrent:window.ogeVariantBatch[0].snapshot[0].tasks[0] === item,
+                    batchPrintCurrent:window.ogeVariantBatch[0].printHTML === currentPrintHTML,
+                    batchAnswersCurrent:window.ogeVariantBatch[0].answersHTML === currentAnswersHTML
+                };
+            });
+        }
+        for (const fixture of [
+            {number:7,index:6,kind:'extra'},
+            {number:10,index:13},
+            {number:11,index:0,sameAnswer:true},
+            {number:17,index:6},
+            {number:18,index:0,sameAnswer:true}
+        ]) {
+            await page.evaluate(({number,index,sameAnswer,kind='main'}) => {
+                const tid=getUniqueTaskIds().find(id => Number(String(id).replace(/\D/g,'')) === number);
+                const original=kind === 'extra' ? getExtraTaskData(tid) : window.database[tid];
+                const source=original.prototypes[index];
+                const drawing=task => task.svg_code || task.svg || '';
+                let pair;
+                for (const first of source.tasks) {
+                    const second=source.tasks.find(other => other !== first && other.text === first.text &&
+                        drawing(other) !== drawing(first) && (!sameAnswer || String(other.answer) === String(first.answer)));
+                    if (second) { pair=[first,second];break; }
+                }
+                if (!pair) throw Error('No real graphic analogue pair for task '+number);
+                const prototype={...source,tasks:pair};
+                const data={...original,prototypes:original.prototypes.map((proto,i) => i === index ? prototype : proto)};
+                const first={...pair[0],theory:prototype,svg:drawing(pair[0]),__ogeSelectedPrototypeIndex:index};
+                const otherTid=getUniqueTaskIds().find(id => Number(String(id).replace(/\D/g,'')) === 9);
+                const otherData=window.database[otherTid],otherProto=otherData.prototypes[0];
+                const other={...otherProto.tasks[0],theory:otherProto,__ogeSelectedPrototypeIndex:0};
+                generateVariant({snapshot:[{tid,kind,data,tasks:[first]},
+                    {tid:otherTid,kind:'main',data:otherData,tasks:[other]}]});
+                window.ogeVariantBatch=[ogeBuildBatchEntry()];
+            },fixture);
+            const before=await graphicState();
+            await target().getByRole('button',{name:'🔄 Заменить внутри типа',exact:true}).click();
+            const after=await graphicState();
+            assert.equal(after.text,before.text,'the shared graphic statement remains the same');
+            assert.equal(after.type,before.type,'a graphic replacement keeps its prototype');
+            if (fixture.sameAnswer) assert.equal(after.answer,before.answer,'equal-answer drawings are still distinct analogues');
+            for (const key of ['sourceGraphic','previewGraphic','printGraphic','gameGraphic']) {
+                assert.notEqual(after[key],before[key],`task ${fixture.number}: ${key} must update immediately`);
+            }
+            assert.equal(after.gameAnswer,after.answer);
+            assert.equal(after.other,before.other,'the other task is preserved');
+            assert.equal(after.otherGame,before.otherGame);
+            assert.equal(after.batchCurrent,true);
+            assert.equal(after.batchPrintCurrent,true);
+            assert.equal(after.batchAnswersCurrent,true);
+        }
         assert.deepEqual(errors, []);
         assert.deepEqual(dialogs, []);
     } finally { await browser.close(); }
