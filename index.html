@@ -4218,15 +4218,17 @@ body.auth-locked > *:not(#passwordGate) {
         }
     }
 
+    function buildOgeScratchpadAreaHTML(draftId, diagramHTML = "") {
+        // Обе части и аналоги: окно 320 px, поле вдвое длиннее прежней второй части.
+        return `<div style="height:320px;overflow-y:auto;overflow-x:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;">
+            <div style="position:relative;width:100%;height:1920px;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">
+                ${diagramHTML || ''}
+                <canvas id="canvas-${draftId}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
+            </div>
+        </div>`;
+    }
+
     function buildOgePart2ScratchpadHTML(draftId, isSecondPart = false, diagramHTML = "") {
-        // Один общий шаблон черновика для обычной задачи, задач для отработки и аналогов.
-        // Во второй части рабочая область ровно в 3 раза выше видимого окна: 320 × 3 = 960 px.
-        // Это сохраняет прокрутку для длинного решения, но не создаёт тяжёлый canvas 2880 px,
-        // из-за которого письмо в аналогах могло заметно подвисать.
-        const scratchViewportStyle = isSecondPart
-            ? "height:320px;overflow-y:auto;overflow-x:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;"
-            : "height:320px;overflow:hidden;border:2px solid #bbdefb;border-radius:8px;background:#fff;";
-        const scratchWorkspaceHeight = isSecondPart ? 960 : 320;
         const diagramCard = diagramHTML ? `<div id="draft-diagram-card-${draftId}" style="position:absolute;left:12px;top:12px;width:min(62%,500px);max-width:calc(100% - 24px);z-index:1;pointer-events:none;">${diagramHTML}</div>` : '';
 
         return `<div id="draw-wrapper-${draftId}" class="${isSecondPart ? 'second-part-scratchpad' : ''}" style="display:none; margin-top:20px; width:100%; transition:all 0.3s ease; clear:both;">
@@ -4254,12 +4256,7 @@ body.auth-locked > *:not(#passwordGate) {
                 <button onclick="window.clearCanvas('${draftId}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
                 <input type="hidden" id="tool-${draftId}" value="pen">
             </div>
-            <div style="${scratchViewportStyle}">
-                <div style="position:relative; width:100%; height:${scratchWorkspaceHeight}px; background-color:#fff; background-size:20px 20px; background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);">
-                    ${diagramCard}
-                    <canvas id="canvas-${draftId}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action:none; cursor:crosshair;"></canvas>
-                </div>
-            </div>
+            ${buildOgeScratchpadAreaHTML(draftId,diagramCard)}
         </div>`;
     }
 
@@ -4816,10 +4813,7 @@ body.auth-locked > *:not(#passwordGate) {
                             <button onclick="window.clearCanvas('${analogId}')" style="background:none;border:none;cursor:pointer;font-size:20px;" title="Очистить всё">🗑️</button>
                             <input type="hidden" id="tool-${analogId}" value="pen">
                         </div>
-                        <div style="position:relative;background-color:#fff;background-size:20px 20px;background-image:linear-gradient(to right,#d2e3f2 1px,transparent 1px),linear-gradient(to bottom,#d2e3f2 1px,transparent 1px);border:2px solid #bbdefb;border-radius:8px;overflow:hidden;height:390px;">
-                            ${diagramCard}
-                            <canvas id="canvas-${analogId}" style="position:absolute;left:0;top:0;z-index:2;display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
-                        </div>
+                        ${buildOgeScratchpadAreaHTML(analogId,diagramCard)}
                     </div>`;
                 };
 
@@ -5089,7 +5083,7 @@ body.auth-locked > *:not(#passwordGate) {
                         <button onclick="window.clearCanvas('${taskCounter}')" style="background:none; border:none; cursor:pointer; font-size:20px;" title="Очистить всё">🗑️</button>
                         <input type="hidden" id="tool-${taskCounter}" value="pen">
                     </div>
-                    <div style="position:relative; background-color: #fff; background-size: 20px 20px; background-image: linear-gradient(to right, #d2e3f2 1px, transparent 1px), linear-gradient(to bottom, #d2e3f2 1px, transparent 1px); border: 2px solid #bbdefb; border-radius: 8px; overflow: hidden; height: 390px;">${draftDiagramHTML}<canvas id="canvas-${taskCounter}" style="position:absolute; left:0; top:0; z-index:2; display:block; width:100%; height:100%; touch-action: none; cursor: crosshair;"></canvas></div>
+                    ${buildOgeScratchpadAreaHTML(String(taskCounter),draftDiagramHTML)}
                 </div>`;
 
                 let interactiveTaskCore = '';
