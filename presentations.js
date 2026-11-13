@@ -1,4 +1,30 @@
 // ===== Offline asset helper =====
+function ogeLoadPresentationAssets(retry) {
+    // Standalone/test runtimes can keep their established URL fallback. In the
+    // generator, ensure exported files receive their self-contained backgrounds.
+    if (typeof window.ogeEnsureOfflineAssets !== 'function' || window.ogeHasOfflineAssets()) return false;
+    const editor = document.getElementById('custom-pres-editor-modal');
+    const customButton = editor?.style.display === 'flex' ? document.getElementById('custom-pres-download-btn') : null;
+    const modal = document.getElementById('pres-modal');
+    let status = document.getElementById('oge-presentation-assets-status');
+    if (!status && modal) {
+        status = document.createElement('p');
+        status.id = 'oge-presentation-assets-status';
+        status.setAttribute('role', 'status');
+        if (customButton) customButton.after(status);
+        else modal.querySelector('.modal-box').appendChild(status);
+    }
+    if (status) status.textContent = 'Подготавливаю изображения для презентации…';
+    window.ogeEnsureOfflineAssets().then(() => {
+        if (status) status.remove();
+        retry();
+    }).catch(error => {
+        if (status) status.textContent = error.message;
+        else alert(error.message);
+    });
+    return true;
+}
+
 if (!window.getEmbeddedAssetUrl) {
     window.getEmbeddedAssetUrl = function(name) {
         if (name && /^data:|^blob:|^https?:/i.test(String(name))) return name;
@@ -293,6 +319,7 @@ function getPresentationDraftDiagramHtml(task) {
 // АВТОРСКИЙ СТИЛЬ 1 (Оранжевый неон)
 // ==========================================
 function generatePresentation1() {
+    if (ogeLoadPresentationAssets(generatePresentation1)) return;
     let teacherName = document.getElementById('teacher-name').value.trim();
     let authorLine = "";
     if (document.getElementById('toggle-signature').checked && teacherName) {
@@ -364,6 +391,7 @@ function generatePresentation1() {
 // АВТОРСКИЙ СТИЛЬ 2 (Розовый неон)
 // ==========================================
 function generatePresentation2() {
+    if (ogeLoadPresentationAssets(generatePresentation2)) return;
     let teacherName = document.getElementById('teacher-name').value.trim();
     let authorLine = "";
     if (document.getElementById('toggle-signature').checked && teacherName) {
@@ -430,6 +458,7 @@ function generatePresentation2() {
 // АВТОРСКИЙ СТИЛЬ 3 (Фиолетовый неон, без плашки)
 // ==========================================
 function generatePresentation3() {
+    if (ogeLoadPresentationAssets(generatePresentation3)) return;
     let teacherName = document.getElementById('teacher-name').value.trim();
     let authorLine = "";
     if (document.getElementById('toggle-signature').checked && teacherName) {
@@ -667,6 +696,7 @@ function makeCustomPresentationTaskSlide(t, i, settings) {
 }
 
 function generateCustomPresentationFromEditor() {
+    if (ogeLoadPresentationAssets(generateCustomPresentationFromEditor)) return;
     const tasks = window.currentGeneratedTasks || [];
     if (!tasks.length) { alert('Сначала сгенерируйте вариант.'); return; }
     const accentColor = getCustomPresAccent();
@@ -883,6 +913,7 @@ window.generateCustomPresentationFromEditor = generateCustomPresentationFromEdit
 // ОБЩИЙ СБОРЩИК ПРЕЗЕНТАЦИЙ (ДЛЯ ЛЮБОГО СТИЛЯ)
 // ==========================================
 function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, fileName, bgTitle, bgMain, accentColor) {
+    if (ogeLoadPresentationAssets(() => generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorLine, topicsList, fileName, bgTitle, bgMain, accentColor))) return;
 
     let showSolutions = true;
     let solToggle = document.getElementById('toggle-explanations'); 

@@ -272,9 +272,9 @@ test('optimized generation retains independent variants, usable downloads and ca
             assert.equal(rules.length,4,'Each seasonal rule should occur once in the source, not in both the page and export template');
             const expected=new Map();
             for (const rule of rules) {
-                const image=rule[0].match(/url\(['"]?(data:image\/[^'"\)]+)['"]?\)/)[1];
-                assert.equal(source.split(image).length-1,1,`The ${rule[1]} image should be embedded once in the application source`);
-                const bytes=Buffer.from(image.slice(image.indexOf(',')+1),'base64');
+                const image=rule[0].match(/url\(['"]?([^'"\)]+)['"]?\)/)[1];
+                assert.ok(!image.startsWith('data:'),'Seasonal images should load only when selected');
+                const bytes=fs.readFileSync(path.join(root,image));
                 let checksum=2166136261;
                 for (const byte of bytes) checksum=Math.imul(checksum^byte,16777619)>>>0;
                 expected.set(rule[1],{length:bytes.length,checksum});
