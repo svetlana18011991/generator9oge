@@ -442,7 +442,7 @@ window.TOWER_TEMPLATE = `<!DOCTYPE html>
         if (drawClose) drawClose.addEventListener('click', (e)=>{ e.stopPropagation(); if(drawPanel){ drawPanel.classList.remove('open'); overlay.classList.remove('draft-open'); } if(draftBtn) draftBtn.classList.remove('active'); });
         window.setTool('tower', 'pen');
 
-        function normalizeAnswer(s){ return String(s||"").trim().toLowerCase(); }
+        function normalizeAnswer(s){ return String(s == null ? "" : s).trim().replace(/−/g, "-").replace(/\\s+/g, "").replace(",", ".").toLowerCase(); }
 
         function escapeHtmlTowerAnswer(value){
             return String(value ?? "").replace(/[&<>'"]/g, ch => ({

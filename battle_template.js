@@ -402,7 +402,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
     let startedAt = null;
     let locked = false;
 
-    function norm(v){ return String(v == null ? '' : v).trim().replace(',', '.').toLowerCase(); }
+    function norm(v){ return String(v == null ? '' : v).trim().replace(/−/g, '-').replace(/\\s+/g, '').replace(',', '.').toLowerCase(); }
     function fmt(sec){ sec = Math.max(0, Math.floor(sec)); return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0'); }
     function heroPct(){ return Math.max(0, (heroLives / maxLives) * 100); }
     function bossPct(){ return Math.max(0, ((total - bossHits) / total) * 100); }
@@ -445,7 +445,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         $('questionPanel').style.display = 'flex';
         $('questionBadge').textContent = 'Задание ' + (currentIndex + 1);
         $('questionProgress').textContent = (currentIndex + 1) + ' / ' + questions.length;
-        $('q').innerHTML = String(q.prompt || '').replace(/\s+([.,!?;:])/g, '$1');
+        $('q').innerHTML = String(q.prompt || '').replace(/\\s+([.,!?;:])/g, '$1');
         $('q').scrollTop = 0;
         
         // Очищаем черновик для нового задания
@@ -1056,7 +1056,7 @@ const BATTLE_TEMPLATE = `<!DOCTYPE html>
         const questionBlock = document.createElement('div');
         questionBlock.className = 'draft-current-question';
         const cleanQuestion = questionHtml || String(currentQuestion.prompt || '');
-        questionBlock.innerHTML = '<b>Задание ' + (currentIndex + 1) + '.</b> ' + cleanQuestion.replace(/\s+([.,!?;:])/g, '$1');
+        questionBlock.innerHTML = '<b>Задание ' + (currentIndex + 1) + '.</b> ' + cleanQuestion.replace(/\\s+([.,!?;:])/g, '$1');
         questionBlock.querySelectorAll('svg,img,picture,canvas').forEach(el => el.remove());
         box.appendChild(questionBlock);
         box.style.display = 'block';

@@ -1125,7 +1125,7 @@ function generateAndDownloadPresentationHTML(taskSlides, hiddenTheories, authorL
         const instantCheck = ${instantCheck};
 
         function normalizeAnswer(value) {
-            return String(value == null ? '' : value).trim().replace(',', '.');
+            return String(value == null ? '' : value).trim().replace(/−/g, '-').replace(/\\s+/g, '').replace(',', '.');
         }
 
         function formatTime(totalSeconds) {

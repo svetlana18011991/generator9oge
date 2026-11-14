@@ -343,7 +343,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
     document.getElementById('finishText').textContent = finishMessage;
     totalCountEl.textContent = questions.length;
 
-    function norm(v){ return String(v == null ? '' : v).trim().replace(',', '.').toLowerCase(); }
+    function norm(v){ return String(v == null ? '' : v).trim().replace(/−/g, '-').replace(/\\s+/g, '').replace(',', '.').toLowerCase(); }
     function typeset(el){ if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(()=>{}); }
     function firstVisualFromHtml(html){
         const tmp = document.createElement('div');
@@ -480,7 +480,7 @@ window.MOTIVATION_TEMPLATE = `<!DOCTYPE html>
         const q = questions[index] || {};
         document.getElementById('taskBadge').textContent = 'Деталь ' + (index + 1) + ' из ' + questions.length;
         const prompt = String(q.prompt || q.text || '');
-        document.getElementById('taskText').innerHTML = prompt.replace(/\s+([.,!?;:])/g, '$1');
+        document.getElementById('taskText').innerHTML = prompt.replace(/\\s+([.,!?;:])/g, '$1');
         document.getElementById('answerInput').value = '';
         const binary = !!q.task19Single;
         document.getElementById('motivationBinary19').style.display = binary ? 'flex' : 'none';

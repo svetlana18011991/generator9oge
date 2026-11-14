@@ -63,10 +63,10 @@
     <script defer src="task19_extra.js?v=20261026-19-single-boolean-v3"></script>
     <script defer src="task20.js?v=20261030-pdf-order"></script>
     <script defer src="task21.js?v=20261027-typed-text-v2"></script>
-    <script defer src="task22.js?v=20261027-typed-text-v2"></script>
-    <script defer src="task23.js?v=20261027-typed-text-v2"></script>
+    <script defer src="task22.js?v=20261115-fraction-answers-1"></script>
+    <script defer src="task23.js?v=20261115-fraction-answers-1"></script>
     <script defer src="task24.js?v=20261027-typed-text-v2"></script>
-    <script defer src="task25.js?v=20261027-typed-text-v2"></script>
+    <script defer src="task25.js?v=20261115-fraction-answers-1"></script>
     <script defer src="shared_image_assets.js?v=20261107-1"></script>
 
     <style id="oge-generator-styles">
@@ -6222,7 +6222,7 @@ body.auth-locked > *:not(#passwordGate) {
         // --- ФУНКЦИЯ ОДИНОЧНОЙ (МГНОВЕННОЙ) ПРОВЕРКИ ---
         function normalizeAnswer(value) {
             // В ОГЭ десятичную дробь записывают через запятую. Точка считается ошибкой.
-            return String(value ?? '').trim().replace(/\u2212/g, '-').replace(/\s+/g, '');
+            return String(value ?? '').trim().replace(/\\u2212/g, '-').replace(/\\s+/g, '');
         }
 
         function checkSingle(btn, taskNum, correctAns) {
@@ -8055,11 +8055,13 @@ ${window.SCRIPT_END}
             tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
             options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']}
         };
+        const mathAnswers = keys.some(task => task.answer.includes('\\(') ||
+            task.answer.includes('\\[') || task.answer.includes('$'));
         const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <title>${title}</title>
             <script>window.MathJax=${JSON.stringify(mathjaxConfig)};${window.SCRIPT_END}
-            <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">${window.SCRIPT_END}
+            ${mathAnswers ? ogeOfflineMathJaxHTML() : ''}
             <style>
                 *{box-sizing:border-box}
                 body{font-family:Arial,Helvetica,sans-serif;max-width:1180px;margin:0 auto;padding:22px 25px;color:#1b2938;background:#fff}
@@ -8173,7 +8175,7 @@ ${window.SCRIPT_END}
             }
             const selectedTowerTasks=eligibleTowerTasks;
             if (typeof window.TOWER_TEMPLATE !== 'string') {
-                ogeLoadGameTemplate('tower_template.js?v=20261031-three-fixes',
+                ogeLoadGameTemplate('tower_template.js?v=20261115-input-fix-1',
                     () => typeof window.TOWER_TEMPLATE === 'string')
                     .then(() => generateTowerGame()).catch(ogeReportGameLoadingError);
                 return;
@@ -8398,7 +8400,7 @@ ${window.SCRIPT_END}
 
         const script = document.createElement('script');
         script.id = 'motivation-template-loader';
-        script.src = 'motivation_template.js?v=20261031-three-fixes' + Date.now();
+        script.src = 'motivation_template.js?v=20261115-input-fix-1-' + Date.now();
 
         script.onload = function() {
             if (typeof window.MOTIVATION_TEMPLATE !== 'undefined') {
@@ -8490,7 +8492,7 @@ ${window.SCRIPT_END}
     window.generateBattleGame = function generateBattleGame() {
         if (getOgeGameEligibleTasks().length === 0) { alert("Баттл создаётся только по заданиям первой части (№1–19)."); return; }
         if (typeof BATTLE_TEMPLATE === 'undefined') {
-            ogeLoadGameTemplate('battle_template.js?v=20261031-three-fixes',
+            ogeLoadGameTemplate('battle_template.js?v=20261115-input-fix-1',
                 () => typeof BATTLE_TEMPLATE === 'string')
                 .then(() => window.generateBattleGame()).catch(ogeReportGameLoadingError);
             return;
@@ -8549,7 +8551,7 @@ ${window.SCRIPT_END}
 
 </script>
 
-<script defer src="presentations.js?v=20261113-lazy-assets-1"></script>
+<script defer src="presentations.js?v=20261115-input-fix-1"></script>
 
 <script>
 (function(){
