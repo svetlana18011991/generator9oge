@@ -18,16 +18,22 @@
                 if (!source || Number(source.examNumber) !== offset + 1) {
                     throw new Error(`Нет прототипа ${themeId}/${id} для варианта тетради ${index + 1}`);
                 }
+                // Additional identification questions use the same apartment plan.
+                // Keep each workbook's original question selected by default.
+                const apartmentAlternatives = themeId === 'apartment' && offset === 0
+                    ? theme.catalog.prototypes.filter(task => ['1.4', '1.5'].includes(String(task.id)))
+                    : [];
                 const candidates = themeId === 'tariff'
                     ? [source, ...theme.catalog.prototypes.filter(task =>
                         Number(task.examNumber) === offset + 1 && String(task.id) !== id)]
-                    : [source];
+                    : [source, ...apartmentAlternatives];
                 tasks[offset + 1] = candidates.map((task, taskIndex) => ({
                     ...task,
                     typeId: task.typeId || task.id,
                     typeTitle: task.typeTitle || `${task.id} — ${task.title}`,
                     sourcePrototypeId: task.id,
-                    ...(themeId === 'tariff' ? {workbookDefault: taskIndex === 0} : {}),
+                    ...(themeId === 'tariff' || apartmentAlternatives.length
+                        ? {workbookDefault: taskIndex === 0} : {}),
                     accepts: (task.accepts || [task.answer]).slice()
                 }));
             });

@@ -10,9 +10,10 @@ const normalize = value => String(value).replace('.', ',');
 
 function loadPractice() {
     const window = { database: {} };
-    const context = vm.createContext({ window, console });
-    const head = html.slice(0, html.indexOf('<script src="task6.js"'));
-    for (const [, filename] of head.matchAll(/<script src="([^"?]+)(?:\?[^"<>]*)?"><\/script>/g)) {
+    const document = { readyState: 'loading', addEventListener() {} };
+    const context = vm.createContext({ window, document, console });
+    const head = html.slice(0, html.indexOf('</head>'));
+    for (const [, filename] of head.matchAll(/<script\b[^>]*\bsrc="([^"?]+)(?:\?[^"<>]*)?"[^>]*><\/script>/g)) {
         if (/practice|tariff_plot|plot_plan|scenario|tires_2_2|workbook/.test(filename)) {
             vm.runInContext(fs.readFileSync(path.join(root, filename), 'utf8'), context, { filename });
         }
