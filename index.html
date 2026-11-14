@@ -3718,6 +3718,7 @@ body.auth-locked > *:not(#passwordGate) {
         });
         const totalEl = document.getElementById('task-total-count');
         if (totalEl) totalEl.textContent = total;
+        if (total > 0) ogePrefetchReferenceAssets();
     }
 
     // Task 19: selecting an explicit true/false response still populates the normal answer field
@@ -5224,7 +5225,12 @@ body.auth-locked > *:not(#passwordGate) {
         if (window.ogeCompactEmbeddedImages) currentInteractiveHTML = window.ogeCompactEmbeddedImages(currentInteractiveHTML);
         window.ogeVariantSnapshot = hasContent ? snapshotBuilt : null;
         window.ogePrintableGroups = printGroups;
-        if (hasContent && !options.silent) { document.getElementById('output-section').style.display = 'block'; document.getElementById('btn-group').style.display = 'flex'; renderPreview(); }
+        if (hasContent && !options.silent) {
+            document.getElementById('output-section').style.display = 'block';
+            document.getElementById('btn-group').style.display = 'flex';
+            renderPreview();
+            ogePrefetchReferenceAssets();
+        }
     }
 
     window.CANVAS_LOGIC_SCRIPT = `
@@ -5756,7 +5762,7 @@ body.auth-locked > *:not(#passwordGate) {
                         }
                     } catch(error) {
                         console.error('Справочные материалы для экспорта:',error);
-                        alert('Не удалось загрузить справочные материалы. Проверьте соединение и повторите создание файла.');
+                        alert('Не удалось загрузить справочные материалы. ' + error.message + ' Повторите скачивание файла.');
                         return;
                     }
                 }
@@ -5797,31 +5803,79 @@ body.auth-locked > *:not(#passwordGate) {
         algebra: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#oge-reference-algebra',
         geometry: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#oge-reference-geometry'
     };
+    const OGE_REFERENCE_LOAD_TIMEOUT_MS = 15000;
     let ogeReferenceAssetsLoad = null;
-    function ogeEnsureReferenceAssets() {
-        const ready = () => [window.OGE_REFERENCE_ALGEBRA_DATA,window.OGE_REFERENCE_GEOMETRY_DATA]
-            .every(value => String(value||'').startsWith('data:image/png;base64,'));
-        if (ready()) return Promise.resolve();
-        if (ogeReferenceAssetsLoad) return ogeReferenceAssetsLoad;
-        const status = document.createElement('p');
-        status.id = 'oge-export-reference-status';
-        status.setAttribute('role','status');
-        status.textContent = 'Подготавливаем файл…';
-        status.style.cssText = 'color:#d1e9e7;text-align:center;margin:12px 0;';
-        document.getElementById('btn-group')?.after(status);
+    let ogeReferenceAssetsScript = null;
+    let ogeReferenceAssetsStatus = null;
+    let ogeReferencePrefetchScheduled = false;
+    let ogeReferenceAssetsAttempts = 0;
+
+    function ogeReferenceAssetsReady() {
+        return [window.OGE_REFERENCE_ALGEBRA_DATA,window.OGE_REFERENCE_GEOMETRY_DATA]
+            .every(value => /^data:image\/(?:png|webp);base64,/.test(String(value||'')));
+    }
+
+    function ogeEnsureReferenceAssets({showStatus = true} = {}) {
+        if (ogeReferenceAssetsReady()) return Promise.resolve();
+        if (showStatus && !ogeReferenceAssetsStatus?.isConnected) {
+            ogeReferenceAssetsStatus = document.createElement('p');
+            ogeReferenceAssetsStatus.id = 'oge-export-reference-status';
+            ogeReferenceAssetsStatus.setAttribute('role','status');
+            ogeReferenceAssetsStatus.textContent = 'Загружаем справочные материалы…';
+            ogeReferenceAssetsStatus.style.cssText = 'color:#d1e9e7;text-align:center;margin:12px 0;';
+            document.getElementById('btn-group')?.after(ogeReferenceAssetsStatus);
+        }
+        if (ogeReferenceAssetsLoad) {
+            if (showStatus && ogeReferenceAssetsScript) ogeReferenceAssetsScript.fetchPriority = 'high';
+            return ogeReferenceAssetsLoad;
+        }
         const script = document.createElement('script');
+        ogeReferenceAssetsScript = script;
         const job = new Promise((resolve,reject) => {
-            script.src = new URL('reference_assets.js?v=20261113-lazy-1',document.baseURI).href;
+            let settled = false;
+            const finish = error => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                script.onload = null;
+                script.onerror = null;
+                if (error && !ogeReferenceAssetsReady()) {
+                    script.remove();
+                    reject(error);
+                } else resolve();
+            };
+            const timer = setTimeout(() => finish(new Error('Загрузка заняла слишком много времени.')),OGE_REFERENCE_LOAD_TIMEOUT_MS);
+            const url = new URL('reference_assets_webp.js?v=20261114-lossless-1',document.baseURI);
+            const attempt = ++ogeReferenceAssetsAttempts;
+            if (attempt > 1) url.searchParams.set('retry',String(attempt));
+            script.src = url.href;
             script.async = true;
-            script.onload = () => ready() ? resolve() : reject(new Error('Справочные материалы не найдены в загруженном файле'));
-            script.onerror = () => reject(new Error('Не удалось загрузить справочные материалы'));
+            script.fetchPriority = showStatus ? 'high' : 'low';
+            script.onload = () => finish(ogeReferenceAssetsReady() ? null : new Error('Справочные материалы не найдены в загруженном файле.'));
+            script.onerror = () => finish(new Error('Проверьте подключение к интернету.'));
             document.head.appendChild(script);
         });
         ogeReferenceAssetsLoad = job;
-        job.then(() => status.remove(),() => {
-            status.remove();ogeReferenceAssetsLoad=null;script.remove();
-        });
+        const cleanup = () => {
+            if (ogeReferenceAssetsLoad !== job) return;
+            ogeReferenceAssetsLoad = null;
+            ogeReferenceAssetsScript = null;
+            ogeReferenceAssetsStatus?.remove();
+            ogeReferenceAssetsStatus = null;
+        };
+        job.then(cleanup,cleanup);
         return job;
+    }
+
+    function ogePrefetchReferenceAssets() {
+        if (ogeReferenceAssetsReady() || ogeReferenceAssetsLoad || ogeReferencePrefetchScheduled) return;
+        ogeReferencePrefetchScheduled = true;
+        const prepare = () => {
+            ogeReferencePrefetchScheduled = false;
+            ogeEnsureReferenceAssets({showStatus:false}).catch(() => {});
+        };
+        if (window.requestIdleCallback) requestIdleCallback(prepare,{timeout:500});
+        else setTimeout(prepare,0);
     }
     window.OGE_REFERENCE_ALGEBRA_DATA = OGE_REFERENCE_PLACEHOLDERS.algebra;
     window.OGE_REFERENCE_GEOMETRY_DATA = OGE_REFERENCE_PLACEHOLDERS.geometry;
@@ -5920,8 +5974,33 @@ body.auth-locked > *:not(#passwordGate) {
         return rule.replace(/url\([^)]*\)/,() => `url('${data}')`).replace(/\}$/, 'background-repeat:no-repeat;}');
     }
 
-    async function downloadStudentHTML() {
+    let ogeStudentDownloadJob = null;
+    function downloadStudentHTML() {
+        if (ogeStudentDownloadJob) return ogeStudentDownloadJob;
         if (!currentInteractiveHTML) { alert("Сначала сгенерируйте вариант!"); return; }
+        const button = document.querySelector('#btn-group .btn-html');
+        const label = button?.textContent;
+        if (button) {
+            button.disabled = true;
+            button.setAttribute('aria-busy','true');
+            button.textContent = 'Подготавливаю интерактив…';
+        }
+        const job = ogePrepareStudentHTML().catch(error => {
+            console.error('Интерактивный файл:',error);
+            alert('Не удалось подготовить интерактивный файл. ' + error.message);
+        }).finally(() => {
+            if (ogeStudentDownloadJob === job) ogeStudentDownloadJob = null;
+            if (button) {
+                button.disabled = false;
+                button.removeAttribute('aria-busy');
+                button.textContent = label;
+            }
+        });
+        ogeStudentDownloadJob = job;
+        return job;
+    }
+
+    async function ogePrepareStudentHTML() {
         let theme = document.getElementById("theme-select").value;
         let seasonalCSS;
         try { seasonalCSS = await getOgeSeasonalBackgroundCSS(theme); }
@@ -6302,7 +6381,7 @@ body.auth-locked > *:not(#passwordGate) {
         html = window.injectReferenceHelpIntoHtml(html, 'interactive');
         if (window.ogePackSharedImages) html = window.ogePackSharedImages(html);
         let blob = new Blob([html], {type:"text/html;charset=utf-8"});
-        downloadBlobSafely(blob, "Интерактивный_вариант.html");
+        await downloadBlobSafely(blob, "Интерактивный_вариант.html");
     }
 
     function ogeBatchPrintData() {
