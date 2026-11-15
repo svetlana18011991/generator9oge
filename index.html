@@ -6042,7 +6042,11 @@ body.auth-locked > *:not(#passwordGate) {
         ${seasonalCSS}
         ${customBgRule}
         .paper{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.95);padding:40px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-        .timer-box { position: sticky; top: 20px; float: right; background: #fff; border: 2px solid #ff8c00; color: #ff8c00; padding: 10px 20px; border-radius: 8px; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .timer-bar { display:flex; justify-content:flex-end; max-width:880px; margin:0 auto 16px; }
+        .timer-box { max-width:100%; box-sizing:border-box; overflow-wrap:anywhere; background: #fff; border: 2px solid #ff8c00; color: #ff8c00; padding: 10px 20px; border-radius: 8px; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        @media (min-width:1480px) {
+            .timer-bar { position:fixed; top:20px; left:calc(50% + 460px); right:20px; max-width:none; margin:0; justify-content:flex-start; z-index:100; }
+        }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-box { background: #fff; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; border-radius: 12px; border: 2px solid #ff8c00; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 30px; position: relative; text-align: left; font-size: 18px;}
         #modal-content-box img, #modal-content-box svg { display:block; max-width:100%; height:auto; }
@@ -6060,8 +6064,8 @@ body.auth-locked > *:not(#passwordGate) {
 </head>
 <body>
     <div class="theme-wrapper bg-${theme}">
+        <div class="timer-bar"><div class="timer-box" id="timer-display">⏱ 00:00</div></div>
         <div class="paper">
-            <div class="timer-box" id="timer-display">⏱ 00:00</div>
             <h1 style="text-align: center; color: #003399; border-bottom: 2px solid #ff8c00; padding-bottom: 15px; margin-top:0;">Тренировочный вариант</h1>
             ${sig}
             ${pupilInteractiveHTML}
