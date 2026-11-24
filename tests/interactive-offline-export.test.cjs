@@ -1,7 +1,9 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const {test} = require('node:test');
+const {pathToFileURL} = require('node:url');
 
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -26,10 +28,12 @@ const firstTheory = String.raw`<section data-test-theory="first">
 </section>`;
 const secondTheory = String.raw`<section data-test-theory="second">
     <p>Другой разбор: $\frac{\sqrt{9}}{3}$.</p>
+    <p>Дробь в MathML: <math><mfrac><mn>1</mn><mn>5</mn></mfrac></math>.</p>
     <img src="${image}" alt="Чертёж во втором разборе">
 </section>`;
 const fixture = String.raw`<section id="test-main-task">
     <p>Условие: \(\frac{3}{\sqrt{9}}\).</p>
+    <div id="test-display-math">\[\dfrac{18\sqrt{3}}{2}\]</div>
     <div id="test-font-rich">$\mathbb{R}\quad\mathcal{ABC}\quad\mathbf{x}\quad\mathfrak{ABC}\quad\mathsf{xyz}\quad\mathtt{123}\quad\sum_{k=1}^{n}k\quad\int_0^1x\,dx$</div>
     <button id="test-open-first" onclick="openTheoryModalLocal('theory-data-1')">Разбор 1</button>
     <button id="test-open-second" onclick="openTheoryModalLocal('theory-data-2')">Разбор 2</button>
@@ -78,10 +82,50 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
         assert.match(html, /<script src="data:text\/javascript;base64,/);
         assert.doesNotMatch(html, /<script\b[^>]*src="https?:[^\"]*mathjax/i);
 
+        const savedURL = origin + '/saved.html';
+        await t.test('the downloaded file displays inline and block math without JavaScript', async t => {
+            const folder = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'oge-student-export-'));
+            const preview = await browser.newContext({javaScriptEnabled:false, viewport:{width:390, height:844}});
+            try {
+                const filename = path.join(folder, download.suggestedFilename());
+                await download.saveAs(filename);
+                await preview.route('**/*', route => route.request().url() === savedURL
+                    ? route.fulfill({path:filename, contentType:'text/html; charset=utf-8'})
+                    : route.abort());
+                let page = await preview.newPage();
+                try {
+                    await page.goto(pathToFileURL(filename).href, {waitUntil:'load'});
+                } catch (error) {
+                    if (!error.message.includes('net::ERR_BLOCKED_BY_ADMINISTRATOR')) throw error;
+                    t.diagnostic('Browser policy blocks file URLs. Previewing the same downloaded bytes via an intercepted route.');
+                    await page.close();
+                    page = await preview.newPage();
+                    await page.goto(savedURL, {waitUntil:'load'});
+                }
+
+                const inline = page.locator('#test-main-task > p mjx-container[jax="SVG"] svg');
+                const display = page.locator('#test-display-math mjx-container[jax="SVG"][display="true"] svg');
+                for (const [kind, formula] of [['inline', inline], ['display', display]]) {
+                    assert.equal(await formula.count(), 1, `${kind} formula is embedded as SVG`);
+                    assert.ok(await formula.isVisible(), `${kind} formula is visible`);
+                    assert.ok(await formula.locator('path').count() > 0, `${kind} glyphs have SVG paths`);
+                    const dimensions = await formula.evaluate(svg => {
+                        const viewBox = svg.viewBox.baseVal;
+                        const bounds = svg.getBoundingClientRect();
+                        return [viewBox.width, viewBox.height, bounds.width, bounds.height];
+                    });
+                    assert.ok(dimensions.every(size => Number.isFinite(size) && size > 0), `${kind} formula has valid dimensions`);
+                }
+                assert.doesNotMatch(await page.locator('#test-main-task').innerText(), /\\(?:d?frac|sqrt|\(|\[)/);
+            } finally {
+                await preview.close();
+                await fs.promises.rm(folder, {recursive:true, force:true});
+            }
+        });
+
         // A separate context has no editor cache, filesystem assets or session.
         const recipient = await browser.newContext({viewport:{width:1365, height:1000}});
         const external = [], errors = [], consoleErrors = [];
-        const savedURL = origin + '/saved.html';
         await recipient.route('**/*', async route => {
             const url = route.request().url();
             if (url === savedURL) return route.fulfill({contentType:'text/html; charset=utf-8', body:html});
@@ -90,6 +134,7 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
         });
         const page = await recipient.newPage();
         page.setDefaultTimeout(5000);
+        page.setDefaultNavigationTimeout(15000);
         page.on('pageerror', error => errors.push(error.message));
         page.on('console', message => {
             if (message.type() === 'error' && !/^Failed to load resource:/.test(message.text())) consoleErrors.push(message.text());
@@ -101,14 +146,15 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
             MathJax.typesetPromise = (...args) => window.testLastTypeset = typeset(...args);
         });
 
-        await t.test('initial formulas preserve their delimiters and render using embedded MathJax', async () => {
+        await t.test('initial formulas remain rendered as SVG after embedded MathJax starts', async () => {
             const state = await page.evaluate(() => ({
                 version:MathJax.version,
                 inlineMath:MathJax.config.tex.inlineMath,
                 adaptiveCSS:MathJax.config.chtml.adaptiveCSS,
-                formulas:document.querySelectorAll('#test-main-task > p mjx-container[jax="CHTML"]').length,
-                fractions:document.querySelectorAll('#test-main-task > p mjx-mfrac').length,
-                roots:document.querySelectorAll('#test-main-task > p mjx-msqrt').length,
+                formulas:document.querySelectorAll('#test-main-task > p mjx-container[jax="SVG"]').length,
+                fractions:document.querySelectorAll('#test-main-task > p svg g[data-mml-node="mfrac"]').length,
+                roots:document.querySelectorAll('#test-main-task > p svg g[data-mml-node="msqrt"]').length,
+                renderedAgain:document.querySelectorAll('#test-main-task mjx-container[jax="CHTML"]').length,
                 errors:[...document.querySelectorAll('mjx-merror')].map(el => el.textContent)
             }));
             assert.match(state.version, /^3\./);
@@ -117,6 +163,7 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
             assert.equal(state.formulas, 1);
             assert.equal(state.fractions, 1);
             assert.equal(state.roots, 1);
+            assert.equal(state.renderedAgain, 0);
             assert.deepEqual(state.errors, []);
         });
 
@@ -154,8 +201,8 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
 
         await t.test('replacing and reopening a breakdown typesets each new fragment', async () => {
             const second = await openTheory('#test-open-second', 'second');
-            assert.equal(second.formulas, 1);
-            assert.equal(second.fractions, 1);
+            assert.equal(second.formulas, 2);
+            assert.equal(second.fractions, 2);
             assert.equal(second.roots, 1);
             assert.equal(second.systems, 0);
             assert.deepEqual(second.errors, []);
@@ -190,7 +237,7 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
                     return {family, embedded:src.includes('data:font/woff;base64,'), status:face.status};
                 }));
                 await document.fonts.ready;
-                const formula = document.querySelector('#test-font-rich mjx-container[jax="CHTML"]');
+                const formula = document.querySelector('#test-font-rich mjx-container[jax="SVG"] svg');
                 return {
                     loaded,
                     richFormula:formula && {width:formula.getBoundingClientRect().width, height:formula.getBoundingClientRect().height},

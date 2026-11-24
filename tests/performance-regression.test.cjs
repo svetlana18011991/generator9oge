@@ -168,19 +168,20 @@ test('optimized generation retains independent variants, usable downloads and ca
             assert.equal(restored.sameTasks,true);
             const pending=app.waitForEvent('download');
             await app.evaluate(()=>downloadAnswers());
-            const download=await pending, filename=path.join(directory,'answers.html');
-            await download.saveAs(filename);
-            let keys=await context.newPage();
-            keys=await openDownloaded(keys,filename);
-            const rows=await keys.locator('.key-table tbody tr').evaluateAll(rows=>rows.map(row=>({
-                number:Number(row.querySelector('th').textContent),
-                values:Array.from(row.querySelectorAll('.key-answer'),cell=>cell.textContent)
-            })));
+            const download=await pending;
+            const keys=fs.readFileSync(await download.path(),'utf8');
+            const rows=await app.evaluate(html=>{
+                // Compare source answers before MathJax replaces the TeX with rendered math.
+                const document=new DOMParser().parseFromString(html,'text/html');
+                return Array.from(document.querySelectorAll('.key-table tbody tr'),row=>({
+                    number:Number(row.querySelector('th').textContent),
+                    values:Array.from(row.querySelectorAll('.key-answer'),cell=>cell.textContent)
+                }));
+            },keys);
             assert.equal(rows.length,25);
             for (const row of rows) {
                 assert.deepEqual(row.values,restored.expectedRows.map(tasks=>tasks.find(task=>task.num===row.number).answer));
             }
-            await keys.close();
         });
         await t.test('repeated drawing and regeneration release global canvas handlers', async () => {
             const cdp=await context.newCDPSession(app);

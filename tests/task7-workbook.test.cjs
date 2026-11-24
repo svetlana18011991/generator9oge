@@ -260,7 +260,13 @@ test('real task 7 selection preserves all workbook questions and their diagrams 
         await staticStudent.route('**/*',route=>route.request().url()===studentOrigin
             ?route.fulfill({body:saved,contentType:'text/html; charset=utf-8'}):route.abort());
         await staticStudent.goto(studentOrigin,{waitUntil:'load'});
-        const exported=await staticStudent.locator('.generated-task-block').allTextContents();
+        const exported=await staticStudent.locator('.generated-task-block').evaluateAll(blocks=>blocks.map(block=>{
+            const statement=block.cloneNode(true);
+            statement.querySelectorAll('mjx-container[data-oge-tex]').forEach(formula=>{
+                formula.replaceWith(formula.getAttribute('data-oge-tex'));
+            });
+            return statement.textContent;
+        }));
         assert.equal(exported.length,75);
         output.forEach((item,index)=>assert.ok(normalizeQuestion(exported[index]).includes(normalizeQuestion(item.text)),`question ${index+1}: exported statement`));
         await staticStudent.close();

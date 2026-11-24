@@ -136,7 +136,14 @@ test('selective preview replacements immediately update the variant and every ex
             const exportedPage = await browser.newPage({javaScriptEnabled:false});
             await exportedPage.route('**/*', route => route.abort());
             await exportedPage.setContent(exported, {waitUntil:'domcontentloaded'});
-            assert.ok((await exportedPage.locator('.generated-task-block').first().textContent()).includes(changedType.tasks[0].text));
+            const exportedStatement = await exportedPage.locator('.generated-task-block').first().evaluate(block => {
+                const statement = block.cloneNode(true);
+                statement.querySelectorAll('mjx-container[data-oge-tex]').forEach(formula => {
+                    formula.replaceWith(formula.getAttribute('data-oge-tex'));
+                });
+                return statement.textContent;
+            });
+            assert.ok(exportedStatement.includes(changedType.tasks[0].text));
             assert.equal(await exportedPage.locator('.generated-task-block').count(), 3);
             await exportedPage.close();
         } finally { fs.rmSync(directory, {recursive:true,force:true}); }

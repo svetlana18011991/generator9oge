@@ -159,13 +159,27 @@ test('task 10 PDF corrections reach selectors, diagrams, theory and HTML export'
                 const filename = path.join(directory,'interactive.html');
                 await download.saveAs(filename);
                 const saved = fs.readFileSync(filename,'utf8');
-                assert.equal((saved.match(/<div\b[^>]*class="generated-task-block\b/g) || []).length,selected.length);
-                generated.forEach(task => {
-                    assert.ok(saved.includes(task.text));
-                    if (task.svg) assert.ok(saved.includes(task.svg));
+                const exported = await page.evaluate(({saved, statements}) => {
+                    const doc = new DOMParser().parseFromString(saved,'text/html');
+                    doc.querySelectorAll('mjx-container[data-oge-tex]').forEach(formula => {
+                        formula.replaceWith(doc.createTextNode(formula.getAttribute('data-oge-tex')));
+                    });
+                    const expected = doc.createElement('div');
+                    return {
+                        blocks:[...doc.querySelectorAll('.generated-task-block')].map(block => block.innerHTML),
+                        statements:statements.map(statement => {
+                            expected.innerHTML = statement;
+                            return expected.innerHTML;
+                        })
+                    };
+                }, {saved, statements:generated.map(task => task.text)});
+                assert.equal(exported.blocks.length,selected.length);
+                generated.forEach((task,index) => {
+                    assert.ok(exported.blocks[index].includes(exported.statements[index]));
+                    if (task.svg) assert.ok(exported.blocks[index].includes(task.svg));
                 });
-                assert.ok(saved.includes('$\\overline{A\\cup B}$'));
-                assert.ok(saved.includes('Из коробки берут случайный маркер'));
+                assert.ok(exported.blocks[selected.indexOf(53)].includes('$\\overline{A\\cup B}$'));
+                assert.ok(exported.blocks[selected.indexOf(6)].includes('Из коробки берут случайный маркер'));
                 assert.ok(saved.includes(encodeURIComponent('Относительная частота исправных')));
             } finally { fs.rmSync(directory,{recursive:true,force:true}); }
         });

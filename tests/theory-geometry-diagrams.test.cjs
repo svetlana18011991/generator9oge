@@ -124,17 +124,30 @@ test('geometry analogs retain the matching diagram in breakdowns and drawable sc
         }, groups);
 
         async function drawStroke(targetPage, canvasId) {
-        await targetPage.waitForFunction(id => !!window.mainCanvases[id],canvasId);
-        const canvas=targetPage.locator('#canvas-'+canvasId);
-        await canvas.scrollIntoViewIfNeeded();
-        const rect=await canvas.boundingBox();
-        assert.ok(rect && rect.width>100 && rect.height>100);
-        const x=rect.x+rect.width*.7,y=rect.y+rect.height*.5;
-        await targetPage.mouse.move(x,y);
-        await targetPage.mouse.down();
-        await targetPage.mouse.move(x+25,y+15,{steps:3});
-        await targetPage.mouse.up();
-        assert.equal(await targetPage.evaluate(id => window.mainCanvases[id].objects.length,canvasId),1,'The pencil creates a stroke over the diagram');
+            await targetPage.waitForFunction(id => !!window.mainCanvases[id],canvasId);
+            const canvas=targetPage.locator('#canvas-'+canvasId);
+            const diagram=targetPage.locator('#draft-diagram-card-'+canvasId);
+            await diagram.scrollIntoViewIfNeeded();
+            const stroke=await canvas.evaluate((element,id) => {
+                const diagram=document.getElementById('draft-diagram-card-'+id).getBoundingClientRect();
+                const viewport=element.parentElement.parentElement.getBoundingClientRect();
+                const left=Math.max(diagram.left,viewport.left,0);
+                const top=Math.max(diagram.top,viewport.top,0);
+                const right=Math.min(diagram.right,viewport.right,innerWidth);
+                const bottom=Math.min(diagram.bottom,viewport.bottom,innerHeight);
+                const point=fraction => ({x:left+(right-left)*fraction,y:top+(bottom-top)*fraction});
+                const start=point(.35), end=point(.55);
+                return {start,end,overCanvas:[start,end].every(({x,y}) => document.elementFromPoint(x,y)===element)};
+            },canvasId);
+            assert.ok(stroke.overCanvas,'The pen starts and ends over the visible diagram');
+            await targetPage.mouse.move(stroke.start.x,stroke.start.y);
+            await targetPage.mouse.down();
+            await targetPage.mouse.move(stroke.end.x,stroke.end.y,{steps:3});
+            await targetPage.mouse.up();
+            const objects=await targetPage.evaluate(id => window.mainCanvases[id].objects,canvasId);
+            assert.equal(objects.length,1,'The pencil creates one stroke over the diagram');
+            assert.equal(objects[0].tool,'pen');
+            assert.ok(objects[0].points.length>1);
         }
 
         async function checkBreakdowns(targetPage, mode) {

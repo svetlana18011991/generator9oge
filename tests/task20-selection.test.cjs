@@ -121,12 +121,26 @@ test('task 20 groups preserve selection and ordered variant/export behavior', {
                 const filename = path.join(directory,'interactive.html');
                 await download.saveAs(filename);
                 const saved = fs.readFileSync(filename,'utf8');
-                const exportedTopics = [...saved.matchAll(/class="task20-topic-variant-header"[^>]*>([^<]+)/g)].map(match => match[1]);
-                assert.deepEqual(exportedTopics,topics);
-                const positions = statements.map(statement => saved.indexOf(statement));
-                assert.ok(positions.every(position => position >= 0));
-                assert.deepEqual(positions,positions.slice().sort((a,b) => a-b));
-                assert.equal((saved.match(/<div\b[^>]*class="generated-task-block\b/g) || []).length,4);
+                const exported = await page.evaluate(({saved, statements}) => {
+                    const doc = new DOMParser().parseFromString(saved,'text/html');
+                    doc.querySelectorAll('mjx-container[data-oge-tex]').forEach(formula => {
+                        formula.replaceWith(doc.createTextNode(formula.getAttribute('data-oge-tex')));
+                    });
+                    const expected = doc.createElement('div');
+                    return {
+                        headings:[...doc.querySelectorAll('.task20-topic-variant-header')].map(node => node.textContent),
+                        blocks:[...doc.querySelectorAll('.generated-task-block')].map(block => block.innerHTML),
+                        statements:statements.map(statement => {
+                            expected.innerHTML = statement;
+                            return expected.innerHTML;
+                        })
+                    };
+                }, {saved, statements});
+                assert.deepEqual(exported.headings,topics);
+                assert.equal(exported.blocks.length,statements.length);
+                exported.statements.forEach((statement,index) => {
+                    assert.ok(exported.blocks[index].includes(statement));
+                });
             } finally { fs.rmSync(directory,{recursive:true,force:true}); }
         });
 

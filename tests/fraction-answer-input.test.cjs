@@ -130,7 +130,12 @@ test('real fraction answers render in previews, analogues, keys and saved files;
             assert.equal(await page.locator('#feedback-2').evaluate(el=>el.classList.contains('correct')),true);
             assert.deepEqual(requests.filter(url=>/mathjax|\.woff2?(?:\?|$)/i.test(url)),[],'formula rendering needs no external scripts or fonts');await recipient.close();
         });
-        await t.test('downloaded keys render all five representative fraction answers without network access',async()=>{
+        await t.test('downloaded keys render fractions from a later variant when the first contains only plain answers',async()=>{
+            await app.evaluate(()=>{
+                const snapshot=window.ogeVariantSnapshot;
+                const plainSnapshot=snapshot.map(block=>({...block,tasks:block.tasks.map(task=>({...task,answer:'1',accepts:[]}))}));
+                window.ogeVariantBatch=[{snapshot:plainSnapshot},{snapshot}];
+            });
             const pending=app.waitForEvent('download');await app.evaluate(()=>downloadAnswers());
             const download=await pending,keys=fs.readFileSync(await download.path(),'utf8'),url=origin+'/saved-keys.html';
             const recipient=await browser.newContext(),requests=[];
@@ -140,7 +145,11 @@ test('real fraction answers render in previews, analogues, keys and saved files;
             });
             const page=await recipient.newPage();page.on('pageerror',e=>errors.push(e.message));
             await page.goto(url,{waitUntil:'load'});await page.evaluate(()=>MathJax.startup.promise);
-            for(let i=0;i<cases.length;i++)assertFraction(await fractionState(page,'.key-table tbody tr:nth-child('+(i+3)+') .key-answer'),cases[i]);
+            for(let i=0;i<cases.length;i++){
+                const row='.key-table tbody tr:nth-child('+(i+3)+')';
+                assert.equal(await page.locator(row+' .key-answer').first().textContent(),'1');
+                assertFraction(await fractionState(page,row+' .key-answer:last-child'),cases[i]);
+            }
             assert.deepEqual(requests,[],'keys require no network requests');await recipient.close();
         });
         assert.deepEqual(errors,[]);

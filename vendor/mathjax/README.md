@@ -1,4 +1,4 @@
-# MathJax 3.2.2, unchanged CHTML bundle
+# MathJax 3.2.2
 
 `tex-mml-chtml.js` is the unchanged component previously loaded from
 `https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js`.
@@ -20,7 +20,15 @@ existing upstream location. The normal startup, standard TeX/AMS formulas,
 and full 25-task generation do not need those optional resources. This is the
 same TeX/MathML to CHTML renderer; no output format or font data was changed.
 
-The JavaScript component is Apache-2.0 licensed; see `LICENSE`. The WOFF fonts
+`tex-mml-svg.js` is loaded on demand by the student HTML exporter. The exporter
+embeds rendered formulas as SVG paths so the saved conditions also display in
+previews with JavaScript disabled. The upstream component is unchanged:
+
+https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-svg.js
+
+SHA-256: `1f17a7ed95ff4a4b27d16bf0fb5f80b915686ee8673e82983a2876ecf8cb9fae`
+
+The JavaScript components are Apache-2.0 licensed; see `LICENSE`. The WOFF fonts
 are SIL Open Font License 1.1 licensed; their original font notices and the OFL
 text are in `FONT-LICENSE.txt` and are also retained inside the font binaries.
 The standard OFL text was obtained from SIL's own font repository:

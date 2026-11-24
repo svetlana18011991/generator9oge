@@ -6000,6 +6000,64 @@ body.auth-locked > *:not(#passwordGate) {
         return job;
     }
 
+    async function ogeRenderStudentMath(html) {
+        // Keep the SVG renderer separate from the editor's live CHTML MathJax.
+        const frame = document.createElement('iframe');
+        frame.setAttribute('aria-hidden', 'true');
+        frame.tabIndex = -1;
+        frame.style.cssText = 'position:absolute;left:-10000px;width:640px;height:1px;border:0';
+        document.body.appendChild(frame);
+        const frameDocument = frame.contentDocument;
+        frame.contentWindow.MathJax = {
+            startup: {typeset: false},
+            tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+            svg: {fontCache: 'none'},
+            options: {enableMenu: false, skipHtmlTags: {'[+]': ['svg', 'mjx-container']}},
+            loader: {paths: {mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5'}}
+        };
+
+        let timeout;
+        try {
+            const rendered = (async () => {
+                const script = frameDocument.createElement('script');
+                script.src = new URL('vendor/mathjax/tex-mml-svg.js?v=3.2.2-local-1', document.baseURI).href;
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Не удалось загрузить модуль отрисовки формул.'));
+                    frameDocument.head.appendChild(script);
+                });
+
+                const math = frame.contentWindow.MathJax;
+                await math.startup.promise;
+                // Detached HTML has no layout. Use MathJax's standalone conversion metrics.
+                math.startup.output.measureMetrics = () => ({
+                    em: 16, ex: 8, containerWidth: 640, lineWidth: 1e6, scale: 1, family: ''
+                });
+                // A template keeps images and scripts inert while we typeset its contents.
+                const template = frameDocument.createElement('template');
+                const content = template.content.ownerDocument.createElement('div');
+                content.innerHTML = html;
+                await math.typesetPromise([content]);
+                for (const item of math.startup.document.math) {
+                    if (item.inputJax.name === 'TeX' && item.typesetRoot?.matches?.('mjx-container[jax="SVG"]')) {
+                        item.typesetRoot.dataset.ogeTex = item.start.delim + item.math + item.end.delim;
+                    }
+                }
+                return {
+                    html: content.innerHTML,
+                    styles: frameDocument.getElementById('MJX-SVG-styles')?.textContent || ''
+                };
+            })();
+            const deadline = new Promise((_, reject) => {
+                timeout = setTimeout(() => reject(new Error('Подготовка формул заняла слишком много времени.')), 15000);
+            });
+            return await Promise.race([rendered, deadline]);
+        } finally {
+            clearTimeout(timeout);
+            frame.remove();
+        }
+    }
+
     async function ogePrepareStudentHTML() {
         let theme = document.getElementById("theme-select").value;
         let seasonalCSS;
@@ -6019,10 +6077,14 @@ body.auth-locked > *:not(#passwordGate) {
         let showCorrectOnError = document.getElementById('toggle-show-correct').checked;
         
         const interactiveMathJaxConfig = {
+            // Only the answers and explanations opened later need runtime typesetting.
+            startup: {typeset: false},
             tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
-            chtml: {adaptiveCSS: false}
+            chtml: {adaptiveCSS: false},
+            options: {skipHtmlTags: {'[+]': ['mjx-container']}}
         };
         const pupilInteractiveHTML = String(currentInteractiveHTML).replace(/<div class="oge-replace-bar">[\s\S]*?<\/div>/g, '');
+        const studentMath = await ogeRenderStudentMath(pupilInteractiveHTML);
         let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -6032,6 +6094,7 @@ body.auth-locked > *:not(#passwordGate) {
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
     <script>window.MathJax=${JSON.stringify(interactiveMathJaxConfig)};${window.SCRIPT_END}
     ${ogeOfflineMathJaxHTML()}
+    <style>${studentMath.styles}</style>
     <style>
         .oge-match11-interactive th,.oge-match11-interactive td{border:1px solid #899bb6;padding:8px 5px;text-align:center;}
         .oge-match11-interactive th{background:#edf5ff;color:#003399;font-weight:700;}
@@ -6068,7 +6131,7 @@ body.auth-locked > *:not(#passwordGate) {
         <div class="paper">
             <h1 style="text-align: center; color: #003399; border-bottom: 2px solid #ff8c00; padding-bottom: 15px; margin-top:0;">Тренировочный вариант</h1>
             ${sig}
-            ${pupilInteractiveHTML}
+            ${studentMath.html}
             <button id="btn-check" onclick="checkAll()" style="display:block; width:100%; padding:15px; font-size:18px; font-weight:bold; background:#ff8c00; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-top:30px; transition:0.3s;">ПОДВЕСТИ ИТОГИ</button>
             <div id="res-box" style="display:none; text-align:center; margin-top:30px; padding:20px; background:rgba(255,255,255,0.9); border:2px dashed #003399; border-radius:8px; font-size:1.2em; font-weight:bold;"></div>
         </div>
@@ -8059,8 +8122,8 @@ ${window.SCRIPT_END}
             tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
             options: {skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']}
         };
-        const mathAnswers = keys.some(task => task.answer.includes('\\(') ||
-            task.answer.includes('\\[') || task.answer.includes('$'));
+        const mathAnswers = variants.some(variant => variant.tasks.some(({answer}) =>
+            answer.includes('\\(') || answer.includes('\\[') || answer.includes('$')));
         const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <title>${title}</title>
