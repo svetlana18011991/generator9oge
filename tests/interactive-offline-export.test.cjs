@@ -42,7 +42,18 @@ const fixture = String.raw`<section id="test-main-task">
     <button id="second-answer-btn-20" onclick="showSecondPartAnswer('20')">Показать ответ</button>
     <div id="second-answer-data-20" hidden>${encodeURIComponent(String.raw`\(\frac{5}{\sqrt{4}}\)`)}</div>
     <div id="second-final-answer-20" style="display:none"></div>
-</section>`;
+</section>
+${[1, 2, 3].map(number => `<section class="generated-task-block" id="test-answer-task-${number}">
+    <input type="text" class="ans-box" id="ans-interactive-${number}" data-task-num="${number}" data-ans="7">
+    <button type="button" class="btn-instant" title="Проверить" onclick='checkSingle(this, ${number}, "7")'>✅</button>
+    <span id="feedback-${number}" class="answer-feedback" style="display:none"></span>
+</section>`).join('')}`;
+
+async function assertPreviewControls(page) {
+    assert.ok(await page.locator('#oge-preview-notice').isVisible());
+    assert.equal(await page.locator('#btn-check').isVisible(), false);
+    assert.equal(await page.locator('.btn-instant:visible').count(), 0);
+}
 
 test('downloaded interactive variants render hidden solutions, answers and fonts without network access', {
     skip: !chromium || !fs.existsSync(executable) ? 'Requires Playwright and Chromium' : false,
@@ -117,9 +128,23 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
                     assert.ok(dimensions.every(size => Number.isFinite(size) && size > 0), `${kind} formula has valid dimensions`);
                 }
                 assert.doesNotMatch(await page.locator('#test-main-task').innerText(), /\\(?:d?frac|sqrt|\(|\[)/);
+                await assertPreviewControls(page);
             } finally {
                 await preview.close();
                 await fs.promises.rm(folder, {recursive:true, force:true});
+            }
+        });
+
+        await t.test('previews that strip script tags also show the notice and hide checking', async () => {
+            const preview = await browser.newPage();
+            try {
+                await preview.route('**/*', route => route.abort());
+                const staticHTML = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '');
+                await preview.setContent(staticHTML, {waitUntil:'load'});
+                await assertPreviewControls(preview);
+                assert.ok(await preview.locator('#test-main-task > p mjx-container[jax="SVG"] svg').isVisible());
+            } finally {
+                await preview.close();
             }
         });
 
@@ -221,6 +246,22 @@ test('downloaded interactive variants render hidden solutions, answers and fonts
             assert.equal(await page.locator('#second-final-answer-20 mjx-mfrac').count(), 1);
             assert.equal(await page.locator('#second-final-answer-20 mjx-msqrt').count(), 1);
             assert.equal(await page.locator('#second-answer-btn-20').isVisible(), false);
+        });
+
+        await t.test('individual checking and the results button work offline when scripts run', async () => {
+            assert.equal(await page.locator('#oge-preview-notice').isVisible(), false);
+            await page.locator('#ans-interactive-1').fill('7');
+            await page.locator('#test-answer-task-1').getByTitle('Проверить').click();
+            assert.ok(await page.locator('#feedback-1.correct').isVisible());
+
+            await page.locator('#ans-interactive-2').fill('8');
+            await page.locator('#btn-check').click();
+            const report = page.locator('#res-box');
+            assert.ok(await report.isVisible());
+            assert.deepEqual(await report.locator('tbody tr td:last-child').allTextContents(), [
+                '✅ Верно', '❌ Неверно', '— Не решено'
+            ]);
+            assert.equal(await page.locator('#btn-check').isVisible(), false);
         });
 
         await t.test('all 22 embedded font assets decode and font-rich math needs no external requests', async () => {

@@ -121,7 +121,10 @@ test('corrected tables reach generated trainer, scenario, and student outputs', 
                     const preview=document.querySelector(`[data-oge-item-index="${index}"]`);
                     const proto=item.__ogeTrainerMeta?.proto||item.__ogeScenarioMeta.chosen;
                     const diagram=item.__ogeTrainerMeta?.commonImageHTML||item.__ogeScenarioMeta.diagramHTML;
+                    const statementHTML=document.createElement('template');
+                    statementHTML.innerHTML=item.text;
                     return {id,index,sourceText:item.text,answer:game.answer,accepts:game.accepts,
+                        studentStatement:statementHTML.innerHTML,
                         statement:tableRows(item.text),preview:tableRows(preview.innerHTML),print:tableRows(printed[index].innerHTML),
                         game:tableRows(game.text),presentation:tableRows(game.presentationText),
                         originalDiagram:game.svg===diagram&&!!diagram,
@@ -148,7 +151,7 @@ test('corrected tables reach generated trainer, scenario, and student outputs', 
             assert.equal(blocks.length,taskCount);
             for(const check of result.checks) {
                 const statement=blocks[check.index].split(/<script\b/)[0];
-                assert.ok(statement.includes(check.sourceText),`${check.id}: full question is preserved in the student file`);
+                assert.ok(statement.includes(check.studentStatement),`${check.id}: full question is preserved in the student file`);
                 assertObjectTable(check.sourceText,check.id);
                 assertObjectTable(statement.match(/<table\b[^>]*>[\s\S]*?<\/table>/i)[0],check.id);
                 assert.doesNotMatch(statement,/oge-replace-bar/);

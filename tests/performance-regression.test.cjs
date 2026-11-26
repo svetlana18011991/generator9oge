@@ -220,7 +220,7 @@ test('optimized generation retains independent variants, usable downloads and ca
             assert.ok(await app.evaluate(()=>window.__mathClears)>0);
             await cdp.detach();
         });
-        await t.test('downloaded HTML hydrates visible and hidden diagrams from a local or opaque origin', async () => {
+        await t.test('downloaded HTML shows the task 1–5 and 18 diagrams without JavaScript and still hydrates hidden diagrams', async () => {
             await app.evaluate(() => {
                 resetTaskCounts();
                 document.getElementById('practice-scenario-theme-tariff').click();
@@ -231,6 +231,11 @@ test('optimized generation retains independent variants, usable downloads and ca
                 document.getElementById('count-practice-scenarios').value='1';
                 const tid=getUniqueTaskIds().find(id=>Number(String(id).replace(/\D/g,''))===6);
                 document.getElementById('count-'+tid).value='1';
+                const geometryId=getUniqueTaskIds().find(id=>Number(String(id).replace(/\D/g,''))===18);
+                document.getElementById('count-'+geometryId).value='1';
+                window.database[geometryId].prototypes.forEach((_,index)=>{
+                    document.getElementById(getPrototypeCheckboxId(geometryId,index)).checked=index===0;
+                });
             });
             await generate('manual');
             assert.equal(await app.evaluate(()=>window.__generationCalls),1);
@@ -242,6 +247,22 @@ test('optimized generation retains independent variants, usable downloads and ca
             const saved=fs.readFileSync(filename,'utf8');
             assert.match(saved,/data-oge-shared-images/);
             assert.doesNotMatch(saved,/blob:http(?:%3A|:)/);
+
+            const preview=await browser.newPage({javaScriptEnabled:false,viewport:{width:390,height:844}});
+            await preview.route('**/*',route=>route.abort());
+            await preview.setContent(saved,{waitUntil:'load'});
+            for(const selector of ['.oge-practice-intro-diagram img','.t18-source-figure img']){
+                const figure=preview.locator(selector).first();
+                assert.equal(await figure.isVisible(),true);
+                assert.match(await figure.getAttribute('src'),/^data:image\//);
+                assert.ok(await figure.evaluate(async image=>{
+                    await image.decode();
+                    return image.naturalWidth>1;
+                }),selector+' uses the actual picture');
+            }
+            assert.equal(await preview.locator('.oge-practice-sticky').evaluate(box=>getComputedStyle(box).maxHeight),'none');
+            await preview.close();
+
             student=await context.newPage();
             student=await openDownloaded(student,filename);
             assert.ok(new URL(student.url()).protocol==='file:' || await student.evaluate(()=>location.origin)==='null');
